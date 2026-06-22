@@ -679,6 +679,10 @@ function renderNatalResult(N){
      <div class="b3"><div class="lbl">🌙 月亮</div><div class="val">${moon.sign} ${moon.deg}°</div></div>
      <div class="b3"><div class="lbl">⬆️ 上升</div><div class="val">${a.asc.sign} ${a.asc.deg}°</div></div>
    </div>
+   <div class="scroll-guide" id="scrollGuide" title="往下，听玄玑为你细读">
+     <span class="sg-word">往下，听玄玑为你细读</span>
+     <span class="sg-arrow"></span>
+   </div>
    <!-- 角色卡暂撤(Athena准备世界观中), 以后加回 -->
    <h2 style="margin-top:14px">✦ 行星落座 · 落宫</h2>
    ${P.map(p=>`<div class="planet"><span class="pname">${p.n}</span><span class="ppos">${p.sign} ${p.deg}°${String(p.min).padStart(2,'0')}' · 第${p.house}宫</span>${p.rx?'<span class="rx">℞ 逆</span>':''}</div>`).join('')}
@@ -699,10 +703,6 @@ function renderNatalResult(N){
    </div>
    <h2 style="margin-top:14px">✦ 本命相位</h2>
    <div class="aspects">${aspectTags(N.asp)}</div>
-   <div class="scroll-guide" id="scrollGuide" title="往下，听玄玑为你细读">
-     <span class="sg-word">往下，听玄玑为你细读</span>
-     <span class="sg-arrow"></span>
-   </div>
    <div class="read-card">
      <div class="ask-title">✦ 你自己的操作说明书 ✦</div>
      <div class="ask-desc">这张盘，就是您出厂自带的说明书——您是谁、您的天赋怎么用、感情与正缘、这一生的功课。<br>星盘只是骨架，请<b>玄玑天庭 · 文澜阁 · 神仙虾</b>当场为您逐一解读：</div>
