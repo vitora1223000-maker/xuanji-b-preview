@@ -743,12 +743,16 @@ function setupScrollGuide(){
     guide.classList.add("fade-out");
     setTimeout(()=>{ if(guide.parentNode) guide.parentNode.removeChild(guide); },650);
   };
-  // 解读卡可见即收起箭头(IntersectionObserver,降级:直接保留浮动)
+  // 箭头自己滚出视野(用户已往下看解读)才收起，避免与解读卡同屏时秒淡出
   if("IntersectionObserver" in window){
+    let seen=false; // 先确认箭头进入过视野，再在它离开时才淡出
     const io=new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{ if(e.isIntersecting){ dismiss(); io.disconnect(); } });
-    },{threshold:.35});
-    io.observe(card);
+      entries.forEach(e=>{
+        if(e.isIntersecting){ seen=true; }
+        else if(seen){ dismiss(); io.disconnect(); }
+      });
+    },{threshold:.6});
+    io.observe(guide);
   }
 }
 
