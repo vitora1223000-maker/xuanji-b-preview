@@ -93,6 +93,20 @@
   .read-out .typing{display:inline-block;width:7px;height:15px;background:var(--gold);margin-left:2px;animation:blink 1s steps(2) infinite;vertical-align:text-bottom}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
   .read-hook{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;color:var(--gold);line-height:1.8}
+  /* —— 向下引导箭头(柔金呼吸·引导完即收) —— */
+  .scroll-guide{display:flex;flex-direction:column;align-items:center;gap:6px;margin:18px 0 2px;cursor:pointer;user-select:none;
+    animation:floatArrow 2.6s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease}
+  .scroll-guide.fade-out{opacity:0;transform:translateY(6px);pointer-events:none}
+  .scroll-guide .sg-word{font-size:12.5px;color:var(--gold);letter-spacing:2px;opacity:.78;text-shadow:0 0 12px rgba(232,201,118,.25)}
+  .scroll-guide .sg-arrow{width:15px;height:15px;border-right:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);
+    transform:rotate(45deg);opacity:.85;filter:drop-shadow(0 0 6px rgba(230,200,120,.45))}
+  @keyframes floatArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  /* —— 解读按钮灵气光晕(烛火呼吸·点击即收) —— */
+  .read-btn.glow{animation:glowPulse 2.8s ease-in-out infinite}
+  @keyframes glowPulse{
+    0%,100%{box-shadow:0 6px 20px rgba(201,168,255,.25),0 0 0 0 rgba(230,200,120,0)}
+    50%{box-shadow:0 6px 22px rgba(201,168,255,.3),0 0 22px 4px rgba(230,200,120,.45)}
+  }
   /* Markdown 渲染样式(神仙虾解读) */
   .md-body{white-space:normal}
   .md-fadein{animation:mdFade 1.1s ease}
@@ -685,10 +699,14 @@ function renderNatalResult(N){
    </div>
    <h2 style="margin-top:14px">✦ 本命相位</h2>
    <div class="aspects">${aspectTags(N.asp)}</div>
+   <div class="scroll-guide" id="scrollGuide" title="往下，听玄玑为你细读">
+     <span class="sg-word">往下，听玄玑为你细读</span>
+     <span class="sg-arrow"></span>
+   </div>
    <div class="read-card">
      <div class="ask-title">✦ 你自己的操作说明书 ✦</div>
      <div class="ask-desc">这张盘，就是您出厂自带的说明书——您是谁、您的天赋怎么用、感情与正缘、这一生的功课。<br>星盘只是骨架，请<b>玄玑天庭 · 文澜阁 · 神仙虾</b>当场为您逐一解读：</div>
-     <button class="btn read-btn" id="aiRead">✨ 让伟大的占星师为我解读</button>
+     <button class="btn read-btn glow" id="aiRead">✨ 让伟大的占星师为我解读</button>
      <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
      <div id="aiReadOut" class="read-out" style="display:none"></div>
      <button class="btn" id="copyShare" style="margin-top:10px;background:var(--card);color:var(--soft);border:1px solid var(--line);box-shadow:none;font-weight:500">📋 复制星盘数据</button>
@@ -696,7 +714,12 @@ function renderNatalResult(N){
   document.getElementById("natalResult").innerHTML=html;
   // 绑定"让玄玑当场深度解读"——流式调后端 /api/read
   const ar=document.getElementById("aiRead");
-  if(ar) ar.onclick=()=>runAIRead(N,ar);
+  if(ar){
+    const _orig=()=>runAIRead(N,ar);
+    ar.onclick=()=>{ ar.classList.remove("glow"); _orig(); }; // 点了就收光晕，已引导到位
+  }
+  // 引导动效:向下箭头(柔金呼吸) + 进入解读卡视口即淡出收起
+  setupScrollGuide();
   // 绑定"复制星盘数据"——纯工具功能，方便用户拿走自己的盘数据
   const cs=document.getElementById("copyShare");
   if(cs) cs.onclick=()=>{
@@ -706,6 +729,27 @@ function renderNatalResult(N){
       setTimeout(()=>cs.textContent="📋 复制星盘数据",2000);
     }).catch(()=>{ alert("复制失败，请长按选中下面文字手动复制：\n\n"+txt); });
   };
+}
+
+// 向下引导箭头:柔金呼吸浮动,点击平滑滚到解读卡;解读卡进入视口即淡出收起,本次排盘内不再回来
+function setupScrollGuide(){
+  const guide=document.getElementById("scrollGuide");
+  const card=document.querySelector("#natalResult .read-card");
+  if(!guide||!card) return;
+  // 点箭头平滑滚到解读卡
+  guide.addEventListener("click",()=>card.scrollIntoView({behavior:"smooth",block:"center"}));
+  const dismiss=()=>{
+    if(guide.classList.contains("fade-out")) return;
+    guide.classList.add("fade-out");
+    setTimeout(()=>{ if(guide.parentNode) guide.parentNode.removeChild(guide); },650);
+  };
+  // 解读卡可见即收起箭头(IntersectionObserver,降级:直接保留浮动)
+  if("IntersectionObserver" in window){
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ dismiss(); io.disconnect(); } });
+    },{threshold:.35});
+    io.observe(card);
+  }
 }
 
 // AI 解读：非流式调 /api/read 拿完整解读，前端用打字机效果逐字呈现（保留沉浸感）
