@@ -185,9 +185,12 @@ async function saveChartToSupabase(N, reading){
     await sb.from("charts").insert({ user_id:_curUser.id, email:_curUser.email, birth_meta, chart_data, reading:(reading||"").slice(0,8000) });
   }catch(_){ /* 存盘静默,失败不打扰用户 */ }
 }
-// 右上角账号角标：登录后显示邮箱+登出
+// 右上角账号角标：登录后显示登出；免登录模式(REQUIRE_LOGIN=false)且未登录时整个隐藏，用户碰不到会发链接的登录入口
 function updateAcctBadge(){
+  const badge=document.getElementById("acctBadge");
   const btn=document.getElementById("acctBtn"); if(!btn) return;
+  // 免登录且未登录 → 藏掉角标（手机号登录上线/开关打开后自动恢复）
+  if(badge) badge.style.display = (!REQUIRE_LOGIN && !_curUser) ? "none" : "flex";
   btn.textContent = _curUser ? "登出" : "登入";
 }
 // 绑定登出 + 页面加载即检查登录态
