@@ -97,10 +97,12 @@
   .scroll-guide{display:flex;flex-direction:column;align-items:center;gap:6px;margin:18px 0 2px;cursor:pointer;user-select:none;
     animation:floatArrow 2.6s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease}
   .scroll-guide.fade-out{opacity:0;transform:translateY(6px);pointer-events:none}
-  .scroll-guide .sg-word{font-size:12.5px;color:var(--gold);letter-spacing:2px;opacity:.78;text-shadow:0 0 12px rgba(232,201,118,.25)}
+  .scroll-guide .sg-word{font-size:12.5px;color:var(--gold);letter-spacing:2px;animation:guideWordGlow 2.8s ease-in-out infinite}
   .scroll-guide .sg-arrow{width:15px;height:15px;border-right:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);
-    transform:rotate(45deg);opacity:.85;filter:drop-shadow(0 0 6px rgba(230,200,120,.45))}
+    transform:rotate(45deg);animation:guideArrowGlow 2.8s ease-in-out infinite}
   @keyframes floatArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  @keyframes guideWordGlow{0%,100%{opacity:.7;text-shadow:0 0 8px rgba(232,201,118,.2)}50%{opacity:1;text-shadow:0 0 16px rgba(230,200,120,.7),0 0 28px rgba(230,200,120,.35)}}
+  @keyframes guideArrowGlow{0%,100%{opacity:.75;filter:drop-shadow(0 0 5px rgba(230,200,120,.4))}50%{opacity:1;filter:drop-shadow(0 0 12px rgba(230,200,120,.85))}}
   /* —— 解读按钮灵气光晕(烛火呼吸·点击即收) —— */
   .read-btn.glow{animation:glowPulse 2.8s ease-in-out infinite}
   @keyframes glowPulse{
@@ -679,8 +681,8 @@ function renderNatalResult(N){
      <div class="b3"><div class="lbl">🌙 月亮</div><div class="val">${moon.sign} ${moon.deg}°</div></div>
      <div class="b3"><div class="lbl">⬆️ 上升</div><div class="val">${a.asc.sign} ${a.asc.deg}°</div></div>
    </div>
-   <div class="scroll-guide" id="scrollGuide" title="往下，听玄玑为你细读">
-     <span class="sg-word">往下，听玄玑为你细读</span>
+   <div class="scroll-guide" id="scrollGuide" title="往下，听从玄玑的指引">
+     <span class="sg-word">往下，听从玄玑的指引</span>
      <span class="sg-arrow"></span>
    </div>
    <!-- 角色卡暂撤(Athena准备世界观中), 以后加回 -->
