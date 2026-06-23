@@ -174,11 +174,13 @@ const SB_URL = "https://tbiymcyggyofysugjkoi.supabase.co";
 const SB_KEY = "sb_publishable_Qf-OJCyStFsqoltB6Z77VQ_ewz7zoOB";
 const sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SB_URL, SB_KEY) : null;
 
-/* ===== 登录开关 =====
- * false=免登录直接用（当前默认，验证码未稳前不丢用户）；true=解读需登录(攒注册)。
- * 默认免登录；临时想要求登录测试，URL 加 ?login=1（不必重新部署）。
- * 等手机号登录上线、验证码稳定后，再评估是否默认改回 true 攒注册。 */
-const REQUIRE_LOGIN = (new URLSearchParams(location.search).get("login") === "1");
+/* ===== 登录开关（在后台代码里定，用户无感）=====
+ * REQUIRE_LOGIN_DEFAULT = true  → 登录模式：用户打开干净网址，右上角即「登入」，解读前需登录(攒注册)。
+ * 江湖救急（仅供我们运维）：万一手机号登录又挂了，把下面这行改成 false 重新部署，全站秒切免登录、不丢用户。
+ * URL ?login=0 / ?login=1 仅留作我们临时测试用，不对用户暴露、不必记。 */
+const REQUIRE_LOGIN_DEFAULT = true;   // ← 救急开关：改成 false 即全站免登录
+const _loginParam = new URLSearchParams(location.search).get("login");
+const REQUIRE_LOGIN = _loginParam === "1" ? true : _loginParam === "0" ? false : REQUIRE_LOGIN_DEFAULT;
 
 // 当前登录用户(null=未登录)
 let _curUser = null;
