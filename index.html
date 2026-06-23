@@ -924,11 +924,47 @@ function panFingerprint(N){
 
 // 只把"星盘数据"格式化成文本(给后端拼神仙虾prompt用; 不含任何角色设定)
 // + 算元素配比和关键身位特征(给后端按身位调语气用)
+// 生命灵数：出生年月日全部数字相加，反复加到一位(11/22/33保留为大师数)。后端算死，绝不让模型算(模型数学不可靠)。
+function lifePathNumber(y,mo,d){
+  let s=String(y)+String(mo)+String(d);
+  let sum=s.split("").reduce((a,c)=>a+(+c),0);
+  while(sum>9 && sum!==11 && sum!==22 && sum!==33){ sum=String(sum).split("").reduce((a,c)=>a+(+c),0); }
+  return sum;
+}
+// ===== 八字+方位(全JS算死,绝不让模型碰生克/计算)。处理晚子时(23点后算次日)。=====
+const _GAN=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const _ZHI=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const _GWX={甲:"木",乙:"木",丙:"火",丁:"火",戊:"土",己:"土",庚:"金",辛:"金",壬:"水",癸:"水"};
+const _KE={木:"土",火:"金",土:"水",金:"木",水:"火"}; // 我克者=财
+const _WXFANG={木:"东方",火:"南方",土:"西南方",金:"西方",水:"北方"};
+const _ELFANG={火:"南方",土:"西南方",风:"东方",水:"北方"};
+function _dayIdx(y,mo,d){const base=Date.UTC(1900,0,1);const cur=Date.UTC(y,mo-1,d);const days=Math.round((cur-base)/86400000);return ((10+days)%60+60)%60;}
+function baziCalc(y,mo,d,hour){
+  let dy=y,dmo=mo,dd=d;
+  if(hour>=23){const nx=new Date(Date.UTC(y,mo-1,d+1));dy=nx.getUTCFullYear();dmo=nx.getUTCMonth()+1;dd=nx.getUTCDate();}
+  let yy=y; if(mo<2||(mo===2&&d<4))yy=y-1;
+  const yIdx=((yy-1984)%60+60)%60; const yp=_GAN[yIdx%10]+_ZHI[yIdx%12];
+  const dIdx=_dayIdx(dy,dmo,dd); const dp=_GAN[dIdx%10]+_ZHI[dIdx%12];
+  const jieDay=[0,0,4,6,5,6,6,8,8,8,8,7,7]; let mIdx=mo-2; if(d<jieDay[mo])mIdx-=1; mIdx=(mIdx%12+12)%12;
+  const mZhi=["寅","卯","辰","巳","午","未","申","酉","戌","亥","子","丑"][mIdx];
+  const wuhu=[2,4,6,8,0]; const mp=_GAN[(wuhu[_GAN.indexOf(yp[0])%5]+mIdx)%10]+mZhi;
+  const zhiIdx=Math.floor(((hour+1)%24)/2); const wushu=[0,2,4,6,8];
+  const hp=_GAN[(wushu[_GAN.indexOf(dp[0])%5]+zhiIdx)%10]+_ZHI[zhiIdx];
+  return {yp,mp,dp,hp};
+}
+function caiFang(dayGan){return _WXFANG[_KE[_GWX[dayGan]]];}          // 财位=日主克者方位
+function luckyFang(el){const o=Object.entries(el).sort((a,b)=>a[1]-b[1]);return _ELFANG[o[0][0]];} // 幸运方位=星盘最缺元素方位
 function buildNatalData(N){
   const a=N.angles,P=N.planets,m=N.meta;
+  const lifePath=lifePathNumber(m.y,m.mo,m.d);
+  // 八字四柱 + 两个方位(全JS算死)
+  const _bz=baziCalc(m.y,m.mo,m.d,m.h);
+  const _cnt0={火:0,土:0,风:0,水:0}; P.forEach(p=>{const e=ELEMENT[p.sign];if(e)_cnt0[e]++;});
+  const _lucky=luckyFang(_cnt0);     // 幸运方位=星盘最缺元素方位
+  const _cai=caiFang(_bz.dp[0]);     // 财位=八字日主克者方位
   const planetStr=P.map(p=>`  ${p.n} ${p.sign}${p.deg}°${p.rx?'(逆)':''} 第${p.house}宫`).join("\n");
   const houseStr=N.houses.map(h=>`${h.num}宫${h.sign}${h.deg}°`).join(" / ");
-  const data=`出生：${m.y}-${String(m.mo).padStart(2,'0')}-${String(m.d).padStart(2,'0')} ${String(m.h).padStart(2,'0')}:${String(m.mi).padStart(2,'0')}（+${m.tz} ${m.city}）｜性别：${m.sex}\n`
+  const data=`出生：${m.y}-${String(m.mo).padStart(2,'0')}-${String(m.d).padStart(2,'0')} ${String(m.h).padStart(2,'0')}:${String(m.mi).padStart(2,'0')}（+${m.tz} ${m.city}）｜性别：${m.sex}｜【生命灵数=${lifePath}】｜【八字日主=${_bz.dp[0]}】｜【幸运方位=${_lucky}】｜【财位=${_cai}】(以上均已算好，直接用，勿改勿算)\n`
     +`日月升：太阳${P[0].sign}${P[0].deg}° / 月亮${P[1].sign}${P[1].deg}° / 上升${a.asc.sign}${a.asc.deg}°\n`
     +`行星与凯龙（落座·落宫，含凯龙=此生最深的伤口与由伤生出的疗愈天赋）：\n${planetStr}\n`
     +`四轴：上升${a.asc.sign}${a.asc.deg}° / 天顶MC${a.mc.sign}${a.mc.deg}° / 下降${a.dsc.sign}${a.dsc.deg}° / 天底IC${a.ic.sign}${a.ic.deg}°\n`
