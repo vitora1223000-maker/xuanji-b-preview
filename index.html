@@ -986,7 +986,7 @@ function doCalcNatal(){
   if(Math.abs(lat)>66){alert("高纬度地区上升点计算精度会下降，结果仅供参考");}
   // 现居地、人格类型必填（先攒数据，后续参与行运/解读）
   if(!resPicked){alert("请选择现居地");return;}
-  if(!document.getElementById("bMbti").value){alert("请选择你的 MBTI 人格类型");return;}
+  // MBTI 选填：没选也照常排盘（选了更好，先攒数据；后续接星座×MBTI解读）
   const sex=document.querySelector("#bSex .opt.on").dataset.v;
   const inp={y,mo,d,h,mi,tz,lat,lon,city:cityName||`${lat},${lon}`,sex};
   natalResult=computeNatal(inp);
