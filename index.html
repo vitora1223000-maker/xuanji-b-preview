@@ -296,12 +296,26 @@ const REQUIRE_LOGIN = _loginParam === "1" ? true : _loginParam === "0" ? false :
 let _curUser = null;
 async function refreshUser(){
   if(!sb) return null;
-  // 先读本地 session（瞬时、不发网络）→ 冷启动/弱网也能立刻认出已登录态，不会误判成未登录
+  // ① 先读 supabase 自己的 session（邮箱登录走这条，正常落盘）
   try{
     const {data:s}=await sb.auth.getSession();
     if(s&&s.session&&s.session.user){ _curUser=s.session.user; updateAcctBadge(); return _curUser; }
   }catch(_){}
-  // 本地无 session 才回退到网络校验
+  // ② supabase 没恢复出来 → 用我们短信登录时存的备份 token 重新 setSession 补回
+  //    （Safari 下手动 setSession 注入的短信 session 不落盘，这是邮箱登录没有、短信登录才有的问题）
+  try{
+    const bak=localStorage.getItem("xuanji-auth-bak");
+    if(bak){
+      const {at,rt}=JSON.parse(bak);
+      if(at&&rt){
+        const {data,error}=await sb.auth.setSession({access_token:at, refresh_token:rt});
+        if(!error&&data&&data.user){ _curUser=data.user; updateAcctBadge(); return _curUser; }
+        // token 失效（过期等）→ 清掉备份，避免每次启动白试
+        if(error) localStorage.removeItem("xuanji-auth-bak");
+      }
+    }
+  }catch(_){}
+  // ③ 都没有 → 回退网络校验
   try{ const {data}=await sb.auth.getUser(); _curUser=(data&&data.user)?data.user:null; }catch(_){ _curUser=null; }
   updateAcctBadge();
   return _curUser;
@@ -332,7 +346,7 @@ function updateAcctBadge(){
   const bind=()=>{
     const btn=document.getElementById("acctBtn");
     if(btn) btn.onclick=async()=>{
-      if(_curUser){ if(sb) await sb.auth.signOut(); _curUser=null; updateAcctBadge(); }   // 已登录→登出
+      if(_curUser){ if(sb) await sb.auth.signOut(); try{localStorage.removeItem("xuanji-auth-bak");}catch(_){} _curUser=null; updateAcctBadge(); }   // 已登录→登出(连备份token一起清，否则刷新又被恢复)
       else { const u=await openLogin(); if(u){ _curUser=u; updateAcctBadge(); } }          // 未登录→弹登录
     };
   };
@@ -423,6 +437,11 @@ function openLogin(){
       if(sb){
         const {data,error}=await sb.auth.setSession({ access_token:r.session.access_token, refresh_token:r.session.refresh_token });
         if(error||!data||!data.user){ $("#lgVerify").disabled=false; setH($("#lgHint2"),"入阁时灵韵一时未稳，再试试","err"); return; }
+        // 双保险：把 token 存进我们自己的独立备份 key（不依赖 supabase 内部格式）。
+        // Safari/ITP 下 setSession 的内部持久化可能不落盘，刷新即丢；启动时若 supabase 没恢复，就用这份备份 setSession 补回。
+        try{
+          localStorage.setItem("xuanji-auth-bak", JSON.stringify({ at:r.session.access_token, rt:r.session.refresh_token }));
+        }catch(_){}
         clearInterval(cdTimer); _curUser=data.user; close(data.user); return;
       }
       $("#lgVerify").disabled=false; setH($("#lgHint2"),"灵阁一时未醒，请刷新再试","err");
