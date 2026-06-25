@@ -1303,11 +1303,15 @@ function buildNatalData(N){
   // 元素配比(给后端判身位调语气): 统计十大行星落座的火土风水
   const cnt={火:0,土:0,风:0,水:0};
   P.forEach(p=>{const e=ELEMENT[p.sign]; if(e)cnt[e]++;});
+  // 金星星座+元素(美睫按金星元素派款,机器算死喂后端,绝不让M3自己判)
+  const venusSign=P[3].sign;          // BODIES顺序:0太阳1月亮2水星3金星
+  const venusElement=ELEMENT[venusSign]||"";
   return {
     data,
     sex:m.sex,
     elements:cnt,
-    sunSign:P[0].sign, moonSign:P[1].sign, ascSign:a.asc.sign
+    sunSign:P[0].sign, moonSign:P[1].sign, ascSign:a.asc.sign,
+    venusSign, venusElement
   };
 }
 
