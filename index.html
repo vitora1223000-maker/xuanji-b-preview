@@ -683,11 +683,17 @@ function computeNatal(inp){
     let v=Math.atan2(Math.cos(r), -(Math.sin(r)*Math.cos(e)+Math.tan(phi)*Math.sin(e)))*deg;
     return (v%360+360)%360;
   })();
-  // ③ 福点 Part of Fortune: 口径已对齐测测=夜盘式(ASC+太阳-月亮)。
-  //    本盘太阳在地平线下=夜盘, 实测夜盘式=双鱼14°35'(差0.5'), 日盘式则差一大截; 故采用夜盘式。
-  //    注: 测测此盘按夜盘式出值; 若日后发现测测对所有盘统一用日盘式, 改下行为 (asc+moonL-sunL)。
+  // ③ 福点 Part of Fortune: 必须按日/夜盘动态选公式(这是占星标准做法, 测测也如此)。
+  //    日盘(太阳在地平线之上=第7~12宫): ASC + 月亮 - 太阳
+  //    夜盘(太阳在地平线之下=第1~6宫):  ASC + 太阳 - 月亮
+  //    判据用 houseOf(sunL): 7~12 宫=日盘。曾误把一张夜生盘对齐后写死夜公式,
+  //    导致日生盘(如太阳9宫)算错(白羊26° vs 正确双子2°), 现已改回动态。
   const sunL=planets[0].L, moonL=planets[1].L;
-  const fortuneL=((asc+sunL-moonL)%360+360)%360;
+  const sunHouse=houseOf(sunL);
+  const isDayChart=(sunHouse>=7&&sunHouse<=12);
+  const fortuneL=isDayChart
+    ? ((asc+moonL-sunL)%360+360)%360   // 日盘
+    : ((asc+sunL-moonL)%360+360)%360;  // 夜盘
   const mkPt=(n,L,rx)=>{const dm=DEGIN(L);return {n,sign:SIGN(L),deg:dm.deg,min:dm.min,house:houseOf(L),rx:!!rx,L};};
   // 北交/南交是平均运动逆行点(永远℞,与测测一致)
   const points=[ mkPt("北交点",nodeL,true), mkPt("南交点",southL,true), mkPt("莉莉丝",lilithL),
