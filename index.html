@@ -184,26 +184,7 @@
 </style>
 </head>
 <body>
-<div id="acctBadge"><button id="acctBtn">登入</button><button id="diagBtn" style="background:none;border:0;color:#ffb;font-size:13px;cursor:pointer;padding:3px 8px">🔍</button></div>
-<script>
-// 🔧临时诊断按钮:查登录持久化(测完删)。三个关键值:
-// xuanji-auth-bak=我们的备份token  xuanji_visits=访问计数(对照整个localStorage是否被清)  sb-*-auth-token=supabase自己的session
-document.addEventListener("click",function(e){
-  if(e.target&&e.target.id==="diagBtn"){
-    var bak=localStorage.getItem("xuanji-auth-bak");
-    var visits=localStorage.getItem("xuanji_visits");
-    var sbKey=null,sbVal=null;
-    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf("auth-token")>=0||k.indexOf("xuanji-auth")===0)){sbKey=k;sbVal=localStorage.getItem(k);}}
-    var allKeys=[];for(var j=0;j<localStorage.length;j++)allKeys.push(localStorage.key(j));
-    var msg="🔍 登录持久化诊断\n\n"
-      +"① 备份token (xuanji-auth-bak):\n   "+(bak?("✅ 在 ("+bak.length+"字符)"):"❌ 没了")+"\n\n"
-      +"② 访问计数 (xuanji_visits):\n   "+(visits!=null?("✅ "+visits+" (说明localStorage没被全清)"):"❌ 也没了→整个localStorage被清(ITP)")+"\n\n"
-      +"③ Supabase自带session:\n   "+(sbKey?("✅ "+sbKey):"❌ 没有")+"\n\n"
-      +"④ localStorage全部key("+allKeys.length+"个):\n   "+(allKeys.join(", ")||"(空)");
-    alert(msg);
-  }
-},true);
-</script>
+<div id="acctBadge"><button id="acctBtn">登入</button></div>
 <div class="wrap">
   <h1>✦ 玄玑 · Astro ✦</h1>
   <div class="sub" id="now">解构人性 · 主宰人生 · 游戏玩家从不做 NPC</div>
@@ -330,8 +311,15 @@ async function refreshUser(){
       if(at&&rt){
         const {data,error}=await sb.auth.setSession({access_token:at, refresh_token:rt});
         if(!error&&data&&data.user){ _curUser=data.user; updateAcctBadge(); return _curUser; }
-        // token 失效（过期等）→ 清掉备份，避免每次启动白试
-        if(error) localStorage.removeItem("xuanji-auth-bak");
+        // 🔴只在确认 token 真失效时才删备份；网络/服务临时不可达(如部署中)绝不删——
+        //   否则部署那几十秒里误删好token,用户被迫重登且再也回不来(这是"偶发要重登"的真凶)。
+        //   token失效特征:错误信息含 invalid/expired/jwt/refresh 等;网络错(failed to fetch/超时)则保留备份。
+        if(error){
+          const m=((error&&error.message)||"").toLowerCase();
+          const tokenDead=/invalid|expired|jwt|refresh|not\s*found|revoked|bad_jwt/.test(m);
+          if(tokenDead){ localStorage.removeItem("xuanji-auth-bak"); }
+          // 网络类错误:啥都不删,保留备份,本轮就当未登录,下次网络好了还能恢复
+        }
       }
     }
   }catch(_){}
