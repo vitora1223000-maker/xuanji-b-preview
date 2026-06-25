@@ -643,10 +643,20 @@ function computeNatal(inp){
     const L=lon(b,utc); const dm=DEGIN(L);
     return {n,sign:SIGN(L),signIdx:Math.floor(((L%360)+360)%360/30),deg:dm.deg,min:dm.min,house:houseOf(L),rx:isRx(b,utc),L};
   });
-  // 凯龙星(Chiron, Moshier库;伤痛与疗愈)——保留在 planets 里，照旧参与解读/相位/元素，绝不动现有逻辑
-  if(typeof chironLon==="function"){
-    const cL=chironLon(utc), cdm=DEGIN(cL);
-    planets.push({n:"凯龙",sign:SIGN(cL),signIdx:Math.floor(((cL%360)+360)%360/30),deg:cdm.deg,min:cdm.min,house:houseOf(cL),rx:false,L:cL});
+  // 凯龙星(Chiron;伤痛与疗愈)——保留在 planets 里，照旧参与解读/相位/元素。
+  // 🔴取值源优先用 asteroid-ephem.js 的 chiron(对测测仅差~8角分),旧 Moshier 库 chironLon 差~54角分。
+  //    凯龙轨道偏心率高,旧库拟合差;asteroid-ephem 同一套四小行星库顺带算的 chiron 准得多。
+  //    降级:asteroid-ephem 没加载/报错时退回 chironLon,保证不崩。
+  {
+    let cL=null, cRx=false;
+    if(typeof asteroidEphem==="function"){
+      try{ const _c=asteroidEphem(utc).chiron; if(_c&&isFinite(_c.L)){ cL=_c.L; cRx=!!_c.rx; } }catch(_){}
+    }
+    if(cL===null && typeof chironLon==="function"){ try{ cL=chironLon(utc); }catch(_){} }
+    if(cL!==null){
+      const cdm=DEGIN(cL);
+      planets.push({n:"凯龙",sign:SIGN(cL),signIdx:Math.floor(((cL%360)+360)%360/30),deg:cdm.deg,min:cdm.min,house:houseOf(cL),rx:cRx,L:cL});
+    }
   }
   // ===== 四小行星(谷神/智神/婚神/灶神)：纯新增，独立成区，只上盘面，不进解读、不进相位、不进三个群运营tab =====
   // 精度已对测测校验(三盘12体落座100%/度差≤17'/末度临界与逆行全对)。asteroid-ephem.js 提供。
