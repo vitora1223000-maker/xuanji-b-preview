@@ -184,7 +184,26 @@
 </style>
 </head>
 <body>
-<div id="acctBadge"><button id="acctBtn">登入</button></div>
+<div id="acctBadge"><button id="acctBtn">登入</button><button id="diagBtn" style="background:none;border:0;color:#ffb;font-size:13px;cursor:pointer;padding:3px 8px">🔍</button></div>
+<script>
+// 🔧临时诊断按钮:查登录持久化(测完删)。三个关键值:
+// xuanji-auth-bak=我们的备份token  xuanji_visits=访问计数(对照整个localStorage是否被清)  sb-*-auth-token=supabase自己的session
+document.addEventListener("click",function(e){
+  if(e.target&&e.target.id==="diagBtn"){
+    var bak=localStorage.getItem("xuanji-auth-bak");
+    var visits=localStorage.getItem("xuanji_visits");
+    var sbKey=null,sbVal=null;
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf("auth-token")>=0||k.indexOf("xuanji-auth")===0)){sbKey=k;sbVal=localStorage.getItem(k);}}
+    var allKeys=[];for(var j=0;j<localStorage.length;j++)allKeys.push(localStorage.key(j));
+    var msg="🔍 登录持久化诊断\n\n"
+      +"① 备份token (xuanji-auth-bak):\n   "+(bak?("✅ 在 ("+bak.length+"字符)"):"❌ 没了")+"\n\n"
+      +"② 访问计数 (xuanji_visits):\n   "+(visits!=null?("✅ "+visits+" (说明localStorage没被全清)"):"❌ 也没了→整个localStorage被清(ITP)")+"\n\n"
+      +"③ Supabase自带session:\n   "+(sbKey?("✅ "+sbKey):"❌ 没有")+"\n\n"
+      +"④ localStorage全部key("+allKeys.length+"个):\n   "+(allKeys.join(", ")||"(空)");
+    alert(msg);
+  }
+},true);
+</script>
 <div class="wrap">
   <h1>✦ 玄玑 · Astro ✦</h1>
   <div class="sub" id="now">解构人性 · 主宰人生 · 游戏玩家从不做 NPC</div>
