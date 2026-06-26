@@ -564,7 +564,7 @@ async function handleSmsVerify(req, res) {
 // ---------- 静态文件 ----------
 function serveStatic(req, res) {
   let urlPath = decodeURIComponent(req.url.split("?")[0]);
-  if (urlPath === "/") urlPath = "/index.html";
+  if (urlPath === "/") urlPath = "/mbti_full.html";  // 测MBTI=入口首页(根地址直接进,零后缀)
   // 防目录穿越
   const filePath = path.join(ROOT, path.normalize(urlPath).replace(/^(\.\.[/\\])+/, ""));
   if (!filePath.startsWith(ROOT)) {
