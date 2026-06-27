@@ -281,6 +281,10 @@
 .cardstage .front .nameline::after{right:0;background:linear-gradient(270deg,transparent,var(--gold))}
 .cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;white-space:nowrap;display:inline-block;
   text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+.cardstage .front .pname::before{content:"◆";font-size:6px;vertical-align:middle;margin-right:9px;
+  filter:drop-shadow(0 0 6px rgba(255,230,168,.9))}
+.cardstage .front .pname::after{content:"◆";font-size:6px;vertical-align:middle;margin-left:9px;
+  filter:drop-shadow(0 0 6px rgba(255,230,168,.9))}
 /* —— 太极封皮（盖着） —— */
 .cardstage .face.back{position:relative}
 .cardstage .back .bimg{display:block;width:100%;height:auto;vertical-align:top}
