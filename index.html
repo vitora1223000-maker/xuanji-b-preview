@@ -273,13 +273,13 @@
 .cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;line-height:1;
   background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
-.cardstage .front .nameline{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:12px}
-.cardstage .front .beam{height:1px;flex:1;max-width:64px;
+.cardstage .front .nameline{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;padding:0 12px}
+.cardstage .front .beam{height:1px;flex:1 1 0;max-width:46px;min-width:14px;
   background:linear-gradient(90deg,transparent,var(--gold) 80%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
 .cardstage .front .beam.r{transform:scaleX(-1)}
 .cardstage .front .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));transform:rotate(45deg);
   box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
-.cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;flex:none;
+.cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:3px;flex:0 0 auto;white-space:nowrap;
   text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
 /* —— 太极封皮（盖着） —— */
 .cardstage .face.back{position:relative}
@@ -375,7 +375,7 @@
     <div class="prompt-box" id="prompt"></div>
     <button class="btn" id="copy">复制</button>
   </div>
-  <div class="foot">玄玑 · Astro · 星历与瑞士星历同源 · 你的出生信息只在本机计算，不上传<br>小红书 @山玉居士　·　以占星解构人性，用数学逻辑主宰人生</div>
+  <div class="foot">玄玑 · Astro · 星历与瑞士星历同源 · 你的出生信息只在本机计算，不上传<br>小红书 @山玉居士　·　以星空视角解构人性，用数学逻辑主宰人生</div>
 </div>
 
 <!-- 出生时间·金色滚轮浮层（放在 body 直属层，脱离 .card 的 backdrop-filter，否则 position:fixed 关不干净） -->
@@ -917,7 +917,7 @@ const ROLES={
 };
 function matchRole(natal){
   const sunIdx=natal.planets[0].signIdx;
-  return ROLES[sunIdx]||{name:"探路者",type:"你的类人格倾向",desc:"你的盘里有一种独属于你的张力——具体是谁，让伟大的占星师为你细读。"};
+  return ROLES[sunIdx]||{name:"探路者",type:"你的类人格倾向",desc:"你的盘里有一种独属于你的张力——具体是谁，让玄玑为你细读。"};
 }
 
 let mode="today";
@@ -1330,7 +1330,6 @@ function initCard(personas){
       </div>`;
     info.innerHTML=`<div class="say only">${p.line}</div>`;
     syncPager();
-    if(seen.size>=PERSONAS.length){swapBtn.classList.add("dead");swapBtn.textContent="✓ 两张命格都已揭晓";}
   }
 
   flip.onclick=()=>{
@@ -1341,9 +1340,9 @@ function initCard(personas){
   };
 
   swapBtn.onclick=()=>{
-    if(swapBtn.classList.contains("dead")) return;
+    // 两张人格之间自由来回切，永不锁死（有人翻到第二张又想分享第一张）
     flip.classList.add("swap");
-    setTimeout(()=>{idx=(idx+1)%PERSONAS.length;seen.add(idx);render();flip.classList.remove("swap");},300);
+    setTimeout(()=>{idx=(idx+1)%PERSONAS.length;render();flip.classList.remove("swap");},300);
   };
 
   const shareMask=document.getElementById("cardShareMask");
@@ -1400,8 +1399,8 @@ function renderNatalResult(N){
    </div>
    <div class="read-card">
      <div class="ask-title">✦ 你自己的操作说明书 ✦</div>
-     <div class="ask-desc">这就是您出厂自带的说明书——您是谁、您的天赋怎么用、感情与正缘、这一生的功课。<br>请<b>玄玑天庭 · 文澜阁 · 神仙虾</b>当场为您逐一解读：</div>
-     <button class="btn read-btn glow" id="aiRead">✨ 让伟大的占星师为我解读</button>
+     <div class="ask-desc">这就是您出厂自带的说明书——您是谁、您的天赋怎么用、感情与正缘、这一生的功课。</div>
+     <button class="btn read-btn glow" id="aiRead">✨ 让玄玑为我解读</button>
      <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
      <div id="aiReadOut" class="read-out" style="display:none"></div>
      <button class="btn" id="copyShare" style="margin-top:10px;background:var(--card);color:var(--soft);border:1px solid var(--line);box-shadow:none;font-weight:500">📋 复制我的数据</button>
@@ -1468,12 +1467,12 @@ async function runAIRead(N,btn){
   const panKey=panFingerprint(N);
   let visits=0;
   try{ visits=parseInt(localStorage.getItem("xuanji_visits")||"0",10)||0; localStorage.setItem("xuanji_visits",visits+1); }catch(_){}
-  btn.disabled=true; btn.textContent="✨ 伟大的占星师正在为您揭秘…";
+  btn.disabled=true; btn.textContent="✨ 玄玑正在为您揭秘…";
   out.style.display="block";
   out.scrollIntoView({behavior:"smooth",block:"center"});
   // 等待文案：揭秘语打头 → 史诗级入场叙事(混沌→月之影→天庭文澜阁→龙现身照盘)。顺序推进不循环,把等待变入场仪式。
   const waitMsgs=[
-    "🔮 伟大的占星师正在为您揭秘基因代码……",
+    "🔮 玄玑正在为您揭秘基因代码……",
     "✨ 正在比对星盘与您的灵魂底色……",
     "🌙 正在读取您出厂自带的人生说明书……",
     "🌌 据说，在盘古开天辟地之前……",
