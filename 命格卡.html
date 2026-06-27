@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>玄玑 · 命格卡</title>
+<style>
+  :root{
+    --bg:#06080f; --ink:#e8e3f5; --soft:#9a92bd;
+    --accent:#c9a8ff; --gold:#ffe6a8; --gold2:#e8c25a; --line:rgba(201,168,255,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,"PingFang SC",sans-serif;color:var(--ink);
+    background:
+      radial-gradient(1px 1px at 18% 26%, rgba(255,255,255,.55), transparent),
+      radial-gradient(1.4px 1.4px at 82% 38%, rgba(232,201,118,.6), transparent),
+      radial-gradient(1px 1px at 38% 72%, rgba(201,168,255,.5), transparent),
+      radial-gradient(1px 1px at 68% 84%, rgba(255,255,255,.45), transparent),
+      radial-gradient(780px 580px at 72% -6%, #2a1f4d 0%, transparent 60%),
+      radial-gradient(680px 600px at 8% 104%, #1a2148 0%, transparent 55%),
+      linear-gradient(160deg,#0a0e1f,#0d1130,#0a0e22);
+    background-attachment:fixed;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:26px 16px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .top{text-align:center;margin-bottom:20px;max-width:340px}
+  .top .rebirth{font-size:23px;font-weight:800;letter-spacing:1px;line-height:1.45;
+    background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.45));}
+  .top .sub{font-size:12.5px;color:var(--soft);letter-spacing:1.5px;margin-top:10px;line-height:1.7;opacity:.88}
+
+  /* —— 换卡进度点（两人格） —— */
+  .pager{display:flex;gap:9px;justify-content:center;margin-bottom:16px}
+  .pager .dot{width:7px;height:7px;border-radius:50%;background:rgba(201,168,255,.3);transition:.3s}
+  .pager .dot.on{background:var(--gold);width:22px;border-radius:4px;box-shadow:0 0 10px rgba(255,230,168,.6)}
+
+  /* ===== 命格卡（可翻面：正=美图 / 背=太极封皮） ===== */
+  .stage{width:100%;max-width:340px;position:relative}
+
+  /* —— 翻开提醒：纯金色光环呼吸（无 emoji·仙气），翻开即消失 —— */
+  .tap-hint{position:absolute;left:50%;bottom:13%;z-index:30;pointer-events:none;
+    transform:translateX(-50%);transition:opacity .4s ease;text-align:center}
+  .flip.opened ~ .tap-hint, .stage.opened .tap-hint{opacity:0}
+  /* 中央呼吸金核 */
+  .tap-hint .core{position:relative;width:14px;height:14px;margin:0 auto 14px;border-radius:50%;
+    background:radial-gradient(circle,#fff6d8,var(--gold) 60%,transparent);
+    box-shadow:0 0 16px 4px rgba(255,230,168,.7);animation:coreBreath 2s ease-in-out infinite}
+  @keyframes coreBreath{0%,100%{transform:scale(.85);opacity:.85}50%{transform:scale(1.15);opacity:1}}
+  /* 向外扩散的金涟漪 */
+  .tap-hint .core::before,.tap-hint .core::after{content:"";position:absolute;left:50%;top:50%;
+    width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+    border:1.5px solid rgba(255,230,168,.6);animation:tapRipple 2s ease-out infinite}
+  .tap-hint .core::after{animation-delay:1s}
+  @keyframes tapRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(4.5);opacity:0}}
+  /* 文字 */
+  .tap-hint .tword{font-size:12.5px;color:var(--gold);letter-spacing:4px;font-weight:600;
+    text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 14px rgba(255,230,168,.5);
+    animation:tapWord 2s ease-in-out infinite}
+  @keyframes tapWord{0%,100%{opacity:.6}50%{opacity:1}}
+  .flip{perspective:1500px;width:100%;cursor:pointer}
+  /* 默认盖着：太极卡背朝上。加 .opened 才翻到美图正面 */
+  .flip-inner{position:relative;width:100%;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .3s ease;transform-style:preserve-3d}
+  .flip.opened .flip-inner{transform:rotateY(180deg)}
+  .flip.swap .flip-inner{opacity:0;transform:scale(.96)}
+  .face{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;overflow:hidden;
+    border:1px solid rgba(232,201,118,.3);box-shadow:0 20px 64px rgba(0,0,0,.6)}
+
+  /* —— 正面：美图（收藏面）·默认转到背后，翻开才露出 —— */
+  .face.front{position:absolute;inset:0;transform:rotateY(180deg)}
+  .front .photo{display:block;width:100%;height:auto;vertical-align:top}
+  .front .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+  .front .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:var(--gold);
+    letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+  .front .overlay{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+    background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+  .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;line-height:1;
+    background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+  /* 称号 C：菱形宝石 + 左右射光束 */
+  .front .nameline{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:12px}
+  .front .beam{height:1px;flex:1;max-width:64px;
+    background:linear-gradient(90deg,transparent,var(--gold) 80%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
+  .front .beam.r{transform:scaleX(-1)}
+  .front .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));transform:rotate(45deg);
+    box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+  .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;flex:none;
+    text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+
+  /* —— 太极封皮：默认朝上（盖着·抽卡未知态），固定·所有卡共用 —— */
+  .face.back{position:relative}
+  .back .bimg{display:block;width:100%;height:auto;vertical-align:top}
+  .back .frame{position:absolute;inset:9px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+  .back::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:radial-gradient(1.5px 1.5px at 16% 10%,rgba(255,230,168,.7),transparent),
+      radial-gradient(1px 1px at 82% 14%,rgba(255,255,255,.55),transparent)}
+  .back .bbrand{position:absolute;bottom:20px;left:0;right:0;z-index:4;
+    display:flex;align-items:center;justify-content:center;gap:14px}
+  .back .bbrand .txt{font-size:12px;color:var(--gold);letter-spacing:5px;flex:none;
+    text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 14px rgba(255,230,168,.4)}
+  .back .bbrand .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));
+    transform:rotate(45deg);box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+
+  /* ===== 卡下信息区（仅翻开后出现：称号解说 + 玄玑推荐buff） ===== */
+  .info{width:100%;max-width:340px;overflow:hidden;
+    max-height:0;opacity:0;margin-top:0;
+    transition:max-height .5s ease,opacity .4s ease,margin-top .5s ease}
+  .info.show{max-height:360px;opacity:1;margin-top:14px}
+  /* 称号解说（封神句·素文字·统一金归一 #ffe6a8） */
+  .info .say{font-size:16px;line-height:1.8;color:var(--gold);text-align:center;letter-spacing:.4px;font-weight:600;
+    padding:20px 26px;background:none;border:0}
+  /* 玄玑推荐·人格 buff（紧凑） */
+  .info .buff{padding:2px 22px 18px;text-align:center}
+  .info .buff .brank{font-size:11px;color:var(--gold2);letter-spacing:2px;margin-bottom:7px;font-weight:600}
+  .info .buff .brank::before{content:"⚜ ";opacity:.8}
+  .info .buff .bfunc{display:inline-block;font-size:19px;font-weight:800;letter-spacing:4px;color:var(--gold);
+    margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(255,230,168,.45))}
+  .info .buff .bfdesc{font-size:13px;line-height:1.7;color:var(--gold);letter-spacing:.2px}
+
+  /* —— 操作区 —— */
+  .ops{width:100%;max-width:340px;margin-top:18px;display:flex;flex-direction:column;gap:12px}
+  .btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:15.5px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.18s}
+  .btn-ghost{background:rgba(201,168,255,.08);border:1px solid var(--line);color:var(--gold)}
+  .btn-ghost:active{background:rgba(201,168,255,.16)}
+  .btn-ghost.dead{opacity:.32;cursor:default;pointer-events:none}
+  .btn-gold{background:linear-gradient(120deg,#c9a8ff,#ffe6a8 60%,#e8c25a);color:#1a1530;
+    box-shadow:0 6px 22px rgba(201,168,255,.35);animation:glowPulse 2.4s ease-in-out infinite}
+  @keyframes glowPulse{0%,100%{box-shadow:0 6px 20px rgba(201,168,255,.3),0 0 14px 1px rgba(255,230,168,.3)}
+    50%{box-shadow:0 8px 26px rgba(201,168,255,.4),0 0 34px 8px rgba(255,230,168,.62)}}
+  .btn-gold:active{opacity:.85}
+  .nextline{text-align:center;font-size:12.5px;color:var(--soft);letter-spacing:1px;margin-top:6px;opacity:.8}
+  .devnote{color:var(--soft);font-size:11px;margin-top:30px;max-width:340px;text-align:center;line-height:1.8;opacity:.5}
+
+  /* ===== 分享图弹层 ===== */
+  .share-mask{position:fixed;inset:0;z-index:200;background:rgba(5,6,15,.86);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+  .share-mask.on{display:flex}
+  .share-scroll{width:100%;max-width:330px;max-height:78vh;overflow-y:auto;border-radius:20px;-webkit-overflow-scrolling:touch}
+  .poster{width:330px;border-radius:20px;overflow:hidden;
+    background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);border:1px solid rgba(232,201,118,.25)}
+  /* —— 分享图顶部=复用正面卡面（金框+星点+底部型号称号光束），不再重复写型号 —— */
+  .poster .p-card{position:relative}
+  .poster .p-photo{display:block;width:100%;height:auto;vertical-align:top}
+  .poster .p-card .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+  .poster .p-card .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:var(--gold);
+    letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+  .poster .p-card-name{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+    background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+  .poster .p-card-name .ptype{font-size:36px;font-weight:800;letter-spacing:6px;line-height:1;
+    background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+  .poster .p-card-name .nameline{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:11px}
+  .poster .p-card-name .beam{height:1px;flex:1;max-width:58px;
+    background:linear-gradient(90deg,transparent,var(--gold) 80%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
+  .poster .p-card-name .beam.r{transform:scaleX(-1)}
+  .poster .p-card-name .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));transform:rotate(45deg);
+    box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+  .poster .p-card-name .pname{font-size:19px;font-weight:700;color:var(--gold);letter-spacing:5px;flex:none;
+    text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+  /* —— 卡座：解说+BUFF+扫码（金归一） —— */
+  .poster .p-body{padding:22px 24px 22px;text-align:center;position:relative;color:var(--gold)}
+  .poster .p-line{font-size:16px;line-height:1.95;color:var(--gold);letter-spacing:.3px;padding:0 6px;opacity:.95}
+  /* 解说与 buff 之间的横光束（中间亮两端渐隐·金归一） */
+  .poster .p-beam{width:64px;height:1px;margin:22px auto;
+    background:linear-gradient(90deg,transparent,#fff6d8 50%,transparent);
+    box-shadow:0 0 8px rgba(255,230,168,.6)}
+  .poster .p-buff{font-size:15px;color:var(--gold);letter-spacing:.5px;line-height:2;margin:0 0 20px;opacity:.95}
+  .poster .p-buff b{color:var(--gold);font-size:21px;font-weight:800;opacity:1;letter-spacing:1px;
+    filter:drop-shadow(0 0 10px rgba(255,230,168,.5))}
+  .poster .p-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    border-top:1px solid rgba(255,230,168,.18);padding-top:16px;text-align:left}
+  .poster .p-foot .urls{display:flex;flex-direction:column;gap:6px}
+  .poster .p-foot .urls .go{color:var(--soft);font-weight:400;font-size:13px;letter-spacing:.5px}
+  .poster .p-foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;
+    background:linear-gradient(120deg,#e8c976,#fff6d8,#c9a8ff);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
+  .poster .p-foot .qr{width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
+  .poster .p-foot .qr img,.poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
+  .share-guide{color:var(--gold);font-size:13.5px;letter-spacing:1px;text-align:center;margin:16px 0 4px;line-height:1.7}
+  .share-close{color:var(--soft);font-size:13px;letter-spacing:2px;margin-top:10px;cursor:pointer;padding:8px 20px;
+    border:1px solid var(--line);border-radius:18px}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="rebirth">重生！这一世<br>我要拿回属于我的一切</div>
+  </div>
+
+  <div class="pager" id="pager"></div>
+
+  <div class="stage" id="stage">
+    <div class="flip" id="flip"></div>
+    <div class="tap-hint" id="tapHint">
+      <div class="core"></div>
+      <div class="tword">轻 点 翻 开</div>
+    </div>
+  </div>
+
+  <!-- 卡下信息区（不翻面） -->
+  <div class="info" id="info"></div>
+
+  <div class="ops">
+    <button class="btn btn-ghost" id="swapBtn">⇄ 试试手气</button>
+    <button class="btn btn-gold" id="shareBtn">✦ 分享 · 看我的人格 buff ✦</button>
+  </div>
+
+  <div class="devnote">原型·占位图(真图后换)。盖着=太极封皮，翻开=美图人格+解说。<br>人格buff 是彩蛋，只在分享图里解锁。</div>
+
+  <!-- 分享图弹层 -->
+  <div class="share-mask" id="shareMask">
+    <div class="share-scroll"><div class="poster" id="poster"></div></div>
+    <div class="share-close" id="shareClose">关闭</div>
+  </div>
+
+<script src="./qrcode.min.js"></script>
+<script src="./engine_mbti_core.js"></script>
+<script>
+const M = window.MBTI;
+const TOOL_URL = "https://xuanji777.preview.aliyun-zeabur.cn/mbti_full.html"; // 玄玑工具网址→二维码
+const CARD_BACK = "卡背底图_紫.jpeg"; // 固定太极封皮（所有卡共用）
+
+// 原型：两个重生人格（真接流程时由 M.tools() 算出）。称号一张卡抽定一次。
+// 解说固定取 B（封神·能炫耀），不给 A（戳心·不好晒）
+const lineB = t => { const a=M.SOUL_LINES[t]||[""]; return a[1]||a[0]; };
+const PERSONAS = [
+  { type:"ISTJ", func:"Si", img:"占位图_人格1.jpg" },
+  { type:"ESTJ", func:"Te", img:"占位图_人格2.jpg" },
+].map(p => ({...p, name:M.pickName(p.type), line:lineB(p.type)}));
+
+let idx = 0;
+const seen = new Set([0]);
+const flip = document.getElementById("flip");
+const pager = document.getElementById("pager");
+const info = document.getElementById("info");
+const stage = document.getElementById("stage");
+const swapBtn = document.getElementById("swapBtn");
+
+PERSONAS.forEach((_,i)=>{ const d=document.createElement("div"); d.className="dot"+(i===0?" on":""); pager.appendChild(d); });
+function syncPager(){ [...pager.children].forEach((d,i)=>d.classList.toggle("on",i===idx)); }
+
+function render(){
+  const p = PERSONAS[idx];
+  const fdesc = M.FUNC_ONE[p.func] || "";
+  flip.classList.remove("opened");    // 换卡回到盖着态（太极朝上）
+  info.classList.remove("show");      // 盖着时卡下信息区收起（空）
+  stage.classList.remove("opened");   // 手势提醒重新出现
+
+  // 卡片：正面美图 + 背面太极封皮
+  flip.innerHTML = `
+    <div class="flip-inner">
+      <div class="face front">
+        <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+        <img class="photo" src="${p.img}" alt="命格之相">
+        <div class="overlay">
+          <div class="ptype">${p.type}</div>
+          <div class="nameline">
+            <span class="beam"></span><span class="gem"></span>
+            <span class="pname">${p.name}</span>
+            <span class="gem"></span><span class="beam r"></span>
+          </div>
+        </div>
+      </div>
+      <div class="face back">
+        <div class="frame"></div>
+        <img class="bimg" src="${CARD_BACK}" alt="命格卡·背面">
+        <div class="bbrand">
+          <span class="gem"></span><span class="txt">玄 玑 · 命 格 卡</span><span class="gem"></span>
+        </div>
+      </div>
+    </div>`;
+
+  // 卡下解说：固定封神句 B（能炫耀）。buff 是分享彩蛋
+  info.innerHTML = `<div class="say only">${p.line}</div>`;
+
+  syncPager();
+  if(seen.size >= PERSONAS.length){ swapBtn.classList.add("dead"); swapBtn.textContent="✓ 两张命格都已揭晓"; }
+}
+
+// 翻面（点卡片）：太极封皮 ⇄ 美图正面；翻开才露解说+buff
+flip.addEventListener("click", ()=>{
+  flip.classList.toggle("opened");
+  const opened = flip.classList.contains("opened");
+  info.classList.toggle("show", opened);
+  stage.classList.toggle("opened", opened);   // 翻开→手势消失
+});
+
+// 换卡：两人格来回切，看完两张停
+swapBtn.addEventListener("click", ()=>{
+  if(swapBtn.classList.contains("dead")) return;
+  flip.classList.add("swap");
+  setTimeout(()=>{ idx=(idx+1)%PERSONAS.length; seen.add(idx); render(); flip.classList.remove("swap"); }, 300);
+});
+
+// 生成分享图（当前卡 + 玄玑工具二维码）
+const shareMask=document.getElementById("shareMask");
+document.getElementById("shareBtn").addEventListener("click", ()=>{
+  const p = PERSONAS[idx];
+  const fdesc = M.FUNC_ONE[p.func] || "";
+  document.getElementById("poster").innerHTML = `
+    <div class="p-card">
+      <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+      <img class="p-photo" src="${p.img}" alt="命格之相">
+      <div class="p-card-name">
+        <div class="ptype">${p.type}</div>
+        <div class="nameline">
+          <span class="beam"></span><span class="gem"></span>
+          <span class="pname">${p.name}</span>
+          <span class="gem"></span><span class="beam r"></span>
+        </div>
+      </div>
+    </div>
+    <div class="p-body">
+      <div class="p-line">${p.line}</div>
+      <div class="p-beam"></div>
+      <div class="p-buff">人格 BUFF · <b>${p.func}</b><br>${fdesc.replace(/[（(].*$/,'').trim()}</div>
+      <div class="p-foot">
+        <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+        <div class="qr" id="qrBox"></div>
+      </div>
+    </div>`;
+  const qrBox=document.getElementById("qrBox"); qrBox.innerHTML="";
+  new QRCode(qrBox, { text:TOOL_URL, width:128, height:128, colorDark:"#0a0e1f", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.M });
+  shareMask.classList.add("on");
+});
+document.getElementById("shareClose").addEventListener("click", ()=> shareMask.classList.remove("on"));
+
+render();
+</script>
+</body>
+</html>
