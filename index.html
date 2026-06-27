@@ -273,16 +273,17 @@
 .cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;padding-left:6px;line-height:1;
   background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
-/* 称号行：称号居中固定，左右光束各占满半边把菱形推到两侧·绝对对称 */
-.cardstage .front .nameline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:10px;margin-top:12px;padding:0 14px}
+/* 称号行：grid三列(光束侧|称号|光束侧)。称号几何居中，菱形贴字留死间距，光束在外不碰字 */
+.cardstage .front .nameline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:0;margin-top:12px;padding:0 14px}
 .cardstage .front .nameline .side{display:flex;align-items:center}
 .cardstage .front .nameline .side.l{justify-content:flex-end}
 .cardstage .front .nameline .side.r{justify-content:flex-start}
-.cardstage .front .beam{height:1px;flex:1;
-  background:linear-gradient(90deg,transparent,var(--gold) 85%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8);margin:0 8px}
+.cardstage .front .beam{height:1px;flex:1;max-width:42px;
+  background:linear-gradient(90deg,transparent,var(--gold) 85%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
 .cardstage .front .beam.r{transform:scaleX(-1)}
+/* 菱形：和光束、和称号之间各留死间距(margin),字再长光束也碰不到字 */
 .cardstage .front .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));transform:rotate(45deg);
-  box-shadow:0 0 12px rgba(255,230,168,.9);flex:none}
+  box-shadow:0 0 12px rgba(255,230,168,.9);flex:none;margin:0 9px}
 .cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:1px;padding-left:1px;white-space:nowrap;text-align:center;
   text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
 /* —— 太极封皮（盖着） —— */
@@ -339,15 +340,15 @@
 .share-mask .poster .p-card-name .ptype{font-size:36px;font-weight:800;letter-spacing:6px;padding-left:6px;line-height:1;
   background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
-.share-mask .poster .p-card-name .nameline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:10px;margin-top:11px;padding:0 14px}
+.share-mask .poster .p-card-name .nameline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:0;margin-top:11px;padding:0 14px}
 .share-mask .poster .p-card-name .side{display:flex;align-items:center}
 .share-mask .poster .p-card-name .side.l{justify-content:flex-end}
 .share-mask .poster .p-card-name .side.r{justify-content:flex-start}
-.share-mask .poster .p-card-name .beam{height:1px;flex:1;
-  background:linear-gradient(90deg,transparent,#ffe6a8 85%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8);margin:0 8px}
+.share-mask .poster .p-card-name .beam{height:1px;flex:1;max-width:42px;
+  background:linear-gradient(90deg,transparent,#ffe6a8 85%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
 .share-mask .poster .p-card-name .beam.r{transform:scaleX(-1)}
 .share-mask .poster .p-card-name .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,#ffe6a8);transform:rotate(45deg);
-  box-shadow:0 0 12px rgba(255,230,168,.9);flex:none}
+  box-shadow:0 0 12px rgba(255,230,168,.9);flex:none;margin:0 9px}
 .share-mask .poster .p-card-name .pname{font-size:19px;font-weight:700;color:#ffe6a8;letter-spacing:1px;padding-left:1px;white-space:nowrap;text-align:center;
   text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
 .share-mask .poster .p-body{padding:22px 24px 22px;text-align:center;position:relative;color:#ffe6a8}
