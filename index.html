@@ -268,12 +268,13 @@
 .cardstage .front .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
 .cardstage .front .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:var(--gold);
   letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
-.cardstage .front .overlay{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+.cardstage .front .overlay{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;
+  display:flex;flex-direction:column;align-items:center;
   background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
-.cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;padding-left:6px;padding-right:6px;line-height:1;
+.cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;line-height:1;
   background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
-.cardstage .front .nameline{margin-top:12px;display:flex;align-items:center;justify-content:center}
+.cardstage .front .nameline{margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center}
 .cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;white-space:nowrap;flex:none;
   text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
 .cardstage .front .side{flex:1;display:flex;align-items:center;overflow:hidden;min-width:0}
