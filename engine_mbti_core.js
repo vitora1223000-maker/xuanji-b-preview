@@ -181,7 +181,7 @@ function rankTools(chart){
   const top3=rank.slice(0,3).map(([t,s],i)=>{
     const o={type:t,score:s};
     if(i<2) o.tie=Math.abs(s-rank[0][1])<0.3;
-    if(i===2) o.mineFunc=mineOfType(t,mine);
+    o.mineFunc=mineOfType(t,mine); // 每个 top3 人格都带自己的 buff 功能(原仅 i===2,卡牌每张卡需各自的)
     return o;
   });
   return {rank, top3, mine, fp};

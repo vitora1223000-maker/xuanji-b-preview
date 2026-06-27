@@ -223,6 +223,145 @@
 .chart-data-fold[open] summary{border-bottom:1px solid rgba(232,194,90,.15);}
 .chart-data-fold>*:not(summary){padding-left:16px;padding-right:16px;}
 .chart-data-fold>*:last-child{padding-bottom:16px;}
+
+/* ========================================================== */
+/*  命格卡（cardstage 作用域·全部加前缀防污染） 来自 命格卡_整合.html  */
+/* ========================================================== */
+.cardstage{--gold:#ffe6a8;--gold2:#e8c25a;--soft:#9a92bd;--accent:#c9a8ff;--line:rgba(201,168,255,.18);
+  display:flex;flex-direction:column;align-items:center;}
+.cardstage .ctop{text-align:center;margin-bottom:20px;max-width:340px}
+.cardstage .ctop .rebirth{font-size:23px;font-weight:800;letter-spacing:1px;line-height:1.45;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.45));}
+/* —— 换卡进度点（两人格） —— */
+.cardstage .pager{display:flex;gap:9px;justify-content:center;margin-bottom:16px}
+.cardstage .pager .dot{width:7px;height:7px;border-radius:50%;background:rgba(201,168,255,.3);transition:.3s}
+.cardstage .pager .dot.on{background:var(--gold);width:22px;border-radius:4px;box-shadow:0 0 10px rgba(255,230,168,.6)}
+/* ===== 命格卡（可翻面：正=美图 / 背=太极封皮） ===== */
+.cardstage .stage{width:100%;max-width:340px;position:relative}
+/* —— 翻开提醒：纯金色光环呼吸 —— */
+.cardstage .tap-hint{position:absolute;left:50%;bottom:13%;z-index:30;pointer-events:none;
+  transform:translateX(-50%);transition:opacity .4s ease;text-align:center}
+.cardstage .stage.opened .tap-hint{opacity:0}
+.cardstage .tap-hint .core{position:relative;width:14px;height:14px;margin:0 auto 14px;border-radius:50%;
+  background:radial-gradient(circle,#fff6d8,var(--gold) 60%,transparent);
+  box-shadow:0 0 16px 4px rgba(255,230,168,.7);animation:cardCoreBreath 2s ease-in-out infinite}
+@keyframes cardCoreBreath{0%,100%{transform:scale(.85);opacity:.85}50%{transform:scale(1.15);opacity:1}}
+.cardstage .tap-hint .core::before,.cardstage .tap-hint .core::after{content:"";position:absolute;left:50%;top:50%;
+  width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+  border:1.5px solid rgba(255,230,168,.6);animation:cardTapRipple 2s ease-out infinite}
+.cardstage .tap-hint .core::after{animation-delay:1s}
+@keyframes cardTapRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(4.5);opacity:0}}
+.cardstage .tap-hint .tword{font-size:12.5px;color:var(--gold);letter-spacing:4px;font-weight:600;
+  text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 14px rgba(255,230,168,.5);
+  animation:cardTapWord 2s ease-in-out infinite}
+@keyframes cardTapWord{0%,100%{opacity:.6}50%{opacity:1}}
+.cardstage .flip{perspective:1500px;width:100%;cursor:pointer}
+.cardstage .flip-inner{position:relative;width:100%;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .3s ease;transform-style:preserve-3d}
+.cardstage .flip.opened .flip-inner{transform:rotateY(180deg)}
+.cardstage .flip.swap .flip-inner{opacity:0;transform:scale(.96)}
+.cardstage .face{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;overflow:hidden;
+  border:1px solid rgba(232,201,118,.3);box-shadow:0 20px 64px rgba(0,0,0,.6)}
+/* —— 正面：美图（收藏面） —— */
+.cardstage .face.front{position:absolute;inset:0;transform:rotateY(180deg)}
+.cardstage .front .photo{display:block;width:100%;height:auto;vertical-align:top}
+.cardstage .front .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.cardstage .front .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:var(--gold);
+  letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+.cardstage .front .overlay{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+  background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+.cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;line-height:1;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+.cardstage .front .nameline{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:12px}
+.cardstage .front .beam{height:1px;flex:1;max-width:64px;
+  background:linear-gradient(90deg,transparent,var(--gold) 80%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
+.cardstage .front .beam.r{transform:scaleX(-1)}
+.cardstage .front .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));transform:rotate(45deg);
+  box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+.cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;flex:none;
+  text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+/* —— 太极封皮（盖着） —— */
+.cardstage .face.back{position:relative}
+.cardstage .back .bimg{display:block;width:100%;height:auto;vertical-align:top}
+.cardstage .back .frame{position:absolute;inset:9px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.cardstage .back::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(1.5px 1.5px at 16% 10%,rgba(255,230,168,.7),transparent),
+    radial-gradient(1px 1px at 82% 14%,rgba(255,255,255,.55),transparent)}
+.cardstage .back .bbrand{position:absolute;bottom:20px;left:0;right:0;z-index:4;
+  display:flex;align-items:center;justify-content:center;gap:14px}
+.cardstage .back .bbrand .txt{font-size:12px;color:var(--gold);letter-spacing:5px;flex:none;
+  text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 14px rgba(255,230,168,.4)}
+.cardstage .back .bbrand .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));
+  transform:rotate(45deg);box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+/* ===== 卡下信息区（翻开后出现） ===== */
+.cardstage .cinfo{width:100%;max-width:340px;overflow:hidden;
+  max-height:0;opacity:0;margin-top:0;
+  transition:max-height .5s ease,opacity .4s ease,margin-top .5s ease}
+.cardstage .cinfo.show{max-height:360px;opacity:1;margin-top:14px}
+.cardstage .cinfo .say{font-size:16px;line-height:1.8;color:var(--gold);text-align:center;letter-spacing:.4px;font-weight:600;
+  padding:20px 26px;background:none;border:0}
+.cardstage .cinfo .buff{padding:2px 22px 18px;text-align:center}
+.cardstage .cinfo .buff .brank{font-size:11px;color:var(--gold2);letter-spacing:2px;margin-bottom:7px;font-weight:600}
+.cardstage .cinfo .buff .brank::before{content:"⚜ ";opacity:.8}
+.cardstage .cinfo .buff .bfunc{display:inline-block;font-size:19px;font-weight:800;letter-spacing:4px;color:var(--gold);
+  margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(255,230,168,.45))}
+.cardstage .cinfo .buff .bfdesc{font-size:13px;line-height:1.7;color:var(--gold);letter-spacing:.2px}
+/* —— 操作区 —— */
+.cardstage .ops{width:100%;max-width:340px;margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.cardstage .cbtn{width:100%;padding:15px;border:0;border-radius:14px;font-size:15.5px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.18s;display:block;margin:0}
+.cardstage .btn-ghost{background:rgba(201,168,255,.08);border:1px solid var(--line);color:var(--gold)}
+.cardstage .btn-ghost:active{background:rgba(201,168,255,.16)}
+.cardstage .btn-ghost.dead{opacity:.32;cursor:default;pointer-events:none}
+.cardstage .btn-gold{background:linear-gradient(120deg,#c9a8ff,#ffe6a8 60%,#e8c25a);color:#1a1530;
+  box-shadow:0 6px 22px rgba(201,168,255,.35);animation:cardGlowPulse 2.4s ease-in-out infinite}
+@keyframes cardGlowPulse{0%,100%{box-shadow:0 6px 20px rgba(201,168,255,.3),0 0 14px 1px rgba(255,230,168,.3)}
+  50%{box-shadow:0 8px 26px rgba(201,168,255,.4),0 0 34px 8px rgba(255,230,168,.62)}}
+.cardstage .btn-gold:active{opacity:.85}
+/* ===== 分享图弹层 ===== */
+.share-mask{position:fixed;inset:0;z-index:200;background:rgba(5,6,15,.86);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+.share-mask.on{display:flex}
+.share-mask .share-scroll{width:100%;max-width:330px;max-height:78vh;overflow-y:auto;border-radius:20px;-webkit-overflow-scrolling:touch}
+.share-mask .poster{width:330px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);border:1px solid rgba(232,201,118,.25)}
+.share-mask .poster .p-card{position:relative}
+.share-mask .poster .p-photo{display:block;width:100%;height:auto;vertical-align:top}
+.share-mask .poster .p-card .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.share-mask .poster .p-card .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:#ffe6a8;
+  letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+.share-mask .poster .p-card-name{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+  background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+.share-mask .poster .p-card-name .ptype{font-size:36px;font-weight:800;letter-spacing:6px;line-height:1;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+.share-mask .poster .p-card-name .nameline{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:11px}
+.share-mask .poster .p-card-name .beam{height:1px;flex:1;max-width:58px;
+  background:linear-gradient(90deg,transparent,#ffe6a8 80%,#fff6d8);box-shadow:0 0 10px rgba(255,230,168,.8)}
+.share-mask .poster .p-card-name .beam.r{transform:scaleX(-1)}
+.share-mask .poster .p-card-name .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,#ffe6a8);transform:rotate(45deg);
+  box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+.share-mask .poster .p-card-name .pname{font-size:19px;font-weight:700;color:#ffe6a8;letter-spacing:5px;flex:none;
+  text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+.share-mask .poster .p-body{padding:22px 24px 22px;text-align:center;position:relative;color:#ffe6a8}
+.share-mask .poster .p-line{font-size:16px;line-height:1.95;color:#ffe6a8;letter-spacing:.3px;padding:0 6px;opacity:.95}
+.share-mask .poster .p-beam{width:64px;height:1px;margin:22px auto;
+  background:linear-gradient(90deg,transparent,#fff6d8 50%,transparent);
+  box-shadow:0 0 8px rgba(255,230,168,.6)}
+.share-mask .poster .p-buff{font-size:15px;color:#ffe6a8;letter-spacing:.5px;line-height:2;margin:0 0 20px;opacity:.95}
+.share-mask .poster .p-buff b{color:#ffe6a8;font-size:21px;font-weight:800;opacity:1;letter-spacing:1px;
+  filter:drop-shadow(0 0 10px rgba(255,230,168,.5))}
+.share-mask .poster .p-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(255,230,168,.18);padding-top:16px;text-align:left}
+.share-mask .poster .p-foot .urls{display:flex;flex-direction:column;gap:6px}
+.share-mask .poster .p-foot .urls .go{color:#9a92bd;font-weight:400;font-size:13px;letter-spacing:.5px}
+.share-mask .poster .p-foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;
+  background:linear-gradient(120deg,#e8c976,#fff6d8,#c9a8ff);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
+.share-mask .poster .p-foot .qr{width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
+.share-mask .poster .p-foot .qr img,.share-mask .poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
+.share-mask .share-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:10px;cursor:pointer;padding:8px 20px;
+  border:1px solid rgba(201,168,255,.18);border-radius:18px}
 </style>
 </head>
 <body>
@@ -308,6 +447,13 @@
   <div class="mbti-grid" id="mbtiGrid"></div>
 </div>
 
+<!-- 命格卡·分享图弹层(固定覆盖层,放 body 末尾) -->
+<div class="share-mask" id="cardShareMask">
+  <div class="share-scroll"><div class="poster" id="cardPoster"></div></div>
+  <div class="share-close" id="cardShareClose">关闭</div>
+</div>
+
+<script src="./qrcode.min.js"></script>
 <script src="./astronomy.js"></script>
 <script src="./cities.js"></script>
 <script src="./ephemeris.bundle.js"></script>
@@ -845,7 +991,7 @@ function renderNatalTab(){
           <input type="hidden" id="bMbti"></div>
         <div class="form-row"><label>性别</label>
           <div class="seg" id="bSex"><div class="opt on" data-v="女">女</div><div class="opt" data-v="男">男</div></div></div>
-        <div class="hint">💫 占星是帮你看见自己、读懂能量与课题的镜子，不预言吉凶、不替你做决定，路怎么走始终由你。</div>
+        <div class="hint">💫 玄玑是帮你看见自己、读懂能量与课题的镜子，不预言吉凶、不替你做决定，路怎么走始终由你。</div>
         <button class="btn glow" id="calcNatal">✨ 照见我的人格底色</button>
       </div>
       <div id="mbtiResult"></div>
@@ -1105,20 +1251,137 @@ function renderMbtiResult(N){
      </div>
    </div>
    <div class="mbti-screen" id="mScreen2" style="display:none;">
-     <div class="m-lead" style="font-size:16px;color:#ffe6a8;letter-spacing:1px;margin:4px 0 16px;"><b>重生！这一世，我要拿回属于我的一切！</b></div>
-     <div class="persona-card">
-       <div class="p-rank">最强人格</div>
-       <div class="p-name-pair">${A}<span class="p-bar">|</span>${B}</div>
-     </div>
-     <div class="func-card">
-       <div class="p-rank">人格 buff 加持功能</div>
-       <div class="func-big">${fkey}</div>
-       <div class="func-desc">${fdesc}</div>
+     <div class="cardstage" id="mCardStage">
+       <div class="ctop"><div class="rebirth">重生！这一世<br>我要拿回属于我的一切</div></div>
+       <div class="pager" id="cardPager"></div>
+       <div class="stage" id="cardStageInner">
+         <div class="flip" id="cardFlip"></div>
+         <div class="tap-hint" id="cardTapHint">
+           <div class="core"></div>
+           <div class="tword">轻 点 翻 开</div>
+         </div>
+       </div>
+       <div class="cinfo" id="cardInfo"></div>
+       <div class="ops">
+         <button class="cbtn btn-ghost" id="cardSwapBtn">⇄ 试试手气</button>
+         <button class="cbtn btn-gold" id="cardShareBtn">✦ 分享 · 看我的人格 BUFF ✦</button>
+       </div>
      </div>
      <div class="m-div"></div>
      <div class="m-hook"><div class="m-q">想不想知道，星星为什么这样写你？</div>
        <button class="btn glow" onclick="document.getElementById('natalResult').style.display='block';this.style.display='none';document.getElementById('natalResult').scrollIntoView({behavior:'smooth',block:'start'});">✨ 解密我的人生说明书</button></div>
    </div>`;
+  // 命格卡初始化(mScreen2 是动态 innerHTML,要在写入 DOM 后再绑事件)
+  initCard([
+    {type:A, func:tk.top3[0].mineFunc, img:"占位图_人格1.jpg"},
+    {type:B, func:tk.top3[1].mineFunc, img:"占位图_人格2.jpg"}
+  ]);
+}
+
+// ===== 命格卡逻辑(来自 命格卡_整合.html,改成 renderMbtiResult 后调用式) =====
+function initCard(personas){
+  const M=window.MBTI; if(!M) return;
+  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/mbti_full.html";
+  const CARD_BACK="卡背底图_紫.jpeg";
+  // 解说固定取 B(封神·能炫耀)
+  const lineB=t=>{const a=M.SOUL_LINES[t]||[""];return a[1]||a[0];};
+  const PERSONAS=personas.map(p=>({...p, name:M.pickName(p.type), line:lineB(p.type)}));
+
+  let idx=0;
+  const seen=new Set([0]);
+  const flip=document.getElementById("cardFlip");
+  const pager=document.getElementById("cardPager");
+  const info=document.getElementById("cardInfo");
+  const stage=document.getElementById("cardStageInner");
+  const swapBtn=document.getElementById("cardSwapBtn");
+  const shareBtn=document.getElementById("cardShareBtn");
+  if(!flip) return;
+
+  pager.innerHTML="";
+  PERSONAS.forEach((_,i)=>{const d=document.createElement("div");d.className="dot"+(i===0?" on":"");pager.appendChild(d);});
+  function syncPager(){[...pager.children].forEach((d,i)=>d.classList.toggle("on",i===idx));}
+
+  function render(){
+    const p=PERSONAS[idx];
+    flip.classList.remove("opened");
+    info.classList.remove("show");
+    stage.classList.remove("opened");
+    flip.innerHTML=`
+      <div class="flip-inner">
+        <div class="face front">
+          <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+          <img class="photo" src="${p.img}" alt="命格之相">
+          <div class="overlay">
+            <div class="ptype">${p.type}</div>
+            <div class="nameline">
+              <span class="beam"></span><span class="gem"></span>
+              <span class="pname">${p.name}</span>
+              <span class="gem"></span><span class="beam r"></span>
+            </div>
+          </div>
+        </div>
+        <div class="face back">
+          <div class="frame"></div>
+          <img class="bimg" src="${CARD_BACK}" alt="命格卡·背面">
+          <div class="bbrand">
+            <span class="gem"></span><span class="txt">玄 玑 · 命 格 卡</span><span class="gem"></span>
+          </div>
+        </div>
+      </div>`;
+    info.innerHTML=`<div class="say only">${p.line}</div>`;
+    syncPager();
+    if(seen.size>=PERSONAS.length){swapBtn.classList.add("dead");swapBtn.textContent="✓ 两张命格都已揭晓";}
+  }
+
+  flip.onclick=()=>{
+    flip.classList.toggle("opened");
+    const opened=flip.classList.contains("opened");
+    info.classList.toggle("show",opened);
+    stage.classList.toggle("opened",opened);
+  };
+
+  swapBtn.onclick=()=>{
+    if(swapBtn.classList.contains("dead")) return;
+    flip.classList.add("swap");
+    setTimeout(()=>{idx=(idx+1)%PERSONAS.length;seen.add(idx);render();flip.classList.remove("swap");},300);
+  };
+
+  const shareMask=document.getElementById("cardShareMask");
+  shareBtn.onclick=()=>{
+    const p=PERSONAS[idx];
+    const fdesc=M.FUNC_ONE[p.func]||"";
+    document.getElementById("cardPoster").innerHTML=`
+      <div class="p-card">
+        <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+        <img class="p-photo" src="${p.img}" alt="命格之相">
+        <div class="p-card-name">
+          <div class="ptype">${p.type}</div>
+          <div class="nameline">
+            <span class="beam"></span><span class="gem"></span>
+            <span class="pname">${p.name}</span>
+            <span class="gem"></span><span class="beam r"></span>
+          </div>
+        </div>
+      </div>
+      <div class="p-body">
+        <div class="p-line">${p.line}</div>
+        <div class="p-beam"></div>
+        <div class="p-buff">人格 BUFF · <b>${p.func}</b><br>${fdesc.replace(/[（(].*$/,'').trim()}</div>
+        <div class="p-foot">
+          <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+          <div class="qr" id="cardQrBox"></div>
+        </div>
+      </div>`;
+    const qrBox=document.getElementById("cardQrBox");qrBox.innerHTML="";
+    if(window.QRCode){
+      new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+    }
+    shareMask.classList.add("on");
+  };
+  const closeBtn=document.getElementById("cardShareClose");
+  if(closeBtn) closeBtn.onclick=()=>shareMask.classList.remove("on");
+
+  render();
 }
 
 function renderNatalResult(N){
