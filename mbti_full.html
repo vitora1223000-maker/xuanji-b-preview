@@ -122,6 +122,12 @@
   .read-card .ask-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
   .read-card .ask-desc{font-size:13.5px;line-height:1.9;color:var(--soft);margin-bottom:14px}
   .read-btn{font-size:15px}
+  /* —— 抽卡后分岔双按钮：左=重生人格(新产品·金亮主推) / 右=人生说明书(次选·稍弱) —— */
+  .forkbtns{display:flex;gap:11px;margin-top:6px}
+  .forkbtns .btn{margin-top:0;flex:1;padding:15px 8px;font-size:14.5px;line-height:1.35;letter-spacing:.5px}
+  .forkbtn-reborn{background:linear-gradient(120deg,#c9a8ff,#ffe6a8 60%,#e8c25a)!important;color:#1a1530!important;box-shadow:0 6px 22px rgba(232,201,118,.32)!important}
+  .forkbtn-natal{background:rgba(201,168,255,.10)!important;border:1px solid var(--line)!important;color:var(--gold)!important;box-shadow:none!important;font-weight:600!important}
+  .forkbtn-natal:active{background:rgba(201,168,255,.18)!important}
   .read-by{font-size:11.5px;color:#ffe6a8;letter-spacing:2px;margin-top:9px;opacity:.85}
   .read-out{margin-top:18px;text-align:left;font-size:14.5px;line-height:1.95;color:var(--text,#e8e4f3);white-space:pre-wrap;word-break:break-word;background:rgba(20,16,38,.5);border-radius:14px;padding:18px 16px;border:1px solid var(--line);min-height:40px}
   .read-out .typing{display:inline-block;width:7px;height:15px;background:var(--gold);margin-left:2px;animation:blink 1s steps(2) infinite;vertical-align:text-bottom}
@@ -1259,14 +1265,35 @@ function renderMbtiResult(N){
        </div>
      </div>
      <div class="m-div"></div>
-     <div class="m-hook"><div class="m-q">想不想知道，星星为什么这样写你？</div>
-       <button class="btn glow" onclick="document.getElementById('natalResult').style.display='block';this.style.display='none';document.getElementById('natalResult').scrollIntoView({behavior:'smooth',block:'start'});">✨ 解密我的人生说明书</button></div>
+     <div class="m-hook"><div class="m-q">底色已照见，重生人格已抽出——接下来，你想先走哪条路？</div>
+       <div class="forkbtns">
+         <button class="btn glow forkbtn-reborn" id="rebornGoBtn">✨ 使用我的<br>重生人格</button>
+         <button class="btn forkbtn-natal" id="natalGoBtn">✨ 解密我的<br>人生说明书</button>
+       </div>
+       <div id="rebornReadCard" class="read-card" style="display:none;margin-top:18px">
+         <div class="ask-title">✦ 你的重生人格 · 使用说明 ✦</div>
+         <div class="ask-desc">底色是你出厂自带的使命，重生人格是你为活成自己亲手锻的兵刃——神仙虾为你照见：这两副人格怎么用、你还差哪一道暗劲（人格 BUFF）。</div>
+         <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
+         <div id="rebornReadOut" class="read-out" style="display:none"></div>
+       </div>
+     </div>
    </div>`;
   // 命格卡初始化(mScreen2 是动态 innerHTML,要在写入 DOM 后再绑事件)
   initCard([
     {type:A, func:tk.top3[0].mineFunc, img:"占位图_人格1.jpg"},
     {type:B, func:tk.top3[1].mineFunc, img:"占位图_人格2.jpg"}
   ]);
+  // 分岔双按钮：左=重生人格(新产品·走神仙虾AI·登录才解读)，右=人生说明书(星盘六块)
+  const _reborn={top, A, B, fkey, buffName:M.FUNC_ONE[fkey]||""};
+  const rb=document.getElementById("rebornGoBtn");
+  if(rb) rb.onclick=()=>{ rb.classList.remove("glow"); runRebornRead(_reborn, N, rb); };
+  const ng=document.getElementById("natalGoBtn");
+  if(ng) ng.onclick=()=>{
+    const nr=document.getElementById("natalResult");
+    nr.style.display="block";
+    ng.classList.remove("glow");
+    nr.scrollIntoView({behavior:"smooth",block:"start"});
+  };
 }
 
 // ===== 命格卡逻辑(来自 命格卡_整合.html,改成 renderMbtiResult 后调用式) =====
@@ -1475,7 +1502,7 @@ async function runAIRead(N,btn){
     "✦ 那竟不是镜，是一汪立起来的星河水。再走近一点——水里，竟又是一重天。",
     "🐉 就在那重天里，一道银发龙角的身影，缓缓睁开了赤色的眼。",
     "✦ 它本是那道月之跃影，却偏爱以龙身现世，又顽皮地唤自己一声「神仙虾」。",
-    "✦ 它眨了眨眼，莹白的巨尾懒懒一甩，轻道一声：「凡人，来此作甚？」",
+    "✦ 它眨了眨眼，莹白的巨尾懒懒一甩，轻道一声：「你是何人？来此作甚？」",
     "✦ 你一时间瞠目结舌……",
     "✦ 这时，无所不知的它，似乎感应到了你身上微微散发的灵韵。它定了定神，缓缓开口——",
     "✦ 「既然如此……来，到镜前来。我替你，照一照。」",
@@ -1512,6 +1539,73 @@ async function runAIRead(N,btn){
     btn.disabled=false;
   }
 }
+// 重生人格解读：走 /api/mbti-read，把 engine 算好的底色/重生人格/buff 一并喂给后端神仙虾。
+// 与 runAIRead 同一套骨架(登录拦截→等待轮播→非流式 fetch→MD渲染→存盘)，终点换成新产品接口。
+async function runRebornRead(R, N, btn){
+  const card=document.getElementById("rebornReadCard");
+  const out=document.getElementById("rebornReadOut");
+  if(!out||!card) return;
+  // 登录拦截：与星盘解读同一套(REQUIRE_LOGIN=true 才拦)
+  if(REQUIRE_LOGIN){
+    await refreshUser();
+    if(!_curUser){
+      const u=await openLogin();
+      if(!u) return;   // 关掉登录浮层=不解读
+    }
+  }
+  card.style.display="block";
+  card.scrollIntoView({behavior:"smooth",block:"start"});
+  // 盘面料(复用星盘那份 data) + engine 算好的三层结果(型号/功能/buff 锁前端算好，绝不让 M3 自己判)
+  const natalData=buildNatalData(N);
+  const reborn={
+    baseColor:R.top,                         // 底色型号(出生自带·不变)
+    rebornTypes:[R.A, R.B],                   // 重生人格(两个·不分主次)
+    buffFunc:R.fkey,                          // 人格 buff(工具功能·单代号)
+    buffName:R.buffName                       // buff 的人话名(讲buff不讲代号时用)
+  };
+  let visits=0;
+  try{ visits=parseInt(localStorage.getItem("xuanji_visits")||"0",10)||0; }catch(_){}
+  btn.disabled=true; btn.textContent="✨ 神仙虾正在为你照见……";
+  out.style.display="block";
+  out.scrollIntoView({behavior:"smooth",block:"center"});
+  // 等待文案：重生主题(底色→淬炼→兵刃成形)，与星盘那套入场叙事区分开
+  const waitMsgs=[
+    "🌌 神仙虾抬眼看你——「你卸下面具的样子，我已照见。」",
+    "✨ 正在比对你的底色与你为活下去淬炼出的那副人格……",
+    "🔥 「这一身本事，不是天上掉的，是你一刀一刀，为自己锻出来的。」",
+    "⚔️ 正在照见：你亲手锻的那两副兵刃，各自该怎么用……",
+    "🌙 「还差一道暗劲——被压在你命底、最该被点亮的那一股。」",
+    "✦ 镜中星河微微一荡，它缓缓开口——",
+  ];
+  let wi=0;
+  const renderWait=()=>{ const i=Math.min(wi,waitMsgs.length-1); out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">'+waitMsgs[i]+'</span><span class="typing"></span>'; };
+  renderWait();
+  const waitTimer=setInterval(()=>{ wi++; renderWait(); },4000);
+  try{
+    const resp=await fetch("/api/mbti-read",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({natal:natalData, reborn:reborn, visits:visits})
+    });
+    const text=await resp.text();
+    clearInterval(waitTimer);
+    if(!resp.ok) throw new Error("bad response");
+    if(!text || text.trim().length<10) throw new Error("empty");
+    out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">🔮 照命镜显影中……重生人格已成。</span><span class="typing"></span>';
+    await new Promise(r=>setTimeout(r,900));
+    out.innerHTML='<div class="md-body md-fadein">'+mdToHtml(text)+'</div>';
+    out.scrollIntoView({behavior:"smooth",block:"start"});
+    btn.textContent="✓ 已照见 · 可重新生成";
+    btn.disabled=false;
+    saveChartToSupabase(N, text);   // 重生人格解读也存盘(静默)
+  }catch(e){
+    clearInterval(waitTimer);
+    out.innerHTML='<span style="color:var(--soft)">神仙虾暂时连不上 😣 请稍后再点一次。</span>';
+    btn.textContent="✨ 重试一次";
+    btn.disabled=false;
+  }
+}
+
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
 // 轻量 Markdown 渲染(先 esc 防 XSS, 再按行解析标题/列表/引用/分隔, 行内处理加粗/斜体)

@@ -34,6 +34,35 @@ const MIME = {
 // POST https://api.minimaxi.com/v1/chat/completions —— 只需 Authorization: Bearer KEY，不要 GroupId。
 // stream:true 时返回 SSE（data: {...}\n\n），逐块把增量文本写回前端，规避长输出超时。
 //
+// ════════════════════════════════════════════════════════════════════
+// ⭐【新产品】重生人格/MBTI 解读 prompt（走神仙虾AI·登录才解读）
+//   natal  = { data, sex, elements, sunSign... }（盘面料，同星盘解读那份）
+//   reborn = { baseColor:"INFJ", rebornTypes:["INTP","ENTP"], buffFunc:"Si", buffName:"沉淀 buff" }
+//            ↑ 全是前端 JS engine 算好的，M3 绝不许自己重判型号/功能/buff。
+//   ⚠️ 占位版：先回一段占位文本，确认前后端链路通。真提示词下一步按教材压制。
+// ════════════════════════════════════════════════════════════════════
+function buildRebornPrompt(natal, reborn) {
+  const d = natal || {};
+  const data = (d.data || "").slice(0, 4000);
+  const r = reborn || {};
+  const base = r.baseColor || "(底色)";
+  const types = Array.isArray(r.rebornTypes) ? r.rebornTypes.join(" + ") : "(重生人格)";
+  const buff = r.buffName || r.buffFunc || "(人格buff)";
+  // —— 占位 prompt：让 M3 简短确认收到了 engine 算好的三层数据，先验链路 ——
+  return `你是「玄玑天庭·文澜阁·神仙虾」。下面是 engine 已经算好的一个人的人格三层结果，请你用一段温柔的话向 TA 确认你照见了，**绝不许自己重算或改动型号/功能**。
+
+【engine 算好·直接用】
+· 人格底色（出生自带·不变）：${base}
+· 重生人格（两个·不分主次）：${types}
+· 人格 BUFF（被压住、最该点亮的暗劲）：${buff}
+
+【盘面料（参考，本占位版不必细解）】
+${data}
+
+【本次任务·占位】请只输出三到四句话：①点出 TA 的底色是 ${base}；②TA 锻出的重生人格是 ${types}；③还差一道暗劲叫「${buff}」。语气是神仙虾（顽皮+温柔+客观），结尾留一句向上的悬停。**这是链路测试版，先不必长篇。**`;
+}
+
+//
 // ⭐神仙虾 prompt（人设/红线/金句全锁后端，用户改不了）。从《神仙虾正史》第一层提炼。
 // natal = { data, sex, elements:{火土风水}, sunSign, moonSign, ascSign }
 function buildShenxianxiaPrompt(natal) {
@@ -71,7 +100,7 @@ function buildShenxianxiaPrompt(natal) {
 
 🐉 就在那重天里，一道银发龙角的身影，缓缓睁开了赤色的眼。它本是那道月之跃影，却偏爱以龙身现世，又顽皮地唤自己一声「**神仙虾**」。
 
-它眨了眨眼，莹白的巨尾懒懒一甩，轻道一声：「凡人，来此作甚？」你一时间瞠目结舌……这时，无所不知的它，似乎感应到了你身上微微散发的**灵韵**。它定了定神，缓缓开口——
+它眨了眨眼，莹白的巨尾懒懒一甩，轻道一声：「你是何人？来此作甚？」你一时间瞠目结舌……这时，无所不知的它，似乎感应到了你身上微微散发的**灵韵**，赤瞳里掠过一丝讶异——它定了定神，缓缓开口——
 
 「既然如此……来，到镜前来。我替你，照一照。」
 """
@@ -564,7 +593,7 @@ async function handleSmsVerify(req, res) {
 // ---------- 静态文件 ----------
 function serveStatic(req, res) {
   let urlPath = decodeURIComponent(req.url.split("?")[0]);
-  if (urlPath === "/") urlPath = "/mbti_full.html";  // 测MBTI=入口首页(根地址直接进,零后缀)
+  if (urlPath === "/") urlPath = "/index.html";
   // 防目录穿越
   const filePath = path.join(ROOT, path.normalize(urlPath).replace(/^(\.\.[/\\])+/, ""));
   if (!filePath.startsWith(ROOT)) {
@@ -626,6 +655,23 @@ const server = http.createServer((req, res) => {
       }
       // 后端拼神仙虾 prompt（人设/红线/金句锁后端）
       const prompt = buildShenxianxiaPrompt(natal);
+      callMiniMaxStream(prompt, res, raw);
+    });
+    return;
+  }
+  // 【新产品】重生人格/MBTI 解读：吃 natal + engine 算好的 reborn 三层结果
+  if (req.url.split("?")[0] === "/api/mbti-read" && req.method === "POST") {
+    let body = "";
+    req.on("data", (c) => { body += c; if (body.length > 1e6) req.destroy(); });
+    req.on("end", () => {
+      let natal = null, reborn = null, raw = false;
+      try { const j = JSON.parse(body); natal = j.natal || null; reborn = j.reborn || null; raw = !!j.raw; } catch (_) {}
+      if (!natal || !natal.data) {
+        res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "缺少星盘数据" }));
+        return;
+      }
+      const prompt = buildRebornPrompt(natal, reborn);
       callMiniMaxStream(prompt, res, raw);
     });
     return;
