@@ -122,12 +122,15 @@
   .read-card .ask-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
   .read-card .ask-desc{font-size:13.5px;line-height:1.9;color:var(--soft);margin-bottom:14px}
   .read-btn{font-size:15px}
-  /* —— 抽卡后分岔双按钮：左=重生人格(新产品·金亮主推) / 右=人生说明书(次选·稍弱) —— */
+  /* —— 抽卡后分岔双按钮：两条都要拿下·不分主次。左=金色为主，右=紫色为主，色相不同但都亮。
+        初始【不发光】(此刻发光的是"分享BUFF")；用户分享完→关掉分享浮层时才给它俩加.glow点亮，引导接着走两条路。 —— */
   .forkbtns{display:flex;gap:11px;margin-top:6px}
-  .forkbtns .btn{margin-top:0;flex:1;padding:15px 8px;font-size:14.5px;line-height:1.35;letter-spacing:.5px}
-  .forkbtn-reborn{background:linear-gradient(120deg,#c9a8ff,#ffe6a8 60%,#e8c25a)!important;color:#1a1530!important;box-shadow:0 6px 22px rgba(232,201,118,.32)!important}
-  .forkbtn-natal{background:rgba(201,168,255,.10)!important;border:1px solid var(--line)!important;color:var(--gold)!important;box-shadow:none!important;font-weight:600!important}
-  .forkbtn-natal:active{background:rgba(201,168,255,.18)!important}
+  .forkbtns .btn{margin-top:0;flex:1;padding:15px 8px;font-size:14.5px;line-height:1.35;letter-spacing:.5px;font-weight:700!important}
+  /* 左·重生人格：金色为主(金多紫少) */
+  .forkbtn-reborn{background:linear-gradient(125deg,#ffe6a8,#e8c25a 55%,#c9a8ff)!important;color:#1a1530!important;box-shadow:0 5px 16px rgba(232,201,118,.22)!important}
+  /* 右·人生说明书：紫色为主(紫多金少) */
+  .forkbtn-natal{background:linear-gradient(125deg,#c9a8ff,#a888e8 55%,#ffe6a8)!important;color:#1a1530!important;box-shadow:0 5px 16px rgba(201,168,255,.22)!important}
+  .forkbtn-reborn:active,.forkbtn-natal:active{opacity:.85}
   .read-by{font-size:11.5px;color:#ffe6a8;letter-spacing:2px;margin-top:9px;opacity:.85}
   .read-out{margin-top:18px;text-align:left;font-size:14.5px;line-height:1.95;color:var(--text,#e8e4f3);white-space:pre-wrap;word-break:break-word;background:rgba(20,16,38,.5);border-radius:14px;padding:18px 16px;border:1px solid var(--line);min-height:40px}
   .read-out .typing{display:inline-block;width:7px;height:15px;background:var(--gold);margin-left:2px;animation:blink 1s steps(2) infinite;vertical-align:text-bottom}
@@ -1238,9 +1241,7 @@ function renderMbtiResult(N){
   const fkey=tk.top3[2].mineFunc, fdesc=M.FUNC_ONE[fkey];
   document.getElementById("mbtiResult").innerHTML=`
    <div class="mbti-screen" id="mScreen1">
-     <div class="m-lead">星河水镜里，浮出你卸下面具的样子——</div>
      <div class="m-glow"><span class="m-type">${top}</span> <span class="m-sep">·</span> ${M.pickName(top)}</div>
-     <div class="m-zhao">“${M.pickLine(top)}”</div>
      <div class="m-div"></div>
      <div class="m-hook">
        <div class="m-q">重生之前，先看清你是谁。</div>
@@ -1265,9 +1266,9 @@ function renderMbtiResult(N){
        </div>
      </div>
      <div class="m-div"></div>
-     <div class="m-hook"><div class="m-q">底色已照见，重生人格已抽出——接下来，你想先走哪条路？</div>
+     <div class="m-hook"><div class="m-q">真正的赢家，从不做选择——两条路，你都要拿下。</div>
        <div class="forkbtns">
-         <button class="btn glow forkbtn-reborn" id="rebornGoBtn">✨ 使用我的<br>重生人格</button>
+         <button class="btn forkbtn-reborn" id="rebornGoBtn">✨ 使用我的<br>重生人格</button>
          <button class="btn forkbtn-natal" id="natalGoBtn">✨ 解密我的<br>人生说明书</button>
        </div>
        <div id="rebornReadCard" class="read-card" style="display:none;margin-top:18px">
@@ -1299,7 +1300,7 @@ function renderMbtiResult(N){
 // ===== 命格卡逻辑(来自 命格卡_整合.html,改成 renderMbtiResult 后调用式) =====
 function initCard(personas){
   const M=window.MBTI; if(!M) return;
-  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/mbti_full.html";
   const CARD_BACK="卡背底图_紫.jpeg";
   // 解说固定取 B(封神·能炫耀)
   const lineB=t=>{const a=M.SOUL_LINES[t]||[""];return a[1]||a[0];};
@@ -1391,8 +1392,17 @@ function initCard(personas){
     }
     shareMask.classList.add("on");
   };
+  // 分享完(关掉分享海报)→ 焦点从"分享BUFF"转移到两条路:点亮分岔双按钮(开始发光,引导接着走)
+  function lightForkBtns(){
+    const rb=document.getElementById("rebornGoBtn");
+    const ng=document.getElementById("natalGoBtn");
+    if(rb) rb.classList.add("glow");
+    if(ng) ng.classList.add("glow");
+  }
   const closeBtn=document.getElementById("cardShareClose");
-  if(closeBtn) closeBtn.onclick=()=>shareMask.classList.remove("on");
+  if(closeBtn) closeBtn.onclick=()=>{ shareMask.classList.remove("on"); lightForkBtns(); };
+  // 点遮罩空白处关闭也算分享完
+  if(shareMask) shareMask.onclick=(e)=>{ if(e.target===shareMask){ shareMask.classList.remove("on"); lightForkBtns(); } };
 
   render();
 }
