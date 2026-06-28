@@ -165,6 +165,8 @@
   .prologue .md-q strong{color:var(--gold)}
   /* 世界观段落里的重点句·金色发光跳出来(用户扫读的抓手) */
   .prologue .md-p strong{color:var(--gold);font-weight:700;text-shadow:0 0 12px rgba(255,230,168,.35)}
+  /* 章节装饰符·世界观四章之间的呼吸点(轻盈·不打断史诗感) */
+  .prologue .md-orn{text-align:center;color:rgba(232,201,118,.55);font-size:13px;letter-spacing:4px;margin:22px 0 20px;text-shadow:0 0 10px rgba(255,230,168,.3)}
   .prologue-div{height:0;border-top:1px dashed rgba(201,168,255,.3);margin:8px 18px 26px;position:relative}
   .prologue-div::after{content:"重生，从这里开始";position:absolute;top:-9px;left:50%;transform:translateX(-50%);white-space:nowrap;
     background:#0e0b1e;padding:0 14px;font-size:11px;color:var(--gold2,#e8c25a);letter-spacing:3px}
@@ -1612,6 +1614,8 @@ const REBORN_PROLOGUE = `🌌 宇宙初定，道分两极。
 
 而你，**曾是这九天之上，最靠近本源的神。**
 
+·✳·
+
 诸神看遍亿万岁月，看惯众生百态。世人皆以为神明高高在上，无情无欲，岁月清闲。
 
 可你不一样。
@@ -1623,6 +1627,8 @@ const REBORN_PROLOGUE = `🌌 宇宙初定，道分两极。
 如今人间乱世残垣，零和厮杀。凡人挣扎，红尘苦轮回——爱别离，怨憎会，求不得，贪嗔痴，一世又一世。
 
 你厌恶这套由欲望设计的规则，厌恶所有既定的命运，厌恶无辜之人必须受难，厌恶情深义重之人终要离散。
+
+·✳·
 
 顺天者，随波逐流，万年为凡——因为，那是人定的天，为了欲望。
 **逆心者，执心而行，方可破命**——因为，那是凡根种的根，为了生存。
@@ -1643,6 +1649,8 @@ const REBORN_PROLOGUE = `🌌 宇宙初定，道分两极。
 
 看清神力——不在杀伐，不在权柄，而在辨是非、破虚妄、改规则、定乾坤。
 看懂博弈——谁是执棋者，谁是盘中子，如何撕碎棋盘、重塑天地。
+
+·✳·
 
 > **苍天已死，黄道当立。王侯将相，宁有种乎？**
 
@@ -1759,6 +1767,7 @@ function mdToHtml(src){
     if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
     if((m=line.match(/^\s*>\s?(.*)$/))){ closeList(); html+=`<blockquote class="md-q">${inline(m[1])}</blockquote>`; continue; }
     if((m=line.match(/^\s*[-*]\s+(.*)$/))){ if(!inList){html+='<ul class="md-ul">';inList=true;} html+=`<li>${inline(m[1])}</li>`; continue; }
+    if(/^\s*·✳·\s*$/.test(line)){ closeList(); html+='<div class="md-orn">·&nbsp;✳&nbsp;·</div>'; continue; } // 章节装饰符(世界观四章之间)
     closeList(); html+=`<p class="md-p">${inline(line)}</p>`;
   }
   closeList();
