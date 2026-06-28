@@ -184,7 +184,30 @@ function rankTools(chart){
     o.mineFunc=mineOfType(t,mine); // 每个 top3 人格都带自己的 buff 功能(原仅 i===2,卡牌每张卡需各自的)
     return o;
   });
-  return {rank, top3, mine, fp};
+  // ⭐人格 buff(=工具功能)·有两说两有一说一：
+  //   从张力表 mine 里，排除掉重生人格(top3 前两个型)各自的主/辅功能(已被用掉)后，
+  //   剩下分数最高的功能；若有并列(差<阈值)给两个，否则给一个。
+  const buffs=pickBuffs(top3, mine);
+  return {rank, top3, mine, fp, buffs};
+}
+// 算 buff 数组：排除重生人格用掉的功能后，取张力最高的(并列给两个/单独给一个)
+function pickBuffs(top3, mine){
+  // 重生人格=top3 前两个型，把它俩的主+辅功能全标记为"已用掉"
+  const used=new Set();
+  for(let i=0;i<2 && i<top3.length;i++){
+    const t=top3[i].type;
+    if(STACKS[t]){ used.add(STACKS[t][0]); used.add(STACKS[t][1]); }
+  }
+  // 候选=8功能里没被用掉的，按张力分从高到低
+  const cand=Object.keys(FUNC_ONE)
+    .filter(f=>!used.has(f))
+    .map(f=>[f, mine[f]||0])
+    .sort((a,b)=>b[1]-a[1]);
+  if(!cand.length) return [];
+  const topScore=cand[0][1];
+  // 与最高分接近(差<0.3 或都≈0时并列)的算并列；最多给两个，避免铺一堆
+  const tied=cand.filter(([,s])=>Math.abs(s-topScore)<0.3).slice(0,2);
+  return tied.map(([f])=>f);
 }
 
 // ============================================================

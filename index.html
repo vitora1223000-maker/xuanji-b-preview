@@ -1239,7 +1239,9 @@ function renderMbtiResult(N){
   const M=window.MBTI;
   const p1=M.top3?'':''; // noop
   const A=tk.top3[0].type, B=tk.top3[1].type;
-  const fkey=tk.top3[2].mineFunc, fdesc=M.FUNC_ONE[fkey];
+  // 人格buff·有两说两有一说一：engine 的 buffs 数组(排除重生人格功能后张力最高的并列)
+  const buffs=(tk.buffs&&tk.buffs.length)?tk.buffs:[tk.top3[2].mineFunc]; // 兜底:旧逻辑
+  const fkey=buffs[0], fdesc=M.FUNC_ONE[fkey];
   document.getElementById("mbtiResult").innerHTML=`
    <div class="mbti-screen" id="mScreen1">
      <div class="m-glow"><span class="m-type">${top}</span> <span class="m-sep">·</span> ${M.pickName(top)}</div>
@@ -1282,12 +1284,14 @@ function renderMbtiResult(N){
      </div>
    </div>`;
   // 命格卡初始化(mScreen2 是动态 innerHTML,要在写入 DOM 后再绑事件)
+  // buffs=整张盘的人格buff(不跟卡片走·有两说两),传进去给分享海报统一显示
   initCard([
     {type:A, func:tk.top3[0].mineFunc, img:"占位图_人格1.jpg"},
     {type:B, func:tk.top3[1].mineFunc, img:"占位图_人格2.jpg"}
-  ]);
+  ], buffs);
   // 分岔双按钮：两条线统一【点按钮→先登录→展开各自说明卡→卡里按钮再出解读】。
-  const _reborn={top, A, B, fkey, buffName:M.FUNC_ONE[fkey]||""};
+  // buffs=代号数组(有两说两)，buffDescs=对应人话解说(每个一句)，喂给后端 AI
+  const _reborn={top, A, B, buffs, buffDescs:buffs.map(f=>M.FUNC_ONE[f]||""), fkey, buffName:M.FUNC_ONE[fkey]||""};
   // 点分岔按钮即拦登录(REQUIRE_LOGIN=true 才拦)；登录成功(或免登录)返回 true
   async function gateLogin(){
     if(!REQUIRE_LOGIN) return true;
@@ -1333,10 +1337,15 @@ function renderMbtiResult(N){
 }
 
 // ===== 命格卡逻辑(来自 命格卡_整合.html,改成 renderMbtiResult 后调用式) =====
-function initCard(personas){
+function initCard(personas, buffs){
   const M=window.MBTI; if(!M) return;
-  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/mbti_full.html";
+  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/";
   const CARD_BACK="卡背底图_紫.jpeg";
+  // 人格buff(整张盘的·有两说两)：拼成"代号 + 一句解说"，每个功能一行，绝不长
+  const BUFFLIST=(buffs&&buffs.length?buffs:[]).map(f=>{
+    const d=(M.FUNC_ONE[f]||"").replace(/[（(].*$/,'').trim(); // 只取破折号前那半句，去掉举例括号，保证一句
+    return {code:f, desc:d};
+  });
   // 解说固定取 B(封神·能炫耀)
   const lineB=t=>{const a=M.SOUL_LINES[t]||[""];return a[1]||a[0];};
   const PERSONAS=personas.map(p=>({...p, name:M.pickName(p.type), line:lineB(p.type)}));
@@ -1400,7 +1409,10 @@ function initCard(personas){
   const shareMask=document.getElementById("cardShareMask");
   shareBtn.onclick=()=>{
     const p=PERSONAS[idx];
-    const fdesc=M.FUNC_ONE[p.func]||"";
+    // buff 是整张盘的属性(不跟卡片走)：有两说两、每个一句。一个=一行，两个=两行。
+    const buffHtml=BUFFLIST.length
+      ? '人格 BUFF<br>'+BUFFLIST.map(b=>`<b>${b.code}</b> · ${b.desc}`).join('<br>')
+      : '';
     document.getElementById("cardPoster").innerHTML=`
       <div class="p-card">
         <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
@@ -1415,7 +1427,7 @@ function initCard(personas){
       <div class="p-body">
         <div class="p-line">${p.line}</div>
         <div class="p-beam"></div>
-        <div class="p-buff">人格 BUFF · <b>${p.func}</b><br>${fdesc.replace(/[（(].*$/,'').trim()}</div>
+        <div class="p-buff">${buffHtml}</div>
         <div class="p-foot">
           <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
           <div class="qr" id="cardQrBox"></div>
