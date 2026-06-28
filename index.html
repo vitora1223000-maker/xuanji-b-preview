@@ -1316,14 +1316,9 @@ function renderMbtiResult(N){
     const card=document.getElementById("rebornReadCard");
     if(card){ card.style.display="block"; card.scrollIntoView({behavior:"smooth",block:"start"}); }
   };
-  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录)。⏳暂未开放(AI排队中),先禁用,真提示词好了再放开。
+  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录·走真提示词)
   const rbAi=document.getElementById("rebornAiRead");
-  if(rbAi){
-    rbAi.disabled=true; rbAi.classList.remove("glow");
-    rbAi.textContent="✨ 重生人格解读 · 即将开放";
-    rbAi.style.opacity=".55"; rbAi.style.cursor="default";
-    // 真提示词上线后:把上面四行删掉,改回 rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
-  }
+  if(rbAi) rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
   // 右·人生说明书：点→登录→收左卡→展开操作说明书卡(卡里"让玄玑为我解读"=aiRead 再出文)
   const ng=document.getElementById("natalGoBtn");
   if(ng) ng.onclick=async()=>{
@@ -1614,11 +1609,15 @@ async function runRebornRead(R, N, btn){
   card.scrollIntoView({behavior:"smooth",block:"start"});
   // 盘面料(复用星盘那份 data) + engine 算好的三层结果(型号/功能/buff 锁前端算好，绝不让 M3 自己判)
   const natalData=buildNatalData(N);
+  // 双重作证要用底色的主导/劣势功能(engine STACKS)，前端查好一起喂(M3 绝不自己查栈)
+  const STK=(window.MBTI&&window.MBTI.STACKS&&window.MBTI.STACKS[R.top])||null;
   const reborn={
-    baseColor:R.top,                         // 底色型号(出生自带·不变)
+    baseColor:R.top,                         // 底色型号(出生自带·不变·使命)
+    domFunc:STK?STK[0]:"",                    // 主导功能=天赋(正向作证)
+    infFunc:STK?STK[3]:"",                    // 劣势功能(反向180°=主导·第二证人)
     rebornTypes:[R.A, R.B],                   // 重生人格(两个·不分主次)
-    buffFunc:R.fkey,                          // 人格 buff(工具功能·单代号)
-    buffName:R.buffName                       // buff 的人话名(讲buff不讲代号时用)
+    buffs:R.buffs||[],                        // 人格buff代号数组(有两说两)
+    buffDescs:R.buffDescs||[]                 // 每个buff对应的人话解说(各一句)
   };
   let visits=0;
   try{ visits=parseInt(localStorage.getItem("xuanji_visits")||"0",10)||0; }catch(_){}

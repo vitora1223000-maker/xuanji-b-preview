@@ -273,5 +273,5 @@ const FUNC_ONE={
  Se:"应变·抓当下（变局里快准狠出手）",Si:"沉淀·稳扎稳打（把经验变成一步一脚印的扎实）"};
 
 
-window.MBTI={derive:deriveBaseColor, tools:rankTools, pickName:pickName, pickLine:pickLine, SOUL_NAMES:SOUL_NAMES, SOUL_LINES:SOUL_LINES, BASECOLOR_SOUL:BASECOLOR_SOUL, PERSONA_SCENE:PERSONA_SCENE, FUNC_ONE:FUNC_ONE};
+window.MBTI={derive:deriveBaseColor, tools:rankTools, pickName:pickName, pickLine:pickLine, SOUL_NAMES:SOUL_NAMES, SOUL_LINES:SOUL_LINES, BASECOLOR_SOUL:BASECOLOR_SOUL, PERSONA_SCENE:PERSONA_SCENE, FUNC_ONE:FUNC_ONE, STACKS:STACKS};
 })();
