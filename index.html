@@ -1765,6 +1765,9 @@ function mdToHtml(src){
     let m;
     if(/^\s*---+\s*$/.test(line)){ closeList(); html+='<hr class="md-hr">'; continue; }
     if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
+    // 兜底:M3 偶尔在 ## 前加 emoji(如 "✨ ## 二"),致行首不是#、标题没被识别、## 裸露给用户。
+    // 只兜底"emoji/符号前缀(非字母数字,1-2字符) + 空格 + ## + 标题文字"这种,把 emoji 挪到标题末尾,绝不误伤正文。
+    if((m=line.match(/^([^\w\s#]{1,2})\s+(#{1,6})\s+(.+)$/))){ closeList(); const lv=Math.min(m[2].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[3].trim()+' '+m[1])}</div>`; continue; }
     if((m=line.match(/^\s*>\s?(.*)$/))){ closeList(); html+=`<blockquote class="md-q">${inline(m[1])}</blockquote>`; continue; }
     if((m=line.match(/^\s*[-*]\s+(.*)$/))){ if(!inList){html+='<ul class="md-ul">';inList=true;} html+=`<li>${inline(m[1])}</li>`; continue; }
     if(/^\s*·✳·\s*$/.test(line)){ closeList(); html+='<div class="md-orn">·&nbsp;✳&nbsp;·</div>'; continue; } // 章节装饰符(世界观四章之间)
