@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>玄玑 · 解读长图小样</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0e1f; --gold:#ffe6a8; --gold2:#e8c25a; --accent:#c9a8ff;
+    --ink:#e8e3f5; --soft:#9a92bd; --line:rgba(232,201,118,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05060f;font-family:-apple-system,"PingFang SC",sans-serif;
+    padding:24px 16px 40px;-webkit-font-smoothing:antialiased;color:var(--ink)}
+
+  /* ───────── 命书卷轴长图本体（这一块就是会被导出成PNG的）───────── */
+  #poster{width:340px;margin:0 auto;border-radius:22px;overflow:hidden;position:relative;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(120,90,180,.28), transparent 60%),
+      radial-gradient(100% 60% at 50% 100%, rgba(90,70,140,.22), transparent 55%),
+      linear-gradient(170deg,#161228 0%,#0e0b1e 45%,#0a081a 100%);
+    border:1px solid var(--line);
+    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,230,168,.08);}
+
+  /* 卷轴四角的描金边框 */
+  #poster .gildframe{position:absolute;inset:12px;border:1px solid rgba(232,201,118,.28);border-radius:14px;pointer-events:none;z-index:5}
+  #poster .gildframe::before,#poster .gildframe::after{content:"";position:absolute;width:18px;height:18px;border:1.5px solid var(--gold);opacity:.7}
+  #poster .gildframe::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
+  #poster .gildframe::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-radius:0 0 6px 0}
+
+  /* —— 题头 —— */
+  .ph-head{text-align:center;padding:30px 26px 18px;position:relative;z-index:2}
+  .ph-brand{font-size:13px;letter-spacing:7px;color:var(--gold2);font-weight:700;margin-bottom:14px;
+    text-shadow:0 0 14px rgba(232,194,90,.4)}
+  .ph-brand .gem{display:inline-block;width:5px;height:5px;background:linear-gradient(135deg,#fff6d8,var(--gold));
+    border-radius:1px;transform:rotate(45deg);vertical-align:middle;margin:0 9px}
+  .ph-type{font-size:38px;font-weight:800;letter-spacing:3px;line-height:1.1;
+    background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.45));white-space:nowrap}
+  .ph-type .dot{-webkit-text-fill-color:var(--gold2);font-weight:300;font-size:26px;margin:0 6px}
+  .ph-sub{font-size:13px;color:var(--soft);letter-spacing:3px;margin-top:12px}
+
+  .ph-div{height:1px;margin:6px 26px 0;background:linear-gradient(90deg,transparent,rgba(232,194,90,.45),transparent)}
+
+  /* —— 正文 —— */
+  .ph-body{padding:22px 28px 8px;position:relative;z-index:2}
+  .ph-body p{font-size:15px;line-height:2.05;color:#f3ecdd;letter-spacing:.3px;margin-bottom:17px;text-align:justify}
+  .ph-body p b{color:var(--gold);font-weight:700}
+  .ph-body .lead{color:var(--gold);font-weight:600}
+
+  /* 一句被引用高亮的金句 */
+  .ph-quote{margin:4px 26px 20px;padding:16px 18px;border-radius:14px;position:relative;z-index:2;
+    background:linear-gradient(160deg,rgba(58,44,86,.5),rgba(34,24,52,.55));
+    border:1px solid rgba(232,194,90,.25);
+    font-size:15px;line-height:1.95;color:var(--gold);text-align:center;letter-spacing:.4px;font-weight:600;
+    box-shadow:inset 0 1px 0 rgba(255,230,168,.08)}
+
+  /* —— 题尾：品牌 + 二维码 —— */
+  .ph-foot{margin:14px 22px 24px;padding:18px 18px 16px;border-radius:16px;position:relative;z-index:2;
+    background:rgba(255,255,255,.03);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .ph-foot .ft-txt{flex:1}
+  .ph-foot .ft-go{font-size:13.5px;color:var(--gold);font-weight:600;letter-spacing:.5px;margin-bottom:7px}
+  .ph-foot .ft-brand{font-size:12px;color:var(--soft);letter-spacing:3px}
+  .ph-foot .ft-qr{width:74px;height:74px;border-radius:9px;background:#fff;padding:5px;flex-shrink:0}
+  .ph-foot .ft-qr img,.ph-foot .ft-qr canvas{width:100%!important;height:100%!important;display:block}
+
+  /* ───────── 控制区（不进图）───────── */
+  .ctrl{width:340px;margin:22px auto 0;display:flex;gap:11px}
+  .ctrl button{flex:1;padding:14px;border:0;border-radius:13px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer}
+  .ctrl .save{background:linear-gradient(120deg,#ffe6a8,#e8c25a 55%,#c9a8ff);color:#1a1530}
+  .ctrl .note{text-align:center;color:#6b6488;font-size:12px;margin:16px auto 0;width:340px;line-height:1.7}
+</style>
+</head>
+<body>
+
+<div id="poster">
+  <div class="gildframe"></div>
+
+  <div class="ph-head">
+    <div class="ph-brand"><span class="gem"></span>玄 玑 · 文 澜 阁<span class="gem"></span></div>
+    <div class="ph-type">ISFJ<span class="dot">·</span>柔情硬汉</div>
+    <div class="ph-sub">— 你的重生人格 · 命书 —</div>
+  </div>
+  <div class="ph-div"></div>
+
+  <div class="ph-body">
+    <p class="lead">嘿嘿～照见啦照见啦～这位姑娘的底色，是一枚稳稳当当的 <b>ISFJ</b>，自带那种把身边人照顾妥帖、细节记得一清二楚的温柔底纹呀。</p>
+    <p>后来你一路把自己锻成了双面刃——<b>ISTJ</b> 的严谨守序和 <b>ESTJ</b> 的雷厉风行，左右手各撑一半，把日子过成了一张张可以勾选的清单呢。</p>
+  </div>
+
+  <div class="ph-quote">"你心里那把'把想法变成落地步骤'的暗劲，<br>还差最后一道火没点亮呢。"</div>
+
+  <div class="ph-body">
+    <p>不过嘛，神仙虾得小声戳你一下：等哪天它彻底醒过来，你可就真的"想到就能做到"啦。</p>
+    <p class="lead">慢慢来，我在文澜阁等你点亮那天。🐉✨</p>
+  </div>
+
+  <div class="ph-foot">
+    <div class="ft-txt">
+      <div class="ft-go">▸ 扫码照见你的重生人格</div>
+      <div class="ft-brand">玄 玑 · Astro</div>
+    </div>
+    <div class="ft-qr" id="qrbox"></div>
+  </div>
+</div>
+
+<div class="ctrl">
+  <button class="save" id="saveBtn">✨ 保存这张命书长图</button>
+</div>
+<div class="note">这是 html2canvas 生成的纯净 PNG 小样 · 假数据演示<br>真实版正文由神仙虾出，型号/金句依盘现写</div>
+
+<script>
+  // 二维码
+  new QRCode(document.getElementById("qrbox"),{
+    text:"https://xuanji777.preview.aliyun-zeabur.cn/",
+    width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M
+  });
+
+  // 一键保存纯净 PNG
+  document.getElementById("saveBtn").onclick=function(){
+    const node=document.getElementById("poster");
+    this.textContent="✨ 正在生成…";
+    html2canvas(node,{backgroundColor:null,scale:3,useCORS:true,logging:false}).then(canvas=>{
+      const a=document.createElement("a");
+      a.download="玄玑-我的重生人格命书.png";
+      a.href=canvas.toDataURL("image/png");
+      a.click();
+      this.textContent="✨ 保存这张命书长图";
+    }).catch(e=>{ this.textContent="✨ 重试一次"; alert("生成失败:"+e); });
+  };
+</script>
+</body>
+</html>
