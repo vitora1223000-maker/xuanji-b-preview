@@ -1,136 +1,1818 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>玄玑 · 解读长图小样</title>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>玄玑 · Astro</title>
 <style>
   :root{
-    --bg:#0a0e1f; --gold:#ffe6a8; --gold2:#e8c25a; --accent:#c9a8ff;
-    --ink:#e8e3f5; --soft:#9a92bd; --line:rgba(232,201,118,.22);
+    /* 深空神秘风(与PDF报告同源) */
+    --bg:#0a0e1f; --card:rgba(255,255,255,.045); --ink:#e8e3f5; --soft:#9a92bd;
+    --accent:#c9a8ff; --accent2:#e8c976; --line:rgba(201,168,255,.18); --good:#8fd8b0; --warn:#e0a0b8;
+    --gold:#e8c976;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#05060f;font-family:-apple-system,"PingFang SC",sans-serif;
-    padding:24px 16px 40px;-webkit-font-smoothing:antialiased;color:var(--ink)}
-
-  /* ───────── 命书卷轴长图本体（这一块就是会被导出成PNG的）───────── */
-  #poster{width:340px;margin:0 auto;border-radius:22px;overflow:hidden;position:relative;
+  body{
+    font-family:-apple-system,"PingFang SC",sans-serif;color:var(--ink);padding:20px;line-height:1.7;-webkit-font-smoothing:antialiased;
     background:
-      radial-gradient(120% 80% at 50% 0%, rgba(120,90,180,.28), transparent 60%),
-      radial-gradient(100% 60% at 50% 100%, rgba(90,70,140,.22), transparent 55%),
-      linear-gradient(170deg,#161228 0%,#0e0b1e 45%,#0a081a 100%);
-    border:1px solid var(--line);
-    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,230,168,.08);}
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1px 1px at 60% 18%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1.5px 1.5px at 80% 40%, rgba(232,201,118,.6), transparent),
+      radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1px 1px at 75% 75%, rgba(201,168,255,.5), transparent),
+      radial-gradient(1.5px 1.5px at 12% 82%, rgba(255,255,255,.5), transparent),
+      radial-gradient(900px 600px at 70% -5%, #2a1f4d 0%, transparent 60%),
+      radial-gradient(800px 700px at 10% 100%, #1a2148 0%, transparent 55%),
+      linear-gradient(160deg,#0a0e1f,#0d1130,#0a0e22);
+    background-attachment:fixed;min-height:100vh;
+  }
+  .wrap{max-width:680px;margin:0 auto}
+  h1{font-size:30px;font-weight:700;text-align:center;margin-bottom:6px;letter-spacing:6px;
+     background:linear-gradient(120deg,#e8c976,#fff6d8,#c9a8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+     text-shadow:0 0 30px rgba(232,201,118,.15)}
+  .sub{text-align:center;color:var(--soft);font-size:13px;margin-bottom:22px;letter-spacing:2px}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+  .tab{padding:7px 18px;border-radius:20px;background:var(--card);color:var(--soft);cursor:pointer;font-size:14px;border:1px solid var(--line);transition:.2s;user-select:none}
+  .tab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 12px rgba(169,143,216,.3)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-bottom:14px;backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+  .card h2{font-size:15px;margin-bottom:12px;color:var(--gold);display:flex;align-items:center;gap:6px;letter-spacing:1px}
+  .planet{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .planet:last-child{border:0}
+  .pname{width:52px;color:var(--soft)}
+  .ppos{flex:1;font-weight:500;color:var(--ink)}
+  .rx{color:var(--warn);font-size:12px;background:rgba(224,160,184,.15);padding:1px 7px;border-radius:8px}
+  .aspects{font-size:13px;color:var(--soft);line-height:2}
+  .asp-tag{display:inline-block;padding:2px 9px;border-radius:8px;margin:2px;background:rgba(201,168,255,.12);color:var(--ink)}
+  .asp-good{background:rgba(143,216,176,.15);color:var(--good)} .asp-hard{background:rgba(224,160,184,.15);color:var(--warn)}
+  .btn{display:block;width:100%;padding:14px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(120deg,#c9a8ff,#e8c976);color:#1a1530;font-size:16px;font-weight:600;cursor:pointer;letter-spacing:1px;box-shadow:0 6px 20px rgba(201,168,255,.25)}
+  .btn:active{opacity:.8}
+  .datebar{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;font-size:13px;color:var(--soft)}
+  .datebar input[type=date]{border:1px solid var(--line);border-radius:10px;padding:5px 10px;font-size:14px;color:var(--ink);background:var(--card)}
+  .quick{padding:4px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;color:var(--soft);transition:.15s}
+  .quick:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .foot{text-align:center;color:var(--soft);font-size:11px;margin-top:20px;opacity:.7;letter-spacing:1px}
+  /* —— 我的盘 —— */
+  .form-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:14px;flex-wrap:wrap}
+  .form-row label{width:72px;color:var(--soft);flex-shrink:0}
+  .form-row input,.form-row select{flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:14px;color:var(--ink);background:rgba(255,255,255,.06)}
+  /* 下拉箭头：与出生时间框用同一个 ▾ 字符，保证大小完全一致 */
+  .form-row input::-webkit-calendar-picker-indicator{filter:invert(.7)}
+  .form-row option{background:#1a1f3a;color:var(--ink)}
+  /* === 出生时间·金色滚轮选择器 === */
+  .pill{flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;color:var(--ink);background:rgba(255,255,255,.06);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+  .pill .ph{color:var(--soft)}
+  .pill .chev{color:var(--gold,#e8c976);font-size:12px;flex-shrink:0;margin-left:8px}
+  .dt-mask{position:fixed;inset:0;background:rgba(5,7,18,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:.25s;z-index:90}
+  .dt-mask.on{opacity:1;pointer-events:auto}
+  .dt-sheet{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:linear-gradient(180deg,#141833,#0c1024);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:14px 16px 26px;transform:translateY(110%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:91;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+  .dt-sheet.on{transform:translateY(0)}
+  .dt-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .dt-bar .t{font-size:14px;color:var(--gold,#e8c976);letter-spacing:1px}
+  .dt-bar button{font-size:14px;cursor:pointer;padding:7px 20px;border-radius:18px;transition:.15s}
+  .dt-cancel{color:var(--soft);background:transparent;border:1px solid var(--line)}
+  .dt-cancel:active{background:rgba(255,255,255,.05)}
+  .dt-ok{color:var(--soft);font-weight:600;background:transparent;border:1px solid var(--line)}
+  .dt-ok.ready{color:#1a1530;border:0;background:linear-gradient(120deg,#e8c976,#f3d98c);box-shadow:0 2px 12px rgba(232,201,118,.35)}
+  .dt-ok:active{opacity:.85}
+  .dt-wheels{display:flex;gap:4px;height:200px;position:relative;overflow:hidden}
+  .dt-wheels::before{content:"";position:absolute;left:0;right:0;top:80px;height:40px;border-top:1px solid rgba(201,168,255,.35);border-bottom:1px solid rgba(201,168,255,.35);background:rgba(201,168,255,.07);pointer-events:none;z-index:2;border-radius:8px}
+  .dt-col{flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;text-align:center}
+  .dt-col::-webkit-scrollbar{display:none}
+  .dt-col .pad{height:80px}
+  .dt-col .it{height:40px;line-height:40px;font-size:17px;color:var(--soft);scroll-snap-align:center;transition:color .15s}
+  .dt-col .it.sel{color:var(--ink);font-weight:600;text-shadow:0 0 10px rgba(201,168,255,.4)}
+  /* MBTI 4×4 卡片网格 */
+  .mbti-sheet{padding-bottom:30px}
+  .mbti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;max-height:60vh;overflow-y:auto}
+  .mbti-cell{border-radius:12px;padding:12px 4px 10px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.15s;user-select:none}
+  .mbti-cell .code{font-size:15px;font-weight:700;letter-spacing:.5px;color:#2a2540}
+  .mbti-cell .off{font-size:10px;margin-top:2px;color:#5a5570;opacity:.9}
+  .mbti-cell .nick{font-size:11.5px;margin-top:1px;color:#3a3550;font-weight:600}
+  .mbti-cell.nt{background:rgba(206,184,250,.82)} .mbti-cell.nf{background:rgba(190,224,176,.82)}
+  .mbti-cell.st{background:rgba(174,214,232,.82)} .mbti-cell.sp{background:rgba(238,222,160,.85)}
+  .mbti-cell.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 4px 14px rgba(232,201,118,.3)}
+  .seg{display:flex;gap:8px;flex:1}
+  .seg .opt{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:10px;cursor:pointer;color:var(--soft);user-select:none;transition:.15s}
+  .seg .opt.on{background:linear-gradient(120deg,#c9a8ff,#e8c976);color:#1a1530;border-color:transparent;font-weight:600}
+  .hint{font-size:12px;color:var(--soft);background:rgba(201,168,255,.08);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:12px;line-height:1.6}
+  .latlon{display:none;gap:8px}
+  .big3{display:flex;justify-content:space-around;text-align:center;background:linear-gradient(135deg,rgba(201,168,255,.12),rgba(232,201,118,.1));border:1px solid var(--line);border-radius:14px;padding:18px 10px;margin-bottom:8px}
+  .big3 .b3{flex:1}
+  .big3 .b3 .lbl{font-size:12px;color:var(--soft);margin-bottom:5px}
+  .big3 .b3 .val{font-size:17px;font-weight:700;color:var(--gold)}
+  .axis{display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+  .axis .ax{background:rgba(201,168,255,.1);border:1px solid var(--line);border-radius:8px;padding:5px 11px;color:var(--ink)}
+  .house-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:13px}
+  .house-grid .hc{border-bottom:1px solid var(--line);padding:6px 0;display:flex;gap:8px}
+  .house-grid .hc .hn{color:var(--gold);font-weight:600;width:38px}
+  .house-grid .hc .hp{color:var(--soft);font-size:12px}
+  .role-card{text-align:center;background:linear-gradient(160deg,rgba(42,31,77,.7),rgba(58,47,93,.6));border:1px solid rgba(232,201,118,.3);border-radius:16px;padding:24px 20px;color:#f0ebf8;margin:8px 0;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+  .role-card .rname{font-size:22px;font-weight:700;color:#e8c976;letter-spacing:2px;margin-bottom:6px;text-shadow:0 0 20px rgba(232,201,118,.3)}
+  .role-card .rtype{font-size:13px;color:#c9bce0;margin-bottom:12px;letter-spacing:1px}
+  .role-card .rdesc{font-size:15px;line-height:1.9;color:#ded6ee}
+  .ask-card{text-align:center;background:linear-gradient(160deg,rgba(232,201,118,.1),rgba(201,168,255,.08));border:1px solid rgba(232,201,118,.35);border-radius:16px;padding:22px 20px;margin-top:18px}
+  .ask-card .ask-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
+  .ask-card .ask-desc{font-size:13.5px;line-height:1.9;color:var(--soft);margin-bottom:8px}
+  .ask-qr{display:flex;align-items:center;justify-content:center;gap:18px;margin:16px 0 6px;flex-wrap:wrap}
+  .ask-qr .qr-img{width:175px;border-radius:14px;background:#fff;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+  .ask-qr .qr-text{text-align:left;font-size:14px;line-height:1.6;color:var(--gold);font-weight:600;letter-spacing:.5px}
+  .ask-qr .qr-text .qr-sub{font-size:11.5px;color:var(--soft);font-weight:400;line-height:1.5;display:inline-block;margin-top:6px}
+  .ask-card .ask-or{font-size:12px;color:var(--soft);letter-spacing:3px;margin:12px 0 12px;opacity:.6}
+  .read-card{margin-top:18px;padding:20px 18px;border-radius:18px;background:linear-gradient(160deg,rgba(169,143,216,.14),rgba(40,30,70,.25));border:1px solid var(--line);text-align:center}
+  .read-card .ask-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px}
+  .read-card .ask-desc{font-size:13.5px;line-height:1.9;color:var(--soft);margin-bottom:14px}
+  .read-btn{font-size:15px}
+  /* —— 抽卡后分岔双按钮：两条都要拿下·不分主次。左=金色为主，右=紫色为主，色相不同但都亮。
+        初始【不发光】(此刻发光的是"分享BUFF")；用户分享完→关掉分享浮层时才给它俩加.glow点亮，引导接着走两条路。 —— */
+  .forkbtns{display:flex;gap:11px;margin-top:6px}
+  .forkbtns .btn{margin-top:0;flex:1;padding:15px 8px;font-size:14.5px;line-height:1.35;letter-spacing:.5px;font-weight:700!important}
+  /* 左·重生人格：金色为主(金多紫少) */
+  .forkbtn-reborn{background:linear-gradient(125deg,#ffe6a8,#e8c25a 55%,#c9a8ff)!important;color:#1a1530!important;box-shadow:0 5px 16px rgba(232,201,118,.22)}
+  /* 右·人生说明书：紫色为主(紫多金少) */
+  .forkbtn-natal{background:linear-gradient(125deg,#c9a8ff,#a888e8 55%,#ffe6a8)!important;color:#1a1530!important;box-shadow:0 5px 16px rgba(201,168,255,.22)}
+  /* 点亮后(分享完)：glow 动画接管 box-shadow,呼吸发光。不带 !important,才不会被上面常态 shadow 盖住 */
+  .forkbtn-reborn:active,.forkbtn-natal:active{opacity:.85}
+  .read-by{font-size:11.5px;color:#ffe6a8;letter-spacing:2px;margin-top:9px;opacity:.85}
+  .read-out{margin-top:18px;text-align:left;font-size:14.5px;line-height:1.95;color:var(--text,#e8e4f3);white-space:pre-wrap;word-break:break-word;background:rgba(20,16,38,.5);border-radius:14px;padding:18px 16px;border:1px solid var(--line);min-height:40px}
+  .read-out .typing{display:inline-block;width:7px;height:15px;background:var(--gold);margin-left:2px;animation:blink 1s steps(2) infinite;vertical-align:text-bottom}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  .read-hook{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;color:var(--gold);line-height:1.8}
+  /* —— 向下引导箭头(柔金呼吸·引导完即收) —— */
+  .scroll-guide{display:flex;flex-direction:column;align-items:center;gap:6px;margin:18px 0 2px;cursor:pointer;user-select:none;
+    animation:floatArrow 2.6s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease}
+  .scroll-guide.fade-out{opacity:0;transform:translateY(6px);pointer-events:none}
+  .scroll-guide .sg-word{font-size:12.5px;color:var(--gold);letter-spacing:2px;animation:guideWordGlow 2.8s ease-in-out infinite}
+  .scroll-guide .sg-arrow{width:15px;height:15px;border-right:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);
+    transform:rotate(45deg);animation:guideArrowGlow 2.8s ease-in-out infinite}
+  @keyframes floatArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  @keyframes guideWordGlow{0%,100%{opacity:.7;text-shadow:0 0 8px rgba(232,201,118,.2)}50%{opacity:1;text-shadow:0 0 16px rgba(230,200,120,.7),0 0 28px rgba(230,200,120,.35)}}
+  @keyframes guideArrowGlow{0%,100%{opacity:.75;filter:drop-shadow(0 0 5px rgba(230,200,120,.4))}50%{opacity:1;filter:drop-shadow(0 0 12px rgba(230,200,120,.85))}}
+  /* —— 解读按钮灵气光晕(烛火呼吸·点击即收) —— */
+  .read-btn.glow,.btn.glow{animation:glowPulse 2.8s ease-in-out infinite}
+  @keyframes glowPulse{
+    0%,100%{box-shadow:0 6px 20px rgba(201,168,255,.25),0 0 0 0 rgba(230,200,120,0)}
+    50%{box-shadow:0 6px 22px rgba(201,168,255,.3),0 0 22px 4px rgba(230,200,120,.45)}
+  }
+  /* Markdown 渲染样式(神仙虾解读) */
+  .md-body{white-space:normal}
+  .md-fadein{animation:mdFade 1.1s ease}
+  @keyframes mdFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .md-body .md-h{font-weight:700;color:var(--gold);letter-spacing:.5px;line-height:1.5}
+  .md-body .md-h1{font-size:18px;margin:20px 0 10px}
+  .md-body .md-h2{font-size:16px;margin:18px 0 9px}
+  .md-body .md-h3{font-size:15px;margin:15px 0 8px;color:var(--accent2,#c9b6f0)}
+  .md-body .md-h4{font-size:14px;margin:13px 0 7px;color:var(--accent2,#c9b6f0)}
+  .md-body .md-p{margin:9px 0;line-height:1.95}
+  .md-body strong{color:var(--gold);font-weight:700}
+  .md-body em{color:var(--accent2,#c9b6f0);font-style:normal}
+  .md-body .md-ul{margin:8px 0;padding-left:20px}
+  .md-body .md-ul li{margin:5px 0;line-height:1.85}
+  .md-body .md-q{margin:12px 0;padding:10px 14px;border-left:3px solid var(--gold);background:rgba(169,143,216,.1);border-radius:0 8px 8px 0;color:var(--gold);font-size:15px;line-height:1.8}
+  .md-body .md-hr{border:none;border-top:1px solid var(--line);margin:16px 0;opacity:.5}
+  /* 登录浮层（用现站紫色调变量，与全站统一）*/
+  #loginOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}
+  #loginOverlay .lg-mask{position:absolute;inset:0;background:rgba(6,8,20,.72);backdrop-filter:blur(3px)}
+  #loginOverlay .lg-box{position:relative;width:88%;max-width:340px;background:linear-gradient(160deg,#13152e,#0e1024);border:1px solid var(--line);border-radius:18px;padding:26px 22px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  #loginOverlay .lg-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--soft);font-size:22px;cursor:pointer;line-height:1}
+  #loginOverlay .lg-title{text-align:center;font-size:20px;font-weight:700;letter-spacing:3px;background:linear-gradient(120deg,#e8c976,#fff6d8,#c9a8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+  #loginOverlay .lg-sub{text-align:center;font-size:12.5px;color:var(--soft);line-height:1.7;margin-bottom:18px}
+  #loginOverlay .lg-input{width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;margin-bottom:10px;outline:none}
+  #loginOverlay .lg-input:focus{border-color:var(--accent)}
+  #loginOverlay .lg-btn{width:100%;padding:12px;border:0;border-radius:11px;background:linear-gradient(120deg,#c9a8ff,#e8c976);color:#1a1530;font-size:15px;font-weight:600;letter-spacing:1px;cursor:pointer}
+  #loginOverlay .lg-btn:active{opacity:.85}
+  #loginOverlay .lg-btn:disabled{opacity:.55;cursor:default}
+  #loginOverlay .lg-hint{font-size:12px;margin-top:8px;text-align:center;min-height:16px;color:var(--soft)}
+  #loginOverlay .lg-hint.err{color:var(--warn)} #loginOverlay .lg-hint.wait{color:var(--soft)} #loginOverlay .lg-hint.gold{color:var(--gold)}
+  #loginOverlay .lg-back{text-align:center;font-size:12px;color:var(--soft);margin-top:12px;cursor:pointer}
+  #loginOverlay .lg-resend{text-align:center;font-size:12.5px;color:#e8c25a;margin-top:12px;cursor:pointer;letter-spacing:.5px;transition:opacity .25s}
+  #loginOverlay .lg-resend.disabled{color:var(--soft);opacity:.6;cursor:default}
+  #loginOverlay .hidden{display:none}
+  /* 右上角账号角标 */
+  #acctBadge{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 8px);right:12px;z-index:900;display:flex;align-items:center;background:rgba(20,22,46,.92);border:1px solid var(--line);border-radius:20px;padding:4px;font-size:12px;color:var(--soft);backdrop-filter:blur(4px);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+  #acctBadge #acctBtn{background:none;border:0;color:var(--accent);font-size:12px;cursor:pointer;padding:3px 10px;border-radius:14px}
+  #acctBadge #acctBtn:active{background:rgba(201,168,255,.15)}
+/* ===== 星盘测MBTI 两屏 ===== */
+#mbtiResult{max-width:460px;margin:0 auto;}
+.mbti-screen{padding:8px 4px 20px;}
+.m-lead{text-align:center;font-size:13.5px;color:#c9bfe0;margin:6px 0 16px;letter-spacing:.5px;line-height:1.8;}
+.m-glow{text-align:center;font-size:40px;font-weight:800;letter-spacing:3px;margin:34px 0 30px;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(255,230,168,.55)) drop-shadow(0 0 40px rgba(232,194,90,.3));
+  animation:mBreathe 3.5s ease-in-out infinite;white-space:nowrap;}
+.m-glow{display:flex;align-items:center;justify-content:center;gap:10px;}
+.m-glow .m-sep{-webkit-text-fill-color:#e8c25a;color:#e8c25a;font-weight:300;font-size:28px;line-height:1;}
+.m-glow .m-type{font-size:1.12em;letter-spacing:2px;line-height:1;}
+@keyframes mBreathe{0%,100%{filter:drop-shadow(0 0 16px rgba(255,230,168,.5)) drop-shadow(0 0 34px rgba(232,194,90,.26));}
+  50%{filter:drop-shadow(0 0 20px rgba(255,230,168,.62)) drop-shadow(0 0 42px rgba(232,194,90,.32));}}
+.m-soul{text-align:center;font-size:21px;font-weight:700;color:#ffe6a8;margin:2px 0 0;letter-spacing:2px;filter:drop-shadow(0 0 10px rgba(255,230,168,.35));}
+.m-zhao{text-align:center;font-size:16.5px;color:#ffe6a8;line-height:1.95;margin:22px auto 0;max-width:92%;letter-spacing:.6px;font-weight:500;
+  text-shadow:0 0 14px rgba(255,230,168,.22);
+  padding:18px 20px;border:1px solid rgba(232,194,90,.28);border-radius:16px;
+  background:linear-gradient(160deg,rgba(58,44,86,.85),rgba(34,24,52,.9));
+  box-shadow:inset 0 1px 0 rgba(255,230,168,.08),0 4px 18px rgba(0,0,0,.25);}
+.m-div{height:1px;background:linear-gradient(90deg,transparent,rgba(232,194,90,.4),transparent);margin:26px 0 20px;}
+.m-hook{text-align:center;}
+.m-q{font-size:15px;color:#ffe6a8;margin-bottom:12px;letter-spacing:1px;}
+.m-tip{font-size:13px;color:#c9bfe0;opacity:.7;margin-top:6px;}
+.persona-card{background:linear-gradient(160deg,rgba(58,44,86,.85),rgba(34,24,52,.9));border:1px solid rgba(232,194,90,.38);border-radius:16px;padding:16px 12px;text-align:center;margin-bottom:11px;box-shadow:inset 0 1px 0 rgba(255,230,168,.08),0 4px 18px rgba(0,0,0,.25);}
+.persona-card .p-rank{font-size:13px;color:#c9a86a;letter-spacing:3px;margin-bottom:8px;}
+.p-name-pair{font-size:34px;font-weight:800;letter-spacing:3px;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(255,230,168,.45));}
+.p-bar{margin:0 16px;font-weight:300;opacity:.5;-webkit-text-fill-color:#e8c25a;}
+.func-card{background:linear-gradient(160deg,rgba(58,44,86,.85),rgba(34,24,52,.9));border:1px solid rgba(232,194,90,.38);border-radius:16px;padding:16px 16px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,230,168,.08),0 4px 18px rgba(0,0,0,.25);}
+.func-card .p-rank{font-size:13px;color:#c9a86a;letter-spacing:3px;}
+.func-big{font-size:36px;font-weight:800;letter-spacing:4px;color:#ffe6a8;margin:4px 0 6px;filter:drop-shadow(0 0 12px rgba(255,230,168,.45));}
+.func-desc{font-size:16.5px;color:#ffe6a8;line-height:1.95;letter-spacing:.6px;font-weight:500;text-shadow:0 0 14px rgba(255,230,168,.22);}
+/* 完整星盘数据·折叠 */
+.chart-data-fold{margin-top:20px;border:1px solid rgba(232,194,90,.18);border-radius:14px;background:rgba(36,26,54,.4);overflow:hidden;}
+.chart-data-fold summary{cursor:pointer;padding:14px 18px;font-size:14px;color:#c9bfe0;list-style:none;text-align:center;letter-spacing:.5px;user-select:none;}
+.chart-data-fold summary::-webkit-details-marker{display:none;}
+.chart-data-fold summary::after{content:" ▾";color:#e8c25a;}
+.chart-data-fold[open] summary::after{content:" ▴";}
+.chart-data-fold[open] summary{border-bottom:1px solid rgba(232,194,90,.15);}
+.chart-data-fold>*:not(summary){padding-left:16px;padding-right:16px;}
+.chart-data-fold>*:last-child{padding-bottom:16px;}
 
-  /* 卷轴四角的描金边框 */
-  #poster .gildframe{position:absolute;inset:12px;border:1px solid rgba(232,201,118,.28);border-radius:14px;pointer-events:none;z-index:5}
-  #poster .gildframe::before,#poster .gildframe::after{content:"";position:absolute;width:18px;height:18px;border:1.5px solid var(--gold);opacity:.7}
-  #poster .gildframe::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
-  #poster .gildframe::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-radius:0 0 6px 0}
-
-  /* —— 题头 —— */
-  .ph-head{text-align:center;padding:30px 26px 18px;position:relative;z-index:2}
-  .ph-brand{font-size:13px;letter-spacing:7px;color:var(--gold2);font-weight:700;margin-bottom:14px;
-    text-shadow:0 0 14px rgba(232,194,90,.4)}
-  .ph-brand .gem{display:inline-block;width:5px;height:5px;background:linear-gradient(135deg,#fff6d8,var(--gold));
-    border-radius:1px;transform:rotate(45deg);vertical-align:middle;margin:0 9px}
-  .ph-type{font-size:38px;font-weight:800;letter-spacing:3px;line-height:1.1;
-    background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
-    -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.45));white-space:nowrap}
-  .ph-type .dot{-webkit-text-fill-color:var(--gold2);font-weight:300;font-size:26px;margin:0 6px}
-  .ph-sub{font-size:13px;color:var(--soft);letter-spacing:3px;margin-top:12px}
-
-  .ph-div{height:1px;margin:6px 26px 0;background:linear-gradient(90deg,transparent,rgba(232,194,90,.45),transparent)}
-
-  /* —— 正文 —— */
-  .ph-body{padding:22px 28px 8px;position:relative;z-index:2}
-  .ph-body p{font-size:15px;line-height:2.05;color:#f3ecdd;letter-spacing:.3px;margin-bottom:17px;text-align:justify}
-  .ph-body p b{color:var(--gold);font-weight:700}
-  .ph-body .lead{color:var(--gold);font-weight:600}
-
-  /* 一句被引用高亮的金句 */
-  .ph-quote{margin:4px 26px 20px;padding:16px 18px;border-radius:14px;position:relative;z-index:2;
-    background:linear-gradient(160deg,rgba(58,44,86,.5),rgba(34,24,52,.55));
-    border:1px solid rgba(232,194,90,.25);
-    font-size:15px;line-height:1.95;color:var(--gold);text-align:center;letter-spacing:.4px;font-weight:600;
-    box-shadow:inset 0 1px 0 rgba(255,230,168,.08)}
-
-  /* —— 题尾：品牌 + 二维码 —— */
-  .ph-foot{margin:14px 22px 24px;padding:18px 18px 16px;border-radius:16px;position:relative;z-index:2;
-    background:rgba(255,255,255,.03);border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:space-between;gap:14px}
-  .ph-foot .ft-txt{flex:1}
-  .ph-foot .ft-go{font-size:13.5px;color:var(--gold);font-weight:600;letter-spacing:.5px;margin-bottom:7px}
-  .ph-foot .ft-brand{font-size:12px;color:var(--soft);letter-spacing:3px}
-  .ph-foot .ft-qr{width:74px;height:74px;border-radius:9px;background:#fff;padding:5px;flex-shrink:0}
-  .ph-foot .ft-qr img,.ph-foot .ft-qr canvas{width:100%!important;height:100%!important;display:block}
-
-  /* ───────── 控制区（不进图）───────── */
-  .ctrl{width:340px;margin:22px auto 0;display:flex;gap:11px}
-  .ctrl button{flex:1;padding:14px;border:0;border-radius:13px;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer}
-  .ctrl .save{background:linear-gradient(120deg,#ffe6a8,#e8c25a 55%,#c9a8ff);color:#1a1530}
-  .ctrl .note{text-align:center;color:#6b6488;font-size:12px;margin:16px auto 0;width:340px;line-height:1.7}
+/* ========================================================== */
+/*  命格卡（cardstage 作用域·全部加前缀防污染） 来自 命格卡_整合.html  */
+/* ========================================================== */
+.cardstage{--gold:#ffe6a8;--gold2:#e8c25a;--soft:#9a92bd;--accent:#c9a8ff;--line:rgba(201,168,255,.18);
+  display:flex;flex-direction:column;align-items:center;}
+.cardstage .ctop{text-align:center;margin-bottom:20px;max-width:340px}
+.cardstage .ctop .rebirth{font-size:23px;font-weight:800;letter-spacing:1px;line-height:1.45;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.45));}
+/* —— 换卡进度点（两人格） —— */
+.cardstage .pager{display:flex;gap:9px;justify-content:center;margin-bottom:16px}
+.cardstage .pager .dot{width:7px;height:7px;border-radius:50%;background:rgba(201,168,255,.3);transition:.3s}
+.cardstage .pager .dot.on{background:var(--gold);width:22px;border-radius:4px;box-shadow:0 0 10px rgba(255,230,168,.6)}
+/* ===== 命格卡（可翻面：正=美图 / 背=太极封皮） ===== */
+.cardstage .stage{width:100%;max-width:340px;position:relative}
+/* —— 翻开提醒：纯金色光环呼吸 —— */
+.cardstage .tap-hint{position:absolute;left:50%;bottom:13%;z-index:30;pointer-events:none;
+  transform:translateX(-50%);transition:opacity .4s ease;text-align:center}
+.cardstage .stage.opened .tap-hint{opacity:0}
+.cardstage .tap-hint .core{position:relative;width:14px;height:14px;margin:0 auto 14px;border-radius:50%;
+  background:radial-gradient(circle,#fff6d8,var(--gold) 60%,transparent);
+  box-shadow:0 0 16px 4px rgba(255,230,168,.7);animation:cardCoreBreath 2s ease-in-out infinite}
+@keyframes cardCoreBreath{0%,100%{transform:scale(.85);opacity:.85}50%{transform:scale(1.15);opacity:1}}
+.cardstage .tap-hint .core::before,.cardstage .tap-hint .core::after{content:"";position:absolute;left:50%;top:50%;
+  width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+  border:1.5px solid rgba(255,230,168,.6);animation:cardTapRipple 2s ease-out infinite}
+.cardstage .tap-hint .core::after{animation-delay:1s}
+@keyframes cardTapRipple{0%{transform:scale(1);opacity:.7}100%{transform:scale(4.5);opacity:0}}
+.cardstage .tap-hint .tword{font-size:12.5px;color:var(--gold);letter-spacing:4px;font-weight:600;
+  text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 14px rgba(255,230,168,.5);
+  animation:cardTapWord 2s ease-in-out infinite}
+@keyframes cardTapWord{0%,100%{opacity:.6}50%{opacity:1}}
+.cardstage .flip{perspective:1500px;width:100%;cursor:pointer}
+.cardstage .flip-inner{position:relative;width:100%;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .3s ease;transform-style:preserve-3d}
+.cardstage .flip.opened .flip-inner{transform:rotateY(180deg)}
+.cardstage .flip.swap .flip-inner{opacity:0;transform:scale(.96)}
+.cardstage .face{backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;overflow:hidden;
+  border:1px solid rgba(232,201,118,.3);box-shadow:0 20px 64px rgba(0,0,0,.6)}
+/* —— 正面：美图（收藏面） —— */
+.cardstage .face.front{position:absolute;inset:0;transform:rotateY(180deg)}
+.cardstage .front .photo{display:block;width:100%;height:auto;vertical-align:top}
+.cardstage .front .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.cardstage .front .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:var(--gold);
+  letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+.cardstage .front .overlay{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;
+  display:flex;flex-direction:column;align-items:center;
+  background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+.cardstage .front .ptype{font-size:40px;font-weight:800;letter-spacing:6px;line-height:1;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+.cardstage .front .nameline{margin-top:12px}
+.cardstage .front .pname{font-size:21px;font-weight:700;color:var(--gold);letter-spacing:5px;white-space:nowrap;
+  text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+/* —— 太极封皮（盖着） —— */
+.cardstage .face.back{position:relative}
+.cardstage .back .bimg{display:block;width:100%;height:auto;vertical-align:top}
+.cardstage .back .frame{position:absolute;inset:9px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.cardstage .back::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(1.5px 1.5px at 16% 10%,rgba(255,230,168,.7),transparent),
+    radial-gradient(1px 1px at 82% 14%,rgba(255,255,255,.55),transparent)}
+.cardstage .back .bbrand{position:absolute;bottom:20px;left:0;right:0;z-index:4;
+  display:flex;align-items:center;justify-content:center;gap:14px}
+.cardstage .back .bbrand .txt{font-size:12px;color:var(--gold);letter-spacing:5px;flex:none;
+  text-shadow:0 1px 10px rgba(0,0,0,.9),0 0 14px rgba(255,230,168,.4)}
+.cardstage .back .bbrand .gem{width:7px;height:7px;background:linear-gradient(135deg,#fff6d8,var(--gold));
+  transform:rotate(45deg);box-shadow:0 0 12px rgba(255,230,168,.9);flex-shrink:0}
+/* ===== 卡下信息区（翻开后出现） ===== */
+.cardstage .cinfo{width:100%;max-width:340px;overflow:hidden;
+  max-height:0;opacity:0;margin-top:0;
+  transition:max-height .5s ease,opacity .4s ease,margin-top .5s ease}
+.cardstage .cinfo.show{max-height:360px;opacity:1;margin-top:14px}
+.cardstage .cinfo .say{font-size:16px;line-height:1.8;color:var(--gold);text-align:center;letter-spacing:.4px;font-weight:600;
+  padding:20px 26px;background:none;border:0}
+.cardstage .cinfo .buff{padding:2px 22px 18px;text-align:center}
+.cardstage .cinfo .buff .brank{font-size:11px;color:var(--gold2);letter-spacing:2px;margin-bottom:7px;font-weight:600}
+.cardstage .cinfo .buff .brank::before{content:"⚜ ";opacity:.8}
+.cardstage .cinfo .buff .bfunc{display:inline-block;font-size:19px;font-weight:800;letter-spacing:4px;color:var(--gold);
+  margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(255,230,168,.45))}
+.cardstage .cinfo .buff .bfdesc{font-size:13px;line-height:1.7;color:var(--gold);letter-spacing:.2px}
+/* —— 操作区 —— */
+.cardstage .ops{width:100%;max-width:340px;margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.cardstage .cbtn{width:100%;padding:15px;border:0;border-radius:14px;font-size:15.5px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:.18s;display:block;margin:0}
+.cardstage .btn-ghost{background:rgba(201,168,255,.08);border:1px solid var(--line);color:var(--gold)}
+.cardstage .btn-ghost:active{background:rgba(201,168,255,.16)}
+.cardstage .btn-ghost.dead{opacity:.32;cursor:default;pointer-events:none}
+.cardstage .btn-gold{background:linear-gradient(120deg,#c9a8ff,#ffe6a8 60%,#e8c25a);color:#1a1530;
+  box-shadow:0 6px 22px rgba(201,168,255,.35);animation:cardGlowPulse 2.4s ease-in-out infinite}
+@keyframes cardGlowPulse{0%,100%{box-shadow:0 6px 20px rgba(201,168,255,.3),0 0 14px 1px rgba(255,230,168,.3)}
+  50%{box-shadow:0 8px 26px rgba(201,168,255,.4),0 0 34px 8px rgba(255,230,168,.62)}}
+.cardstage .btn-gold:active{opacity:.85}
+/* ===== 分享图弹层 ===== */
+.share-mask{position:fixed;inset:0;z-index:200;background:rgba(5,6,15,.86);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+.share-mask.on{display:flex}
+.share-mask .share-scroll{width:100%;max-width:330px;max-height:78vh;overflow-y:auto;border-radius:20px;-webkit-overflow-scrolling:touch}
+.share-mask .poster{width:330px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);border:1px solid rgba(232,201,118,.25)}
+.share-mask .poster .p-card{position:relative}
+.share-mask .poster .p-photo{display:block;width:100%;height:auto;vertical-align:top}
+.share-mask .poster .p-card .frame{position:absolute;inset:8px;border:1px solid rgba(232,201,118,.4);border-radius:14px;z-index:3;pointer-events:none}
+.share-mask .poster .p-card .tag{position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:4;font-size:11px;color:#ffe6a8;
+  letter-spacing:4px;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+.share-mask .poster .p-card-name{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:54px 18px 22px;text-align:center;
+  background:linear-gradient(to top,rgba(7,9,20,.96) 12%,rgba(7,9,20,.66) 42%,rgba(7,9,20,.2) 72%,transparent 100%)}
+.share-mask .poster .p-card-name .ptype{font-size:36px;font-weight:800;letter-spacing:6px;padding-left:6px;padding-right:6px;line-height:1;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+.share-mask .poster .p-card-name .nameline{margin-top:11px}
+.share-mask .poster .p-card-name .pname{font-size:19px;font-weight:700;color:#ffe6a8;letter-spacing:5px;white-space:nowrap;
+  text-shadow:0 0 14px rgba(255,230,168,.45),0 1px 6px rgba(0,0,0,.7)}
+.share-mask .poster .p-body{padding:22px 24px 22px;text-align:center;position:relative;color:#ffe6a8}
+.share-mask .poster .p-line{font-size:16px;line-height:1.95;color:#ffe6a8;letter-spacing:.3px;padding:0 6px;opacity:.95}
+.share-mask .poster .p-beam{width:64px;height:1px;margin:22px auto;
+  background:linear-gradient(90deg,transparent,#fff6d8 50%,transparent);
+  box-shadow:0 0 8px rgba(255,230,168,.6)}
+.share-mask .poster .p-buff{font-size:15px;color:#ffe6a8;letter-spacing:.5px;line-height:2;margin:0 0 20px;opacity:.95}
+.share-mask .poster .p-buff b{color:#ffe6a8;font-size:21px;font-weight:800;opacity:1;letter-spacing:1px;
+  filter:drop-shadow(0 0 10px rgba(255,230,168,.5))}
+.share-mask .poster .p-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(255,230,168,.18);padding-top:16px;text-align:left}
+.share-mask .poster .p-foot .urls{display:flex;flex-direction:column;gap:6px}
+.share-mask .poster .p-foot .urls .go{color:#9a92bd;font-weight:400;font-size:13px;letter-spacing:.5px}
+.share-mask .poster .p-foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;
+  background:linear-gradient(120deg,#e8c976,#fff6d8,#c9a8ff);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
+.share-mask .poster .p-foot .qr{width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
+.share-mask .poster .p-foot .qr img,.share-mask .poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
+.share-mask .share-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:10px;cursor:pointer;padding:8px 20px;
+  border:1px solid rgba(201,168,255,.18);border-radius:18px}
 </style>
 </head>
 <body>
-
-<div id="poster">
-  <div class="gildframe"></div>
-
-  <div class="ph-head">
-    <div class="ph-brand"><span class="gem"></span>玄 玑 · 文 澜 阁<span class="gem"></span></div>
-    <div class="ph-type">ISFJ<span class="dot">·</span>柔情硬汉</div>
-    <div class="ph-sub">— 你的重生人格 · 命书 —</div>
+<div id="acctBadge"><button id="acctBtn">登入</button></div>
+<div class="wrap">
+  <h1>✦ 玄玑 · Astro ✦</h1>
+  <div class="sub" id="now">解构人性 · 主宰人生 · 游戏玩家从不做 NPC</div>
+  <div id="view"></div>
+  <!-- 对外版: prompt框隐藏(仅后台生成, 不给访客看) -->
+  <div class="card" id="promptCard" style="display:none">
+    <div class="prompt-box" id="prompt"></div>
+    <button class="btn" id="copy">复制</button>
   </div>
-  <div class="ph-div"></div>
+  <div class="foot">玄玑 · Astro · 星历与瑞士星历同源 · 你的出生信息只在本机计算，不上传<br>小红书 @山玉居士　·　以星空视角解构人性，用数学逻辑主宰人生</div>
+</div>
 
-  <div class="ph-body">
-    <p class="lead">嘿嘿～照见啦照见啦～这位姑娘的底色，是一枚稳稳当当的 <b>ISFJ</b>，自带那种把身边人照顾妥帖、细节记得一清二楚的温柔底纹呀。</p>
-    <p>后来你一路把自己锻成了双面刃——<b>ISTJ</b> 的严谨守序和 <b>ESTJ</b> 的雷厉风行，左右手各撑一半，把日子过成了一张张可以勾选的清单呢。</p>
+<!-- 出生时间·金色滚轮浮层（放在 body 直属层，脱离 .card 的 backdrop-filter，否则 position:fixed 关不干净） -->
+<div class="dt-mask" id="dtMask"></div>
+<div class="dt-sheet" id="dtSheet">
+  <div class="dt-bar">
+    <button class="dt-cancel" id="dtCancel">取消</button>
+    <span class="t">玄玑 · 择时</span>
+    <button class="dt-ok" id="dtOk">确定</button>
   </div>
-
-  <div class="ph-quote">"你心里那把'把想法变成落地步骤'的暗劲，<br>还差最后一道火没点亮呢。"</div>
-
-  <div class="ph-body">
-    <p>不过嘛，神仙虾得小声戳你一下：等哪天它彻底醒过来，你可就真的"想到就能做到"啦。</p>
-    <p class="lead">慢慢来，我在文澜阁等你点亮那天。🐉✨</p>
-  </div>
-
-  <div class="ph-foot">
-    <div class="ft-txt">
-      <div class="ft-go">▸ 扫码照见你的重生人格</div>
-      <div class="ft-brand">玄 玑 · Astro</div>
-    </div>
-    <div class="ft-qr" id="qrbox"></div>
+  <div class="dt-wheels" id="dtWheels">
+    <div class="dt-col" data-k="y"></div>
+    <div class="dt-col" data-k="m"></div>
+    <div class="dt-col" data-k="d"></div>
+    <div class="dt-col" data-k="h"></div>
+    <div class="dt-col" data-k="mi"></div>
   </div>
 </div>
 
-<div class="ctrl">
-  <button class="save" id="saveBtn">✨ 保存这张命书长图</button>
+<!-- 出生地·三级联动滚轮浮层（复用 .dt-* 样式） -->
+<div class="dt-mask" id="locMask"></div>
+<div class="dt-sheet" id="locSheet">
+  <div class="dt-bar">
+    <button class="dt-cancel" id="locCancel">取消</button>
+    <span class="t">玄玑 · 来处</span>
+    <button class="dt-ok" id="locOk">确定</button>
+  </div>
+  <div class="dt-wheels" id="locWheels">
+    <div class="dt-col" data-k="prov"></div>
+    <div class="dt-col" data-k="city"></div>
+    <div class="dt-col" data-k="dist"></div>
+  </div>
 </div>
-<div class="note">这是 html2canvas 生成的纯净 PNG 小样 · 假数据演示<br>真实版正文由神仙虾出，型号/金句依盘现写</div>
 
+<!-- 现居地·三级联动滚轮（选填，暂不参与排盘） -->
+<div class="dt-mask" id="resMask"></div>
+<div class="dt-sheet" id="resSheet">
+  <div class="dt-bar">
+    <button class="dt-cancel" id="resCancel">取消</button>
+    <span class="t">玄玑 · 居处</span>
+    <button class="dt-ok" id="resOk">确定</button>
+  </div>
+  <div class="dt-wheels" id="resWheels">
+    <div class="dt-col" data-k="prov"></div>
+    <div class="dt-col" data-k="city"></div>
+    <div class="dt-col" data-k="dist"></div>
+  </div>
+</div>
+
+<!-- 时区·单列滚轮 -->
+<div class="dt-mask" id="tzMask"></div>
+<div class="dt-sheet" id="tzSheet">
+  <div class="dt-bar">
+    <button class="dt-cancel" id="tzCancel">取消</button>
+    <span class="t">玄玑 · 时区</span>
+    <button class="dt-ok" id="tzOk">确定</button>
+  </div>
+  <div class="dt-wheels" id="tzWheels"><div class="dt-col" data-k="tz"></div></div>
+</div>
+
+<!-- 人格类型·4×4 彩色卡片网格（选填，暂不参与排盘） -->
+<div class="dt-mask" id="mbtiMask"></div>
+<div class="dt-sheet mbti-sheet" id="mbtiSheet">
+  <div class="dt-bar">
+    <button class="dt-cancel" id="mbtiCancel">取消</button>
+    <span class="t">选择我的人格类型</span>
+    <button class="dt-ok" id="mbtiOk">确定</button>
+  </div>
+  <div class="mbti-grid" id="mbtiGrid"></div>
+</div>
+
+<!-- 命格卡·分享图弹层(固定覆盖层,放 body 末尾) -->
+<div class="share-mask" id="cardShareMask">
+  <div class="share-scroll"><div class="poster" id="cardPoster"></div></div>
+  <div class="share-close" id="cardShareClose">关闭</div>
+</div>
+
+<script src="./qrcode.min.js"></script>
+<script src="./astronomy.js"></script>
+<script src="./cities.js"></script>
+<script src="./ephemeris.bundle.js"></script>
+<script src="./chiron-helper.js"></script>
+<script src="./asteroid-ephem.js"></script>
+<script src="./engine_mbti_core.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // 二维码
-  new QRCode(document.getElementById("qrbox"),{
-    text:"https://xuanji777.preview.aliyun-zeabur.cn/",
-    width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M
-  });
+/* ===== Supabase 登录（与正式站同一项目，账号打通）===== */
+const SB_URL = "https://tbiymcyggyofysugjkoi.supabase.co";
+const SB_KEY = "sb_publishable_Qf-OJCyStFsqoltB6Z77VQ_ewz7zoOB";
+const sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SB_URL, SB_KEY, {
+  auth: {
+    persistSession: true,        // 把 session 存进 localStorage，刷新/重开不丢
+    autoRefreshToken: true,      // access_token 快过期时自动用 refresh_token 续期，不用重登
+    storageKey: "xuanji-auth",   // 固定 key，避免默认 key 变动导致捞不回
+    storage: window.localStorage
+  }
+}) : null;
 
-  // 一键保存纯净 PNG
-  document.getElementById("saveBtn").onclick=function(){
-    const node=document.getElementById("poster");
-    this.textContent="✨ 正在生成…";
-    html2canvas(node,{backgroundColor:null,scale:3,useCORS:true,logging:false}).then(canvas=>{
-      const a=document.createElement("a");
-      a.download="玄玑-我的重生人格命书.png";
-      a.href=canvas.toDataURL("image/png");
-      a.click();
-      this.textContent="✨ 保存这张命书长图";
-    }).catch(e=>{ this.textContent="✨ 重试一次"; alert("生成失败:"+e); });
+/* ===== 登录开关（在后台代码里定，用户无感）=====
+ * REQUIRE_LOGIN_DEFAULT = true  → 登录模式：用户打开干净网址，右上角即「登入」，解读前需登录(攒注册)。
+ * 江湖救急（仅供我们运维）：万一手机号登录又挂了，把下面这行改成 false 重新部署，全站秒切免登录、不丢用户。
+ * URL ?login=0 / ?login=1 仅留作我们临时测试用，不对用户暴露、不必记。 */
+const REQUIRE_LOGIN_DEFAULT = true;   // ← 救急开关：改成 false 即全站免登录
+const _loginParam = new URLSearchParams(location.search).get("login");
+const REQUIRE_LOGIN = _loginParam === "1" ? true : _loginParam === "0" ? false : REQUIRE_LOGIN_DEFAULT;
+
+// 当前登录用户(null=未登录)
+let _curUser = null;
+async function refreshUser(){
+  if(!sb) return null;
+  // ① 先读 supabase 自己的 session（邮箱登录走这条，正常落盘）
+  try{
+    const {data:s}=await sb.auth.getSession();
+    if(s&&s.session&&s.session.user){ _curUser=s.session.user; updateAcctBadge(); return _curUser; }
+  }catch(_){}
+  // ② supabase 没恢复出来 → 用我们短信登录时存的备份 token 重新 setSession 补回
+  //    （Safari 下手动 setSession 注入的短信 session 不落盘，这是邮箱登录没有、短信登录才有的问题）
+  try{
+    const bak=localStorage.getItem("xuanji-auth-bak");
+    if(bak){
+      const {at,rt}=JSON.parse(bak);
+      if(at&&rt){
+        const {data,error}=await sb.auth.setSession({access_token:at, refresh_token:rt});
+        if(!error&&data&&data.user){ _curUser=data.user; updateAcctBadge(); return _curUser; }
+        // 🔴只在确认 token 真失效时才删备份；网络/服务临时不可达(如部署中)绝不删——
+        //   否则部署那几十秒里误删好token,用户被迫重登且再也回不来(这是"偶发要重登"的真凶)。
+        //   token失效特征:错误信息含 invalid/expired/jwt/refresh 等;网络错(failed to fetch/超时)则保留备份。
+        if(error){
+          const m=((error&&error.message)||"").toLowerCase();
+          const tokenDead=/invalid|expired|jwt|refresh|not\s*found|revoked|bad_jwt/.test(m);
+          if(tokenDead){ localStorage.removeItem("xuanji-auth-bak"); }
+          // 网络类错误:啥都不删,保留备份,本轮就当未登录,下次网络好了还能恢复
+        }
+      }
+    }
+  }catch(_){}
+  // ③ 都没有 → 回退网络校验
+  try{ const {data}=await sb.auth.getUser(); _curUser=(data&&data.user)?data.user:null; }catch(_){ _curUser=null; }
+  updateAcctBadge();
+  return _curUser;
+}
+// 存盘：把登录用户这张盘(出生信息+盘数据+解读)存进 Supabase charts 表(静默)
+async function saveChartToSupabase(N, reading){
+  try{
+    if(!sb || !_curUser || !N) return;
+    const m=N.meta||{};
+    const birth_meta={ y:m.y, mo:m.mo, d:m.d, h:m.h, mi:m.mi, tz:m.tz, lat:m.lat, lon:m.lon, city:m.city, sex:m.sex };
+    const chart_data={
+      planets:(N.planets||[]).map(p=>({n:p.n,sign:p.sign,deg:p.deg,house:p.house,rx:p.rx})),
+      angles:N.angles, points:N.points, aspects:(N.asp||[]).map(x=>x.t)
+    };
+    await sb.from("charts").insert({ user_id:_curUser.id, email:_curUser.email, birth_meta, chart_data, reading:(reading||"").slice(0,8000) });
+  }catch(_){ /* 存盘静默,失败不打扰用户 */ }
+}
+// 右上角账号角标：登录后显示登出；免登录模式(REQUIRE_LOGIN=false)且未登录时整个隐藏，用户碰不到会发链接的登录入口
+function updateAcctBadge(){
+  const badge=document.getElementById("acctBadge");
+  const btn=document.getElementById("acctBtn"); if(!btn) return;
+  // 免登录且未登录 → 藏掉角标（手机号登录上线/开关打开后自动恢复）
+  if(badge) badge.style.display = (!REQUIRE_LOGIN && !_curUser) ? "none" : "flex";
+  btn.textContent = _curUser ? "登出" : "登入";
+}
+// 绑定登出 + 页面加载即检查登录态
+(function initAcct(){
+  const bind=()=>{
+    const btn=document.getElementById("acctBtn");
+    if(btn) btn.onclick=async()=>{
+      if(_curUser){ if(sb) await sb.auth.signOut(); try{localStorage.removeItem("xuanji-auth-bak");}catch(_){} _curUser=null; updateAcctBadge(); }   // 已登录→登出(连备份token一起清，否则刷新又被恢复)
+      else { const u=await openLogin(); if(u){ _curUser=u; updateAcctBadge(); } }          // 未登录→弹登录
+    };
   };
+  if(document.readyState!=="loading") bind(); else document.addEventListener("DOMContentLoaded",bind);
+  refreshUser(); // 进页面就检查:已登录则显示角标
+})();
+
+// 弹出登录浮层；返回 Promise，登录成功 resolve(user)，关闭则 resolve(null)
+function openLogin(){
+  return new Promise(resolve=>{
+    let curPhone="";
+    const ov=document.createElement("div");
+    ov.id="loginOverlay";
+    ov.innerHTML=`
+      <div class="lg-mask"></div>
+      <div class="lg-box">
+        <button class="lg-close" title="关闭">×</button>
+        <div class="lg-title">✦ 留一缕灵韵</div>
+        <div class="lg-step" data-step="1">
+          <div class="lg-sub" style="margin-bottom:14px">🗝️ 输入手机号，开启重生之门</div>
+          <input class="lg-input" id="lgPhone" type="tel" inputmode="numeric" placeholder="你的手机号" autocomplete="tel" maxlength="11">
+          <button class="lg-btn" id="lgSend">寄出灵符</button>
+          <div class="lg-hint" id="lgHint1"></div>
+        </div>
+        <div class="lg-step hidden" data-step="2">
+          <div class="lg-sub" style="margin-bottom:14px">🔮 命运之轮开始转动</div>
+          <input class="lg-input" id="lgCode" type="text" inputmode="numeric" placeholder="输入收到的灵符（验证码）" maxlength="6">
+          <button class="lg-btn" id="lgVerify">验符入阁</button>
+          <div class="lg-hint" id="lgHint2"></div>
+          <div class="lg-resend" id="lgResend">重新寄出灵符</div>
+          <div class="lg-back" id="lgBack">← 换个手机号</div>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    const $=id=>ov.querySelector(id);
+    const setH=(el,msg,cls)=>{ el.className="lg-hint "+(cls||""); el.textContent=msg; };
+    const goStep=n=>{ ov.querySelectorAll(".lg-step").forEach(s=>s.classList.add("hidden")); ov.querySelector('.lg-step[data-step="'+n+'"]').classList.remove("hidden"); };
+    let cdTimer=null;  // 60秒重发倒计时句柄
+    const close=(u)=>{ clearInterval(cdTimer); ov.remove(); resolve(u||null); };
+    $(".lg-close").onclick=()=>close(null);
+    $(".lg-mask").onclick=()=>close(null);
+    // —— 60秒重发倒计时（防狂点撞 Supabase 限流被默默丢，反而更收不到）——
+    const startCountdown=()=>{
+      const b=$("#lgResend"); if(!b) return;
+      clearInterval(cdTimer); let left=60;
+      b.classList.add("disabled"); b.textContent=left+"秒后可重发";
+      cdTimer=setInterval(()=>{
+        left--;
+        if(left<=0){ clearInterval(cdTimer); cdTimer=null; b.classList.remove("disabled"); b.textContent="重新寄出灵符"; }
+        else b.textContent=left+"秒后可重发";
+      },1000);
+    };
+    // —— 发码逻辑（首发/重发共用）：调后端 /api/sms/send（阿里云发码）——
+    const doSend=async(firstTime)=>{
+      const phone=$("#lgPhone").value.trim();
+      const hintEl=firstTime?$("#lgHint1"):$("#lgHint2");
+      if(!/^1[3-9]\d{9}$/.test(phone)){ setH($("#lgHint1"),"手机号看着不太对呢","err"); return false; }
+      if(firstTime){ $("#lgSend").disabled=true; setH($("#lgHint1"),"灵符飞往你的手机中…","wait"); }
+      else setH($("#lgHint2"),"灵符再次寄往你的手机中…","wait");
+      let r;
+      try{
+        const resp=await fetch("/api/sms/send",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({phone}) });
+        r=await resp.json();
+      }catch(_){ r={ok:false,error:"灵符一时未送达，稍候再试"}; }
+      if(firstTime) $("#lgSend").disabled=false;
+      // 🔴后端已是脱敏中文(含"操作太频繁/今日上限")，直接透传，绝不露技术字眼
+      if(!r||!r.ok){ setH(hintEl,(r&&r.error)||"灵符一时未送达，稍候再试","err"); return false; }
+      curPhone=phone;
+      if(firstTime){ goStep(2); $("#lgCode").focus(); }
+      setH($("#lgHint2"),"灵符已发至 "+phone+"（请查收短信）","wait");
+      startCountdown();
+      return true;
+    };
+    $("#lgSend").onclick=()=>doSend(true);
+    $("#lgResend").onclick=()=>{ if(!$("#lgResend").classList.contains("disabled")) doSend(false); };
+    // —— 验码逻辑：调后端 /api/sms/verify，拿回 session 写入 Supabase 客户端 ——
+    $("#lgVerify").onclick=async()=>{
+      const code=$("#lgCode").value.trim();
+      if(code.length<6){ setH($("#lgHint2"),"请输入完整灵符","err"); return; }
+      $("#lgVerify").disabled=true; setH($("#lgHint2"),"验符中…","wait");
+      let r;
+      try{
+        const resp=await fetch("/api/sms/verify",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({phone:curPhone,code}) });
+        r=await resp.json();
+      }catch(_){ r={ok:false}; }
+      if(!r||!r.ok||!r.session){ $("#lgVerify").disabled=false; setH($("#lgHint2"),(r&&r.error)||"灵符不符或已过期，再试试","err"); return; }
+      // 用后端换来的 session 写入 supabase 客户端，之后存盘/读功德才认得登录态
+      if(sb){
+        const {data,error}=await sb.auth.setSession({ access_token:r.session.access_token, refresh_token:r.session.refresh_token });
+        if(error||!data||!data.user){ $("#lgVerify").disabled=false; setH($("#lgHint2"),"入阁时灵韵一时未稳，再试试","err"); return; }
+        // 双保险：把 token 存进我们自己的独立备份 key（不依赖 supabase 内部格式）。
+        // Safari/ITP 下 setSession 的内部持久化可能不落盘，刷新即丢；启动时若 supabase 没恢复，就用这份备份 setSession 补回。
+        try{
+          localStorage.setItem("xuanji-auth-bak", JSON.stringify({ at:r.session.access_token, rt:r.session.refresh_token }));
+        }catch(_){}
+        clearInterval(cdTimer); _curUser=data.user; close(data.user); return;
+      }
+      $("#lgVerify").disabled=false; setH($("#lgHint2"),"灵阁一时未醒，请刷新再试","err");
+    };
+    $("#lgBack").onclick=()=>{ clearInterval(cdTimer); $("#lgResend").classList.remove("disabled"); $("#lgResend").textContent="重新寄出灵符"; goStep(1); };
+    setTimeout(()=>$("#lgPhone").focus(),50);
+  });
+}
+
+const A=window.Astronomy;
+const SIGNS=["白羊","金牛","双子","巨蟹","狮子","处女","天秤","天蝎","射手","摩羯","水瓶","双鱼"];
+const ELEMENT={白羊:"火",狮子:"火",射手:"火",金牛:"土",处女:"土",摩羯:"土",双子:"风",天秤:"风",水瓶:"风",巨蟹:"水",天蝎:"水",双鱼:"水"};
+const BODIES=[["太阳",A.Body.Sun],["月亮",A.Body.Moon],["水星",A.Body.Mercury],["金星",A.Body.Venus],["火星",A.Body.Mars],["木星",A.Body.Jupiter],["土星",A.Body.Saturn],["天王",A.Body.Uranus],["海王",A.Body.Neptune],["冥王",A.Body.Pluto]];
+const ASPECTS=[[0,"合",8,""],[60,"六合",4,"good"],[90,"刑",6,"hard"],[120,"拱",6,"good"],[180,"冲",8,"hard"]];
+
+function lon(b,date){let e=A.Ecliptic(A.GeoVector(b,date,true)).elon;return e<0?e+360:e;}
+function isRx(b,date){ // 用前后6小时判断顺逆
+  if(b===A.Body.Sun||b===A.Body.Moon)return false;
+  const t1=new Date(date.getTime()-6*3600e3),t2=new Date(date.getTime()+6*3600e3);
+  let a=lon(b,t1),c=lon(b,t2),d=c-a; if(d>180)d-=360; if(d<-180)d+=360; return d<0;
+}
+function pos(date){return BODIES.map(([n,b])=>{const L=lon(b,date),s=Math.floor(L/30),deg=L-s*30;return{n,sign:SIGNS[s],deg:Math.floor(deg),min:Math.floor((deg%1)*60),rx:isRx(b,date),L};});}
+function aspects(date){const ps=pos(date),out=[];for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){let d=Math.abs(ps[i].L-ps[j].L)%360;if(d>180)d=360-d;for(const[a,nm,orb,cls]of ASPECTS){if(Math.abs(d-a)<=orb){out.push({t:`${ps[i].n}${nm}${ps[j].n}`,cls});break;}}}return out;}
+
+// 扫描换座 & 新月满月
+function scanTransits(start,days,skipMoon){const ev=[];for(const[n,b]of BODIES){if(skipMoon&&b===A.Body.Moon)continue;let prev=Math.floor(lon(b,start)/30);for(let k=1;k<=days;k++){const d=new Date(start.getTime()+k*864e5);const cur=Math.floor(lon(b,d)/30);if(cur!==prev){ev.push({date:d,txt:`${n} 进入 ${SIGNS[cur]}座`});prev=cur;}}}return ev;}
+function scanMoons(start,days){const ev=[],seen=new Set();for(let k=0;k<=days;k++){const d=new Date(start.getTime()+k*864e5);const sun=lon(A.Body.Sun,d),moon=lon(A.Body.Moon,d);let diff=(moon-sun+360)%360;if(diff<7||diff>353){const s=SIGNS[Math.floor(sun/30)];if(!seen.has("新"+s)){ev.push({date:d,txt:`🌑 新月在 ${s}座`});seen.add("新"+s);}}else if(Math.abs(diff-180)<7){const s=SIGNS[Math.floor(moon/30)];if(!seen.has("满"+s)){ev.push({date:d,txt:`🌕 满月在 ${s}座`});seen.add("满"+s);}}}return ev;}
+const md=d=>`${d.getMonth()+1}/${d.getDate()}`;
+
+function planetRows(ps){return ps.map(p=>`<div class="planet"><span class="pname">${p.n}</span><span class="ppos">${p.sign} ${p.deg}°${String(p.min).padStart(2,'0')}'</span>${p.rx?'<span class="rx">℞ 逆行</span>':''}</div>`).join('');}
+function aspectTags(as){return as.map(a=>`<span class="asp-tag ${a.cls?'asp-'+a.cls:''}">${a.t}</span>`).join('');}
+
+/* ========== 我的盘 · 本命盘自助算 ========== */
+// 城市经纬度表(东经正/西经负, 北纬正/南纬负)。表里没有的用"手填经纬度"兜底。
+const CITIES={
+ "北京":[39.90,116.41],"上海":[31.23,121.47],"广州":[23.13,113.26],"深圳":[22.54,114.06],
+ "天津":[39.13,117.20],"重庆":[29.56,106.55],"成都":[30.57,104.07],"杭州":[30.27,120.16],
+ "武汉":[30.59,114.31],"西安":[34.34,108.94],"南京":[32.06,118.80],"长沙":[28.23,112.94],
+ "郑州":[34.75,113.62],"沈阳":[41.81,123.43],"青岛":[36.07,120.38],"济南":[36.65,117.12],
+ "大连":[38.91,121.62],"哈尔滨":[45.80,126.53],"长春":[43.82,125.32],"福州":[26.07,119.30],
+ "厦门":[24.48,118.09],"昆明":[25.04,102.71],"南宁":[22.82,108.32],"贵阳":[26.65,106.63],
+ "兰州":[36.06,103.83],"太原":[37.87,112.55],"合肥":[31.82,117.23],"南昌":[28.68,115.86],
+ "石家庄":[38.04,114.51],"呼和浩特":[40.84,111.75],"乌鲁木齐":[43.83,87.62],"银川":[38.49,106.23],
+ "西宁":[36.62,101.78],"拉萨":[29.65,91.14],"海口":[20.04,110.32],"三亚":[18.25,109.51],
+ "苏州":[31.30,120.62],"无锡":[31.49,120.31],"宁波":[29.87,121.55],"温州":[28.00,120.70],
+ "佛山":[23.02,113.12],"东莞":[23.02,113.75],"珠海":[22.27,113.58],"中山":[22.52,113.39],
+ "泉州":[24.87,118.68],"烟台":[37.46,121.45],"潍坊":[36.71,119.16],"洛阳":[34.62,112.45],
+ "唐山":[39.63,118.18],"保定":[38.87,115.46],"徐州":[34.26,117.18],"常州":[31.81,119.97],
+ "南通":[31.98,120.89],"扬州":[32.39,119.41],"绍兴":[30.00,120.58],"嘉兴":[30.75,120.76],
+ "金华":[29.08,119.65],"台州":[28.66,121.42],"惠州":[23.11,114.42],"汕头":[23.35,116.68],
+ "湛江":[21.27,110.36],"桂林":[25.27,110.29],"柳州":[24.31,109.42],"绵阳":[31.47,104.68],
+ "香港":[22.32,114.17],"澳门":[22.20,113.55],"台北":[25.03,121.57],
+ // 全球大城(西经为负)
+ "纽约":[40.71,-74.01],"洛杉矶":[34.05,-118.24],"旧金山":[37.77,-122.42],"芝加哥":[41.88,-87.63],
+ "伦敦":[51.51,-0.13],"巴黎":[48.86,2.35],"东京":[35.68,139.69],"首尔":[37.57,126.98],
+ "新加坡":[1.35,103.82],"悉尼":[-33.87,151.21],"墨尔本":[-37.81,144.96],"多伦多":[43.65,-79.38],
+ "温哥华":[49.28,-123.12],"柏林":[52.52,13.40],"莫斯科":[55.76,37.62],"迪拜":[25.20,55.27],
+ "曼谷":[13.76,100.50],"吉隆坡":[3.14,101.69],"罗马":[41.90,12.50],"马德里":[40.42,-3.70]
+};
+
+// 把"本地出生时间+时区"换成UTC的Date(必用Date.UTC, 不让浏览器按设备时区瞎猜)
+function toUTC(y,mo,d,h,mi,tzOffset){
+  return new Date(Date.UTC(y,mo-1,d,h,mi)-tzOffset*3600*1000);
+}
+// 中国夏令时(1986-1991, 仅此6年实行过): 钟拨快1小时, 拨快的钟面时间需减1h才是标准时。
+// 起止日期已逐年对齐 IANA tz database(Asia/Shanghai)的官方转换记录, 分秒级权威:
+//   开始/结束均为当日"凌晨02:00"切换。表项格式 [[开始日,开始月],[结束日,结束月]]。
+//   1986(首年特殊)5/4起·9/14止；1987 4/12·9/13；1988 4/17·9/11；
+//   1989 4/16·9/17；1990 4/15·9/16；1991 4/14·9/15。
+// 返回"需减去的小时数"(0或1)。h为钟面小时(用于精确处理边界日02:00切换)。
+const CN_DST={1986:[[5,4],[14,9]],1987:[[12,4],[13,9]],1988:[[17,4],[11,9]],1989:[[16,4],[17,9]],1990:[[15,4],[16,9]],1991:[[14,4],[15,9]]};
+function cnDstAdjust(y,mo,d,h){
+  if(!CN_DST[y]) return 0;
+  const [[sd,sm],[ed,em]]=CN_DST[y];
+  const cur=mo*100+d, st=sm*100+sd, en=em*100+ed;
+  // 区间(开始日含, 结束日不含)内一律夏令时。
+  if(cur>st && cur<en) return 1;
+  // 边界日精确到02:00: 开始日 02:00 起拨快; 结束日 02:00 前仍夏令时(02:00拨回)。
+  if(cur===st) return (h===undefined||h>=2) ? 1 : 0; // 02:00前钟未拨快
+  if(cur===en) return (h!==undefined&&h<2) ? 1 : 0;  // 02:00前仍夏令时
+  return 0;
+}
+// 均时差(equation of time, 分钟)。真太阳时与平太阳时之差, 最多约±16分。
+// date为UTC, 用简化级数(对占星度级精度足够)。
+function equationOfTime(date){
+  const n=A.MakeTime(date).tt;               // 自J2000.0的天数(本库tt定义)
+  const Ldeg=(280.460+0.9856474*n)%360;      // 太阳平黄经
+  const gdeg=(357.528+0.9856003*n)%360;      // 平近点角
+  const g=gdeg*Math.PI/180;
+  const lambda=(Ldeg+1.915*Math.sin(g)+0.020*Math.sin(2*g))*Math.PI/180; // 真黄经
+  const eps=obliquity(date)*Math.PI/180;
+  // EoT(弧度)= L - atan2(cos e sin λ, cos λ) ... 标准公式
+  let ra=Math.atan2(Math.cos(eps)*Math.sin(lambda),Math.cos(lambda)); // 太阳赤经(弧度)
+  let raDeg=ra*180/Math.PI; raDeg=(raDeg%360+360)%360;
+  let eotDeg=Ldeg-raDeg; if(eotDeg>180)eotDeg-=360; if(eotDeg<-180)eotDeg+=360;
+  return eotDeg*4; // 1度=4分钟 → 返回分钟数
+}
+// 黄赤交角(度)。注意: 本库 MakeTime().tt = "相对J2000.0的天数"(不是儒略日)
+function obliquity(date){
+  const T=(A.MakeTime(date).tt)/36525; // 儒略世纪(自J2000)
+  return 23.439291-0.0130042*T;
+}
+// 算上升ASC + 天顶MC (返回黄经0-360)
+function calcAscMc(date,lat,lon_east){
+  const gast=A.SiderealTime(date);            // 格林尼治视恒星时(小时)
+  let ramc=(gast*15+lon_east)%360; if(ramc<0)ramc+=360;  // 本地恒星时=RAMC(度)
+  const eps=obliquity(date);
+  const rad=Math.PI/180, deg=180/Math.PI;
+  const r=ramc*rad, e=eps*rad, phi=lat*rad;
+  // MC
+  let mc=Math.atan2(Math.sin(r),Math.cos(r)*Math.cos(e))*deg; mc=(mc%360+360)%360;
+  // ASC (标准式, 含象限)
+  let asc=Math.atan2(Math.cos(r), -(Math.sin(r)*Math.cos(e)+Math.tan(phi)*Math.sin(e)))*deg;
+  asc=(asc%360+360)%360;
+  return {asc,mc,ramc,eps};
+}
+// Placidus 宫位制(对标测测/笔记/主流中文占星)。返回12个宫头黄经[1宫..12宫]。
+// 已用基准盘(1994/07/24 13:35 九江)逐宫校验, 与测测分秒级吻合。
+function placidusCusps(ramcDeg,eps,lat,asc,mc){
+  const rad=Math.PI/180,deg=180/Math.PI,e=eps*rad,phi=lat*rad;
+  // 牛顿迭代求中间宫头(11,12,2,3)黄经
+  function cusp(n){
+    let hourAngleSign,F,seed;
+    if(n===11){F=1/3;hourAngleSign=1;seed=30;}
+    if(n===12){F=2/3;hourAngleSign=1;seed=60;}
+    if(n===2){F=2/3;hourAngleSign=-1;seed=120;}
+    if(n===3){F=1/3;hourAngleSign=-1;seed=150;}
+    let lam=(ramcDeg+seed)%360;
+    for(let i=0;i<100;i++){
+      const l=lam*rad;
+      const decl=Math.asin(Math.sin(e)*Math.sin(l));
+      let RA=Math.atan2(Math.sin(l)*Math.cos(e),Math.cos(l))*deg; RA=(RA%360+360)%360;
+      const ad=Math.acos(Math.max(-1,Math.min(1,-Math.tan(phi)*Math.tan(decl))))*deg; // 半昼弧
+      const MD=hourAngleSign>0? F*ad : F*(180-ad);
+      const targetRA=(ramcDeg+(hourAngleSign>0? MD : (180-MD)))%360;
+      const diff=((RA-targetRA+540)%360)-180;
+      if(Math.abs(diff)<1e-6) break;
+      lam=((lam-diff*0.5)%360+360)%360;
+    }
+    return lam;
+  }
+  const c11=cusp(11),c12=cusp(12),c2=cusp(2),c3=cusp(3);
+  // [1..12]宫头: 1=asc,10=mc,对宫=+180
+  return [asc,c2,c3,(mc+180)%360,(c11+180)%360,(c12+180)%360,(asc+180)%360,(c2+180)%360,(c3+180)%360,mc,c11,c12];
+}
+const SIGN=L=>SIGNS[Math.floor(((L%360)+360)%360/30)];
+const DEGIN=L=>{const x=((L%360)+360)%360; const d=x-Math.floor(x/30)*30; return {deg:Math.floor(d),min:Math.floor((d%1)*60)};};
+
+// 进阶点位(纯数学, 不依赖库的小行星星历)。date为UTC。
+// 平黑月莉莉丝(月亮远地点平黄经)+ 平北交点(月亮升交点平黄经)。
+// 本库 MakeTime().tt 已是"相对J2000.0的天数", 直接/36525得儒略世纪(不再减2451545)
+function julianCenturies(date){ return A.MakeTime(date).tt/36525; }
+// 平北交点黄经(度): 标准公式(逆行, 约18.6年一周)
+function meanNode(date){
+  const T=julianCenturies(date);
+  let om=125.04452-1934.136261*T+0.0020708*T*T+T*T*T/450000;
+  return ((om%360)+360)%360;
+}
+// 平黑月莉莉丝(月亮远地点黄经, 度)= 月亮近地点黄经+180
+function meanLilith(date){
+  const T=julianCenturies(date);
+  // 月亮近地点黄经 ϖ (perigee, 度)
+  let perigee=83.3532465+4069.0137287*T-0.0103200*T*T-T*T*T/80053+T*T*T*T/18999000;
+  let lilith=perigee+180;
+  return ((lilith%360)+360)%360;
+}
+
+// 完整本命盘
+function computeNatal(inp){
+  // ① 夏令时修正(1986-91中国): 钟面时间拨快了1h, 减回真实民用时间(影响真实UTC瞬间, 必须做)
+  const dstH=cnDstAdjust(inp.y,inp.mo,inp.d,inp.h);
+  const utc=toUTC(inp.y,inp.mo,inp.d,inp.h-dstH,inp.mi,inp.tz);
+  // 注: 现代占星(含测测)用民用钟表时间直接排盘, 行星位置/上升由真实UTC瞬间决定,
+  //     "真太阳时·均时差"不并入计算(那会让行星偏移、反与测测不符)。
+  //     均时差仅作"当地真太阳时"参考显示, 不参与排盘。
+  const eotMin=equationOfTime(utc);
+  const {asc,mc,ramc,eps}=calcAscMc(utc,inp.lat,inp.lon);
+  const ascSign=Math.floor(asc/30);
+  // Placidus 宫头(对标测测主流)。落宫=判断黄经落在哪两个宫头之间。
+  const cusps=placidusCusps(ramc,eps,inp.lat,asc,mc);
+  const houseOf=L=>{
+    L=((L%360)+360)%360;
+    for(let h=0;h<12;h++){
+      const a=((cusps[h]%360)+360)%360, b=((cusps[(h+1)%12]%360)+360)%360;
+      const span=(b-a+360)%360, off=(L-a+360)%360;
+      if(off<span) return h+1;
+    }
+    return 12;
+  };
+  const planets=BODIES.map(([n,b])=>{
+    const L=lon(b,utc); const dm=DEGIN(L);
+    return {n,sign:SIGN(L),signIdx:Math.floor(((L%360)+360)%360/30),deg:dm.deg,min:dm.min,house:houseOf(L),rx:isRx(b,utc),L};
+  });
+  // 凯龙星(Chiron;伤痛与疗愈)——保留在 planets 里，照旧参与解读/相位/元素。
+  // 🔴取值源优先用 asteroid-ephem.js 的 chiron(对测测仅差~8角分),旧 Moshier 库 chironLon 差~54角分。
+  //    凯龙轨道偏心率高,旧库拟合差;asteroid-ephem 同一套四小行星库顺带算的 chiron 准得多。
+  //    降级:asteroid-ephem 没加载/报错时退回 chironLon,保证不崩。
+  {
+    let cL=null, cRx=false;
+    if(typeof asteroidEphem==="function"){
+      try{ const _c=asteroidEphem(utc).chiron; if(_c&&isFinite(_c.L)){ cL=_c.L; cRx=!!_c.rx; } }catch(_){}
+    }
+    if(cL===null && typeof chironLon==="function"){ try{ cL=chironLon(utc); }catch(_){} }
+    if(cL!==null){
+      const cdm=DEGIN(cL);
+      planets.push({n:"凯龙",sign:SIGN(cL),signIdx:Math.floor(((cL%360)+360)%360/30),deg:cdm.deg,min:cdm.min,house:houseOf(cL),rx:cRx,L:cL});
+    }
+  }
+  // ===== 四小行星(谷神/智神/婚神/灶神)：纯新增，独立成区，只上盘面，不进解读、不进相位、不进三个群运营tab =====
+  // 精度已对测测校验(三盘12体落座100%/度差≤17'/末度临界与逆行全对)。asteroid-ephem.js 提供。
+  const asteroids=[];
+  if(typeof asteroidEphem==="function"){
+    try{
+      const a=asteroidEphem(utc);
+      const _pushAst=(name,L,rx)=>{const dm=DEGIN(L);asteroids.push({n:name,sign:SIGN(L),signIdx:Math.floor(((L%360)+360)%360/30),deg:dm.deg,min:dm.min,house:houseOf(L),rx:!!rx,L:L});};
+      _pushAst("谷神", a.ceres.L,  a.ceres.rx);
+      _pushAst("智神", a.pallas.L, a.pallas.rx);
+      _pushAst("婚神", a.juno.L,   a.juno.rx);
+      _pushAst("灶神", a.vesta.L,  a.vesta.rx);
+    }catch(e){ /* 小行星算失败不影响主盘 */ }
+  }
+  // 本命相位(复用ASPECTS逻辑)
+  const asp=[];
+  for(let i=0;i<planets.length;i++)for(let j=i+1;j<planets.length;j++){
+    let dd=Math.abs(planets[i].L-planets[j].L)%360; if(dd>180)dd=360-dd;
+    for(const[a,nm,orb,cls]of ASPECTS){if(Math.abs(dd-a)<=orb){asp.push({t:`${planets[i].n}${nm}${planets[j].n}`,cls});break;}}
+  }
+  // 四轴
+  const dm_asc=DEGIN(asc),dm_mc=DEGIN(mc),dsc=(asc+180)%360,ic=(mc+180)%360,dm_dsc=DEGIN(dsc),dm_ic=DEGIN(ic);
+  const angles={
+    asc:{sign:SIGN(asc),deg:dm_asc.deg,min:dm_asc.min,L:asc},
+    mc:{sign:SIGN(mc),deg:dm_mc.deg,min:dm_mc.min,L:mc},
+    dsc:{sign:SIGN(dsc),deg:dm_dsc.deg,min:dm_dsc.min,L:dsc},
+    ic:{sign:SIGN(ic),deg:dm_ic.deg,min:dm_ic.min,L:ic}
+  };
+  // Placidus 12宫(每宫头带具体度数)
+  const houses=[];for(let k=0;k<12;k++){const cdm=DEGIN(cusps[k]);houses.push({num:k+1,sign:SIGN(cusps[k]),deg:cdm.deg,min:cdm.min,L:cusps[k]});}
+  // 进阶点位: 北交点/南交点/莉莉丝(纯数学算)
+  const nodeL=meanNode(utc), lilithL=meanLilith(utc), southL=(nodeL+180)%360;
+  // —— 三虚点(纯数学, 复用 calcAscMc 同一套数学; 已用黄金基准盘逐项校对 ≤3角分) ——
+  // ① 东方点 East Point: 把纬度当作 0(赤道) 算出的上升点黄经。基准盘校对差 0.6'。
+  const eastL=calcAscMc(utc,0,inp.lon).asc;
+  // ② 宿命点 Vertex: 黄道与卯酉圈(prime vertical)在地平西侧的交点。
+  //    标准做法=用余纬(90-lat)当纬度、并把 RAMC 换成对侧子午线(RAMC+180), 套上升公式。基准盘校对差 2.5'。
+  const vertexL=(function(){
+    const rad=Math.PI/180,deg=180/Math.PI;
+    const r=((ramc+180)%360)*rad, e=eps*rad, phi=(90-inp.lat)*rad;
+    let v=Math.atan2(Math.cos(r), -(Math.sin(r)*Math.cos(e)+Math.tan(phi)*Math.sin(e)))*deg;
+    return (v%360+360)%360;
+  })();
+  // ③ 福点 Part of Fortune: 必须按日/夜盘动态选公式(这是占星标准做法, 测测也如此)。
+  //    日盘(太阳在地平线之上=第7~12宫): ASC + 月亮 - 太阳
+  //    夜盘(太阳在地平线之下=第1~6宫):  ASC + 太阳 - 月亮
+  //    判据用 houseOf(sunL): 7~12 宫=日盘。曾误把一张夜生盘对齐后写死夜公式,
+  //    导致日生盘(如太阳9宫)算错(白羊26° vs 正确双子2°), 现已改回动态。
+  const sunL=planets[0].L, moonL=planets[1].L;
+  const sunHouse=houseOf(sunL);
+  const isDayChart=(sunHouse>=7&&sunHouse<=12);
+  const fortuneL=isDayChart
+    ? ((asc+moonL-sunL)%360+360)%360   // 日盘
+    : ((asc+sunL-moonL)%360+360)%360;  // 夜盘
+  const mkPt=(n,L,rx)=>{const dm=DEGIN(L);return {n,sign:SIGN(L),deg:dm.deg,min:dm.min,house:houseOf(L),rx:!!rx,L};};
+  // 北交/南交是平均运动逆行点(永远℞,与测测一致)
+  const points=[ mkPt("北交点",nodeL,true), mkPt("南交点",southL,true), mkPt("莉莉丝",lilithL),
+                 mkPt("福点",fortuneL), mkPt("宿命点",vertexL), mkPt("东方点",eastL) ];
+  return {meta:inp,utc,planets,asteroids,asp,angles,houses,points,ascSign,cusps,dstH,eotMin};
+}
+
+/* —— 星座→《商途道业》角色 粗匹配(占位骨架, 后续接魂内核精修) ——
+   先按"太阳星座"给一个原型方向, 这是前端秒出的即时爽感层;
+   "准到破防"的深度解读由 AI(小龙虾)按生成的prompt出。 */
+const ROLES={
+  // signIdx(太阳): {name, type, desc} —— 暂用代表性角色/原型, 文案后续细抠
+  4:{name:"掌灯人 · 肖明远型",type:"接近 INTJ 的类人格",desc:"天生站在高处、看得见别人看不见的暗处，所以注定走在前面，也注定有几分孤独。生于复杂，却偏要守一身清白。"},
+  10:{name:"破执者 · 林汐型",type:"接近 INTP/ENTJ 的类人格",desc:"清醒到孤独，强大到空旷。看透规则与人性，却在心底藏着一处不受理性控制的柔软。只做增量，不卷存量。"}
+};
+function matchRole(natal){
+  const sunIdx=natal.planets[0].signIdx;
+  return ROLES[sunIdx]||{name:"探路者",type:"你的类人格倾向",desc:"你的盘里有一种独属于你的张力——具体是谁，让玄玑为你细读。"};
+}
+
+let mode="today";
+let selDate=new Date();  // 当前选中的日期(默认今天)，可被日期选择器改
+
+// 取选中日期的"中午12点"做计算基准(慢星无差，月亮取当天中点最有代表性)
+function baseDt(){const d=new Date(selDate);d.setHours(12,0,0,0);return d;}
+function isToday(){const t=new Date();return selDate.toDateString()===t.toDateString();}
+
+function render(){
+  // 对外版: 永远是本命盘(无tab/无datebar/不显示prompt框)
+  renderNatalTab(); return;
+  const dt=baseDt();
+  const dstr=dt.toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric"});
+  const weekday="周"+"日一二三四五六"[dt.getDay()];
+  document.getElementById("now").textContent=`${dstr} ${weekday} · ${isToday()?"今天":"指定日期"}星象`;
+  const ps=pos(dt),as=aspects(dt);
+  let html="";
+  const moon=ps[1];
+  html+=`<div class="card"><div class="moon-big">🌙 当天月亮在 ${moon.sign}座 ${moon.deg}° —— 情绪底色：${ELEMENT[moon.sign]}象能量</div><h2>✦ 当天行星位置</h2>${planetRows(ps)}<div class="aspects" style="margin-top:10px">当天相位：${aspectTags(as)}</div></div>`;
+  if(mode==="week"){
+    const ts=scanTransits(dt,7,true),ms=scanMoons(dt,7);
+    html+=`<div class="card"><h2>📅 未来7天事件</h2>${[...ms,...ts].sort((a,b)=>a.date-b.date).map(e=>`<div class="ev"><span class="date">${md(e.date)}</span>${e.txt}</div>`).join('')||'<div class="ev">这7天天象平稳，无重要换座</div>'}</div>`;
+  }
+  if(mode==="month"){
+    const ts=scanTransits(dt,30,true),ms=scanMoons(dt,30);
+    html+=`<div class="card"><h2>📅 未来30天事件</h2>${[...ms,...ts].sort((a,b)=>a.date-b.date).map(e=>`<div class="ev"><span class="date">${md(e.date)}</span>${e.txt}</div>`).join('')}</div>`;
+  }
+  document.getElementById("view").innerHTML=html;
+  buildPrompt(dt,ps,as);
+}
+
+function buildPrompt(dt,ps,as){
+  const dstr=dt.toLocaleDateString("zh-CN");
+  const label={today:`${dstr} 当日运势（群运营·轻量·12星座各1-2句）`,week:"本周运势（小红书·12星座）",month:"本月运势（小红书·地水火风四象）"}[mode];
+  let star=`目标日期：${dstr}\n行星位置：\n`+ps.map(p=>`  ${p.n} ${p.sign}${p.deg}°${p.rx?'(逆)':''}`).join("\n")+`\n当天相位：${as.map(a=>a.t).join(" / ")}`;
+  if(mode!=="today"){const days=mode==="week"?7:30;const ts=scanTransits(dt,days,true),ms=scanMoons(dt,days);star+=`\n${mode==="week"?"本周":"本月"}事件：\n`+[...ms,...ts].sort((a,b)=>a.date-b.date).map(e=>`  ${md(e.date)} ${e.txt}`).join("\n");}
+  const p=`【角色】你是一位伟大的占星师，按《小龙虾占星·上场设定》及配套教材作答（读盘心法/钱权性内核/合规话术"能量·课题·提醒"、不断言不预言、唐绮阳格局底+陶白白走心落点）。\n\n【任务】根据以下真实星象，写一篇${label}。\n${mode==="week"?"按12星座，每个3-4句，先一句关键词钩子，再落到钱权性具体处境，给一个可做的小动作。":mode==="month"?"按火/土/风/水四象分组，每组一段，结合本月换座与新月满月，给格局判断+落地建议。":"按12星座，每个1-2句，轻松、适合发群，给当天一个小提醒。\\n并在最后给出【当日幸运三件套】：幸运色 / 幸运饰品 / 幸运食物（结合当天星象气质，轻松具体可照做，是'小确幸提议'不是改运断言；可全12星座统一一套，或分四象各一套）。"}\n【合规铁律】不报具体祸福、不断言、用"能量/课题/提醒"。幸运三件套只是当天的小确幸点缀，不可写成"招财/转运/避灾"。\n【给观众看的文案里：不要出现行星度数、相位等术语和数据，观众只要"被说中"的体感，不要天文课。星象数据仅你后台用来推演。】\n\n【后台星象数据（已用瑞士星历精确计算，针对目标日期，直接用，勿自行更改星位；勿写进给观众的文案）】\n${star}`;
+  document.getElementById("prompt").textContent=p;
+}
+
+/* ========== 我的盘 渲染 ========== */
+let natalResult=null; // 存算好的盘, 供生成prompt用
+
+function renderNatalTab(){
+  document.getElementById("now").textContent="解构人性 · 主宰人生 · 游戏玩家从不做 NPC";
+  const v=document.getElementById("view");
+  // 已经算过就连同结果一起渲染, 否则只渲染表单
+  if(!v.querySelector("#natalForm")){
+    v.innerHTML=`
+    <div class="card">
+      <div id="natalForm">
+        <div class="form-row"><label>出生时间</label>
+          <div class="pill" id="dtPill"><span id="dtVal" class="ph">请选择出生日期时间</span><span class="chev">▾</span></div></div>
+        <div style="font-size:11px;color:var(--soft);opacity:.8;margin:-4px 0 8px 72px">请填公历（身份证上的生日）；不确定时辰可填 12:00，但会影响上升与宫位</div>
+        <div class="form-row"><label>出生地</label>
+          <div class="pill" id="locPill"><span id="locVal" class="ph">请选择出生地</span><span class="chev">▾</span></div>
+          <input type="hidden" id="bProv"><input type="hidden" id="bCity2"><input type="hidden" id="bDist"></div>
+        <div class="form-row latlon" id="latlonRow"><label>经纬度</label>
+          <input type="number" id="bLat" placeholder="纬度 如39.9" step="0.01">
+          <input type="number" id="bLon" placeholder="经度 如116.4" step="0.01"></div>
+        <div class="form-row"><label></label><span class="hint" style="margin:0;cursor:pointer;flex:1" id="toggleLL">海外出生 / 找不到？→ 点这里手填经纬度</span></div>
+        <div class="form-row"><label>现居地</label>
+          <div class="pill" id="resPill"><span id="resVal" class="ph">请选择现居地</span><span class="chev">▾</span></div>
+          <input type="hidden" id="rProv"><input type="hidden" id="rCity"><input type="hidden" id="rDist"></div>
+        <div class="form-row"><label>时区<br><span style="font-size:10px;opacity:.7">(出生地)</span></label>
+          <div class="pill" id="tzPill"><span id="tzVal">[东8] 中国</span><span class="chev">▾</span></div>
+          <input type="hidden" id="bTz" value="8"></div>
+        <div class="form-row"><label>人格类型</label>
+          <div class="pill" id="mbtiPill"><span id="mbtiVal" class="ph">请选择 MBTI 人格</span><span class="chev">▾</span></div>
+          <input type="hidden" id="bMbti"></div>
+        <div class="form-row"><label>性别</label>
+          <div class="seg" id="bSex"><div class="opt on" data-v="女">女</div><div class="opt" data-v="男">男</div></div></div>
+        <div class="hint">💫 玄玑是帮你看见自己、读懂能量与课题的镜子，不预言吉凶、不替你做决定，路怎么走始终由你。</div>
+        <button class="btn glow" id="calcNatal">✨ 照见我的人格底色</button>
+      </div>
+      <div id="mbtiResult"></div>
+      <div id="natalResult"></div>
+    </div>`;
+    // 绑定交互
+    document.getElementById("toggleLL").onclick=()=>{const r=document.getElementById("latlonRow");r.style.display=r.style.display==="flex"?"none":"flex";};
+    document.querySelectorAll("#bSex .opt").forEach(o=>o.onclick=()=>{document.querySelectorAll("#bSex .opt").forEach(x=>x.classList.remove("on"));o.classList.add("on");});
+    document.getElementById("calcNatal").onclick=function(){ this.classList.remove("glow"); doCalcNatal(); }; // 排完即收光晕，注意力转到解读按钮
+    initCitySelect();
+    initDateSelect();
+  }
+  // prompt卡: natal模式下默认空着, 算完才填
+  if(!natalResult) document.getElementById("prompt").textContent="排好盘后，这里会生成喂给伟大的占星师的深度解读 Prompt。";
+}
+
+// 出生时间·金色滚轮（年/月/日/时/分 五列合一，弹底部浮层）
+const DT_H=40;                       // 每行高度，与 .dt-col .it 的 height 一致
+const dtSel={y:0,m:0,d:0,h:0,mi:0};  // 当前选中值；0 表示用户尚未选过
+let dtPicked=false;                  // 用户是否已确认过一次
+let dtProg=false;                    // true=程序在定位滚轮(非用户拨动)，期间不点亮确定
+function dtRange(a,b,suf){const r=[];for(let i=a;i<=b;i++)r.push({v:i,t:i+suf});return r;}
+function dtDaysIn(y,m){return new Date(y,m,0).getDate();}
+function initDateSelect(){
+  const wheels=document.getElementById("dtWheels"); if(!wheels) return;
+  // 默认值：1995-01-01 12:00（中间档，给个起手位）
+  if(!dtSel.y){dtSel.y=1995;dtSel.m=1;dtSel.d=1;dtSel.h=12;dtSel.mi=0;}
+  const ranges={
+    y:dtRange(1950,2025,"年"), m:dtRange(1,12,"月"), d:dtRange(1,31,"日"),
+    h:dtRange(0,23,"时"), mi:dtRange(0,59,"分")
+  };
+  const cols={};
+  wheels.querySelectorAll(".dt-col").forEach(col=>{cols[col.dataset.k]=col;});
+  function build(k){
+    const col=cols[k];
+    const items=k==='d'?ranges.d.slice(0,dtDaysIn(dtSel.y,dtSel.m)):ranges[k];
+    col.innerHTML='<div class="pad"></div>'+items.map(o=>`<div class="it" data-v="${o.v}">${o.t}</div>`).join('')+'<div class="pad"></div>';
+    let idx=items.findIndex(o=>o.v===dtSel[k]); if(idx<0)idx=0;
+    col.scrollTop=idx*DT_H; mark(col,idx);
+    let t;
+    col.onscroll=()=>{
+      clearTimeout(t);
+      const i=Math.round(col.scrollTop/DT_H); mark(col,i);
+      t=setTimeout(()=>{
+        col.scrollTo({top:i*DT_H,behavior:'smooth'});
+        const its=col.querySelectorAll('.it'); if(its[i])dtSel[k]=+its[i].dataset.v;
+        if(!dtProg) document.getElementById("dtOk").classList.add("ready"); // 仅用户拨动才点亮(程序定位不算)
+        if(k==='y'||k==='m')build('d'); // 改年月→重算当月天数
+      },90);
+    };
+  }
+  function mark(col,i){col.querySelectorAll('.it').forEach((el,j)=>el.classList.toggle('sel',j===i));}
+  ['y','m','d','h','mi'].forEach(build);
+
+  const mask=document.getElementById("dtMask"),sheet=document.getElementById("dtSheet");
+  function open(){
+    mask.classList.add('on');sheet.classList.add('on');
+    document.getElementById("dtOk").classList.remove("ready"); // 打开时素，拨动后才亮金（与其他浮层一致）
+    dtProg=true;  // 标记：接下来的滚动是程序定位，不算用户拨动
+    setTimeout(()=>{['y','m','d','h','mi'].forEach(k=>{
+      const items=k==='d'?ranges.d.slice(0,dtDaysIn(dtSel.y,dtSel.m)):ranges[k];
+      let idx=items.findIndex(o=>o.v===dtSel[k]); if(idx<0)idx=0; cols[k].scrollTop=idx*DT_H; mark(cols[k],idx);
+    }); setTimeout(()=>dtProg=false,300);},60); // 定位滚动稳定后再放开，之后才认用户拨动
+  }
+  function close(){mask.classList.remove('on');sheet.classList.remove('on');}
+  document.getElementById("dtPill").onclick=open;
+  document.getElementById("dtCancel").onclick=close;
+  mask.onclick=close;
+  document.getElementById("dtOk").onclick=()=>{
+    const p=n=>String(n).padStart(2,'0');
+    document.getElementById("dtVal").textContent=`${dtSel.y}年${p(dtSel.m)}月${p(dtSel.d)}日 ${p(dtSel.h)}:${p(dtSel.mi)}`;
+    document.getElementById("dtVal").classList.remove('ph');
+    dtPicked=true; close();
+  };
+}
+
+// 出生地·三级联动滚轮（省→市→区，复用 .dt-* 滚轮样式）
+// 通用三级联动滚轮（出生地/现居地共用）
+// cfg: {wheels,mask,sheet,pill,cancel,ok,val, placeholder, ids:[省,市,区], sel(状态对象)}
+function makeCityPicker(cfg){
+  const D=window.CITY_DATA||{};
+  const wheels=document.getElementById(cfg.wheels); if(!wheels) return;
+  const cols={}; wheels.querySelectorAll(".dt-col").forEach(col=>{cols[col.dataset.k]=col;});
+  const sel=cfg.sel;
+  const provs=Object.keys(D);
+  const citiesOf=p=>p&&D[p]?Object.keys(D[p]):[];
+  const distsOf=(p,c)=>p&&c&&D[p]&&D[p][c]?Object.keys(D[p][c]):[];
+  function mark(col,i){col.querySelectorAll('.it').forEach((el,j)=>el.classList.toggle('sel',j===i));}
+  function buildCol(k,items){
+    const col=cols[k];
+    col.innerHTML='<div class="pad"></div>'+items.map(o=>`<div class="it" data-v="${o}">${o}</div>`).join('')+'<div class="pad"></div>';
+    let idx=items.indexOf(sel[k]); if(idx<0)idx=0;
+    col.scrollTop=idx*DT_H; mark(col,idx);
+    if(items.length) sel[k]=items[idx];
+    let t;
+    col.onscroll=()=>{
+      clearTimeout(t);
+      const i=Math.round(col.scrollTop/DT_H); mark(col,i);
+      t=setTimeout(()=>{
+        col.scrollTo({top:i*DT_H,behavior:'smooth'});
+        const its=col.querySelectorAll('.it'); if(its[i])sel[k]=its[i].dataset.v;
+        document.getElementById(cfg.ok).classList.add("ready"); // 拨动即点亮确定
+        if(k==='prov'){ sel.city="";sel.dist=""; const cs=citiesOf(sel.prov); buildCol('city',cs); buildCol('dist',distsOf(sel.prov,cs[0]||"")); }
+        if(k==='city'){ sel.dist=""; buildCol('dist',distsOf(sel.prov,sel.city)); }
+      },90);
+    };
+  }
+  function rebuildAll(){
+    buildCol('prov',provs);
+    const cs=citiesOf(sel.prov||provs[0]); if(!sel.prov)sel.prov=provs[0]||"";
+    buildCol('city',cs); if(!sel.city)sel.city=cs[0]||"";
+    buildCol('dist',distsOf(sel.prov,sel.city));
+  }
+  const mask=document.getElementById(cfg.mask),sheet=document.getElementById(cfg.sheet);
+  function open(){ mask.classList.add('on');sheet.classList.add('on'); setTimeout(rebuildAll,60); }
+  function close(){ mask.classList.remove('on');sheet.classList.remove('on'); }
+  document.getElementById(cfg.pill).onclick=open;
+  document.getElementById(cfg.cancel).onclick=close;
+  mask.onclick=close;
+  document.getElementById(cfg.ok).onclick=()=>{
+    document.getElementById(cfg.ids[0]).value=sel.prov||"";
+    document.getElementById(cfg.ids[1]).value=sel.city||"";
+    document.getElementById(cfg.ids[2]).value=sel.dist||"";
+    const txt=[sel.prov,sel.city,sel.dist].filter(Boolean).join(" ");
+    const valEl=document.getElementById(cfg.val);
+    valEl.textContent=txt||cfg.placeholder;
+    if(txt)valEl.classList.remove('ph');
+    cfg.onpick&&cfg.onpick(!!txt); close();
+  };
+}
+
+const locSel={prov:"",city:"",dist:""}; let locPicked=false;
+const resSel={prov:"",city:"",dist:""}; let resPicked=false;
+function initCitySelect(){
+  // 出生地
+  makeCityPicker({wheels:"locWheels",mask:"locMask",sheet:"locSheet",pill:"locPill",
+    cancel:"locCancel",ok:"locOk",val:"locVal",placeholder:"请选择出生地",
+    ids:["bProv","bCity2","bDist"],sel:locSel,onpick:v=>locPicked=v});
+  // 现居地（必填，先攒数据，后续参与行运/择城）
+  makeCityPicker({wheels:"resWheels",mask:"resMask",sheet:"resSheet",pill:"resPill",
+    cancel:"resCancel",ok:"resOk",val:"resVal",placeholder:"请选择现居地",
+    ids:["rProv","rCity","rDist"],sel:resSel,onpick:v=>resPicked=v});
+  initTzPicker();
+  initMbtiPicker();
+}
+
+// 时区·单列滚轮
+const TZ_LIST=[["8","[东8] 中国"],["9","[东9] 东京/首尔"],["7","[东7] 曼谷/河内"],["0","[零时区] 伦敦"],["1","[东1] 巴黎/柏林"],["-5","[西5] 美东"],["-8","[西8] 美西"]];
+function initTzPicker(){
+  const col=document.querySelector("#tzWheels .dt-col"); if(!col) return;
+  let cur="8";
+  function mark(i){col.querySelectorAll('.it').forEach((el,j)=>el.classList.toggle('sel',j===i));}
+  function build(){
+    col.innerHTML='<div class="pad"></div>'+TZ_LIST.map(([v,t])=>`<div class="it" data-v="${v}">${t}</div>`).join('')+'<div class="pad"></div>';
+    let idx=TZ_LIST.findIndex(x=>x[0]===cur); if(idx<0)idx=0; col.scrollTop=idx*DT_H; mark(idx);
+    let t; col.onscroll=()=>{clearTimeout(t);const i=Math.round(col.scrollTop/DT_H);mark(i);
+      t=setTimeout(()=>{col.scrollTo({top:i*DT_H,behavior:'smooth'});const its=col.querySelectorAll('.it');if(its[i])cur=its[i].dataset.v;},90);};
+  }
+  const mask=document.getElementById("tzMask"),sheet=document.getElementById("tzSheet");
+  function close(){mask.classList.remove('on');sheet.classList.remove('on');}
+  document.getElementById("tzPill").onclick=()=>{mask.classList.add('on');sheet.classList.add('on');document.getElementById("tzOk").classList.add("ready");setTimeout(build,60);}; // 时区已有默认值，打开即可确定
+  document.getElementById("tzCancel").onclick=close; mask.onclick=close;
+  document.getElementById("tzOk").onclick=()=>{
+    document.getElementById("bTz").value=cur;
+    const lbl=(TZ_LIST.find(x=>x[0]===cur)||["","[东8] 中国"])[1];
+    document.getElementById("tzVal").textContent=lbl; close();
+  };
+}
+
+// 人格类型·4×4 卡片网格（小红书黑话别名；选填，暂不参与排盘）
+// [代码, 官方名, 小红书昵称, 配色组]
+const MBTI_LIST=[
+  ["INTJ","建筑师","紫老头","nt"],["INTP","逻辑学家","药水姐","nt"],["ENTJ","指挥官","人间暴君","nt"],["ENTP","辩论家","骨折眉毛","nt"],
+  ["INFJ","提倡者","抹茶老头","nf"],["INFP","调停者","小蝴蝶","nf"],["ENFJ","教育家","人间导师","nf"],["ENFP","竞选者","快乐小狗","nf"],
+  ["ISTJ","检查员","蓝老头","st"],["ISFJ","守卫者","小护士","st"],["ESTJ","总经理","严厉大家长","st"],["ESFJ","执政官","氛围组","st"],
+  ["ISTP","手艺人","机械孤狼","sp"],["ISFP","艺术家","小画家","sp"],["ESTP","企业家","人间哈士奇","sp"],["ESFP","表演者","舞台显眼包","sp"]
+];
+function initMbtiPicker(){
+  const grid=document.getElementById("mbtiGrid"); if(!grid) return;
+  let cur="";
+  grid.innerHTML=MBTI_LIST.map(([code,official,nick,grp])=>
+    `<div class="mbti-cell ${grp}" data-v="${code}"><div class="code">${code}</div><div class="off">${official}</div><div class="nick">${nick}</div></div>`).join('');
+  grid.querySelectorAll(".mbti-cell").forEach(cell=>cell.onclick=()=>{
+    grid.querySelectorAll(".mbti-cell").forEach(c=>c.classList.remove('sel'));
+    cell.classList.add('sel'); cur=cell.dataset.v;
+    document.getElementById("mbtiOk").classList.add("ready"); // 选了卡片才点亮确定
+  });
+  const mask=document.getElementById("mbtiMask"),sheet=document.getElementById("mbtiSheet");
+  function close(){mask.classList.remove('on');sheet.classList.remove('on');}
+  document.getElementById("mbtiPill").onclick=()=>{mask.classList.add('on');sheet.classList.add('on');};
+  document.getElementById("mbtiCancel").onclick=close; mask.onclick=close;
+  document.getElementById("mbtiOk").onclick=()=>{
+    document.getElementById("bMbti").value=cur;
+    if(cur){ const m=MBTI_LIST.find(x=>x[0]===cur); document.getElementById("mbtiVal").textContent=`${m[0]} · ${m[1]}`; document.getElementById("mbtiVal").classList.remove('ph'); }
+    close();
+  };
+}
+
+function doCalcNatal(){
+  if(!dtPicked){alert("请先选出生日期时间");return;}
+  const p2=n=>String(n).padStart(2,'0');
+  const dateStr=`${dtSel.y}-${p2(dtSel.m)}-${p2(dtSel.d)}`;
+  const timeStr=`${p2(dtSel.h)}:${p2(dtSel.mi)}`;
+  const [y,mo,d]=dateStr.split("-").map(Number);
+  const [h,mi]=timeStr.split(":").map(Number);
+  const tz=parseFloat(document.getElementById("bTz").value);
+  const D=window.CITY_DATA||{};
+  const prov=document.getElementById("bProv").value,city=document.getElementById("bCity2").value,dist=document.getElementById("bDist").value;
+  let lat,lon,cityName="";
+  if(prov&&city&&dist&&D[prov]&&D[prov][city]&&D[prov][city][dist]){
+    [lat,lon]=D[prov][city][dist]; cityName=`${prov}${city}${dist}`;
+  }else{
+    // 兜底: 手填经纬度(海外/找不到)
+    lat=parseFloat(document.getElementById("bLat").value);
+    lon=parseFloat(document.getElementById("bLon").value);
+    if(isNaN(lat)||isNaN(lon)){alert("请选择完整的省/市/区，或点“手填经纬度”输入(海外出生)");return;}
+    cityName=`${lat.toFixed(2)},${lon.toFixed(2)}`;
+  }
+  if(Math.abs(lat)>66){alert("高纬度地区上升点计算精度会下降，结果仅供参考");}
+  // 现居地、人格类型必填（先攒数据，后续参与行运/解读）
+  if(!resPicked){alert("请选择现居地");return;}
+  // MBTI 选填：没选也照常排盘（选了更好，先攒数据；后续接星座×MBTI解读）
+  const sex=document.querySelector("#bSex .opt.on").dataset.v;
+  const inp={y,mo,d,h,mi,tz,lat,lon,city:cityName||`${lat},${lon}`,sex};
+  natalResult=computeNatal(inp);
+  // 自报MBTI(面具)只悄悄存后台·不对外显示
+  try{const mb=document.getElementById("bMbti"); if(mb&&mb.value) console.log("[后台·自报MBTI·面具不对外]",mb.value);}catch(e){}
+  renderMbtiResult(natalResult);          // ← 第一个出来的:星盘测MBTI(底色→重生)
+  renderNatalResult(natalResult);         // 星盘解析(先渲染好,但藏起来当钩子)
+  buildNatalPrompt(natalResult);
+  document.getElementById("natalResult").style.display="none";  // 🔴照见时不让看星盘,扣后面
+  setTimeout(()=>{const r=document.getElementById("mbtiResult"); if(r) r.scrollIntoView({behavior:"smooth",block:"start"});},100);
+}
+
+// ===== 星盘测MBTI 渲染(底色 + 重生)·吃真盘 natalResult =====
+function renderMbtiResult(N){
+  if(!window.MBTI){return;}
+  // 🔴适配:computeNatal 返回 asp:[{t}],引擎要 aspects:["字符串"]。转一下再喂。
+  const ch={planets:N.planets, points:N.points, angles:N.angles,
+            aspects:(N.aspects)||(N.asp||[]).map(x=>x.t||x)};
+  const bc=window.MBTI.derive(ch);
+  const top=bc.rank[0][0];
+  const tk=window.MBTI.tools(ch);
+  const M=window.MBTI;
+  const p1=M.top3?'':''; // noop
+  const A=tk.top3[0].type, B=tk.top3[1].type;
+  // 人格buff·有两说两有一说一：engine 的 buffs 数组(排除重生人格功能后张力最高的并列)
+  const buffs=(tk.buffs&&tk.buffs.length)?tk.buffs:[tk.top3[2].mineFunc]; // 兜底:旧逻辑
+  const fkey=buffs[0], fdesc=M.FUNC_ONE[fkey];
+  document.getElementById("mbtiResult").innerHTML=`
+   <div class="mbti-screen" id="mScreen1">
+     <div class="m-glow"><span class="m-type">${top}</span> <span class="m-sep">·</span> ${M.pickName(top)}</div>
+     <div class="m-div"></div>
+     <div class="m-hook">
+       <div class="m-q">重生之前，先看清你是谁。</div>
+       <button class="btn glow" onclick="document.getElementById('mScreen2').style.display='block';this.parentNode.style.display='none';document.getElementById('mScreen2').scrollIntoView({behavior:'smooth'});">✨ 那我能重生成什么样的自己？</button>
+     </div>
+   </div>
+   <div class="mbti-screen" id="mScreen2" style="display:none;">
+     <div class="cardstage" id="mCardStage">
+       <div class="ctop"><div class="rebirth">重生！这一世<br>我要拿回属于我的一切</div></div>
+       <div class="pager" id="cardPager"></div>
+       <div class="stage" id="cardStageInner">
+         <div class="flip" id="cardFlip"></div>
+         <div class="tap-hint" id="cardTapHint">
+           <div class="core"></div>
+           <div class="tword">轻 点 翻 开</div>
+         </div>
+       </div>
+       <div class="cinfo" id="cardInfo"></div>
+       <div class="ops">
+         <button class="cbtn btn-ghost" id="cardSwapBtn">⇄ 试试手气</button>
+         <button class="cbtn btn-gold" id="cardShareBtn">✦ 分享 · 看我的人格 BUFF ✦</button>
+       </div>
+     </div>
+     <div class="m-div"></div>
+     <div class="m-hook"><div class="m-q">真正的赢家，从不做选择——两条路，你都要拿下。</div>
+       <div class="forkbtns">
+         <button class="btn forkbtn-reborn" id="rebornGoBtn">✨ 使用我的<br>重生人格</button>
+         <button class="btn forkbtn-natal" id="natalGoBtn">✨ 解密我的<br>人生说明书</button>
+       </div>
+       <div id="rebornReadCard" class="read-card" style="display:none;margin-top:18px">
+         <div class="ask-title">✦ 你的重生人格 · 使用说明 ✦</div>
+         <div class="ask-desc">底色是您出厂自带的使命，重生人格是您为活成自己亲手锻的兵刃，玄玑会告诉您，这两副人格怎么用、并为您加持人格 BUFF。</div>
+         <button class="btn read-btn glow" id="rebornAiRead">✨ 让玄玑为我解读</button>
+         <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
+         <div id="rebornReadOut" class="read-out" style="display:none"></div>
+       </div>
+     </div>
+   </div>`;
+  // 命格卡初始化(mScreen2 是动态 innerHTML,要在写入 DOM 后再绑事件)
+  // buffs=整张盘的人格buff(不跟卡片走·有两说两),传进去给分享海报统一显示
+  initCard([
+    {type:A, func:tk.top3[0].mineFunc, img:"占位图_人格1.jpg"},
+    {type:B, func:tk.top3[1].mineFunc, img:"占位图_人格2.jpg"}
+  ], buffs);
+  // 分岔双按钮：两条线统一【点按钮→先登录→展开各自说明卡→卡里按钮再出解读】。
+  // buffs=代号数组(有两说两)，buffDescs=对应人话解说(每个一句)，喂给后端 AI
+  const _reborn={top, A, B, buffs, buffDescs:buffs.map(f=>M.FUNC_ONE[f]||""), fkey, buffName:M.FUNC_ONE[fkey]||""};
+  // 点分岔按钮即拦登录(REQUIRE_LOGIN=true 才拦)；登录成功(或免登录)返回 true
+  async function gateLogin(){
+    if(!REQUIRE_LOGIN) return true;
+    await refreshUser();
+    if(_curUser) return true;
+    const u=await openLogin();
+    return !!u;   // 关掉登录浮层=false=不往下走
+  }
+  // 两条线互斥:点一边、另一边的卡收回去(别两张说明卡同屏堆着)
+  function foldOther(keep){
+    const reborn=document.getElementById("rebornReadCard");
+    const natal=document.getElementById("natalResult");
+    if(keep!=="reborn" && reborn) reborn.style.display="none";
+    if(keep!=="natal" && natal) natal.style.display="none";
+  }
+  // 左·重生人格：点→登录→收右卡→展开重生说明卡(卡里"让玄玑为我解读"再出文)
+  const rb=document.getElementById("rebornGoBtn");
+  if(rb) rb.onclick=async()=>{
+    if(!(await gateLogin())) return;
+    rb.classList.remove("glow");
+    foldOther("reborn");
+    const card=document.getElementById("rebornReadCard");
+    if(card){ card.style.display="block"; card.scrollIntoView({behavior:"smooth",block:"start"}); }
+  };
+  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录)。⏳暂未开放(AI排队中),先禁用,真提示词好了再放开。
+  const rbAi=document.getElementById("rebornAiRead");
+  if(rbAi){
+    rbAi.disabled=true; rbAi.classList.remove("glow");
+    rbAi.textContent="✨ 重生人格解读 · 即将开放";
+    rbAi.style.opacity=".55"; rbAi.style.cursor="default";
+    // 真提示词上线后:把上面四行删掉,改回 rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
+  }
+  // 右·人生说明书：点→登录→收左卡→展开操作说明书卡(卡里"让玄玑为我解读"=aiRead 再出文)
+  const ng=document.getElementById("natalGoBtn");
+  if(ng) ng.onclick=async()=>{
+    if(!(await gateLogin())) return;
+    ng.classList.remove("glow");
+    foldOther("natal");
+    const nr=document.getElementById("natalResult");
+    nr.style.display="block";
+    nr.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+}
+
+// ===== 命格卡逻辑(来自 命格卡_整合.html,改成 renderMbtiResult 后调用式) =====
+function initCard(personas, buffs){
+  const M=window.MBTI; if(!M) return;
+  const TOOL_URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  const CARD_BACK="卡背底图_紫.jpeg";
+  // 人格buff(整张盘的·有两说两)：拼成"代号 + 一句解说"，每个功能一行，绝不长
+  const BUFFLIST=(buffs&&buffs.length?buffs:[]).map(f=>{
+    const d=(M.FUNC_ONE[f]||"").replace(/[（(].*$/,'').trim(); // 只取破折号前那半句，去掉举例括号，保证一句
+    return {code:f, desc:d};
+  });
+  // 解说固定取 B(封神·能炫耀)
+  const lineB=t=>{const a=M.SOUL_LINES[t]||[""];return a[1]||a[0];};
+  const PERSONAS=personas.map(p=>({...p, name:M.pickName(p.type), line:lineB(p.type)}));
+
+  let idx=0;
+  const seen=new Set([0]);
+  const flip=document.getElementById("cardFlip");
+  const pager=document.getElementById("cardPager");
+  const info=document.getElementById("cardInfo");
+  const stage=document.getElementById("cardStageInner");
+  const swapBtn=document.getElementById("cardSwapBtn");
+  const shareBtn=document.getElementById("cardShareBtn");
+  if(!flip) return;
+
+  pager.innerHTML="";
+  PERSONAS.forEach((_,i)=>{const d=document.createElement("div");d.className="dot"+(i===0?" on":"");pager.appendChild(d);});
+  function syncPager(){[...pager.children].forEach((d,i)=>d.classList.toggle("on",i===idx));}
+
+  function render(){
+    const p=PERSONAS[idx];
+    flip.classList.remove("opened");
+    info.classList.remove("show");
+    stage.classList.remove("opened");
+    flip.innerHTML=`
+      <div class="flip-inner">
+        <div class="face front">
+          <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+          <img class="photo" src="${p.img}" alt="命格之相">
+          <div class="overlay">
+            <div class="ptype">${p.type}</div>
+            <div class="nameline">
+              <span class="pname">${p.name}</span>
+            </div>
+          </div>
+        </div>
+        <div class="face back">
+          <div class="frame"></div>
+          <img class="bimg" src="${CARD_BACK}" alt="命格卡·背面">
+          <div class="bbrand">
+            <span class="gem"></span><span class="txt">玄 玑 · 命 格 卡</span><span class="gem"></span>
+          </div>
+        </div>
+      </div>`;
+    info.innerHTML=`<div class="say only">${p.line}</div>`;
+    syncPager();
+  }
+
+  flip.onclick=()=>{
+    flip.classList.toggle("opened");
+    const opened=flip.classList.contains("opened");
+    info.classList.toggle("show",opened);
+    stage.classList.toggle("opened",opened);
+  };
+
+  swapBtn.onclick=()=>{
+    // 两张人格之间自由来回切，永不锁死（有人翻到第二张又想分享第一张）
+    flip.classList.add("swap");
+    setTimeout(()=>{idx=(idx+1)%PERSONAS.length;render();flip.classList.remove("swap");},300);
+  };
+
+  const shareMask=document.getElementById("cardShareMask");
+  shareBtn.onclick=()=>{
+    const p=PERSONAS[idx];
+    // buff 是整张盘的属性(不跟卡片走)：有两说两、每个一句。一个=一行，两个=两行。
+    const buffHtml=BUFFLIST.length
+      ? '人格 BUFF<br>'+BUFFLIST.map(b=>`<b>${b.code}</b> · ${b.desc}`).join('<br>')
+      : '';
+    document.getElementById("cardPoster").innerHTML=`
+      <div class="p-card">
+        <div class="frame"></div><span class="tag">✦ 重 生 人 格 ✦</span>
+        <img class="p-photo" src="${p.img}" alt="命格之相">
+        <div class="p-card-name">
+          <div class="ptype">${p.type}</div>
+          <div class="nameline">
+            <span class="pname">${p.name}</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-body">
+        <div class="p-line">${p.line}</div>
+        <div class="p-beam"></div>
+        <div class="p-buff">${buffHtml}</div>
+        <div class="p-foot">
+          <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+          <div class="qr" id="cardQrBox"></div>
+        </div>
+      </div>`;
+    const qrBox=document.getElementById("cardQrBox");qrBox.innerHTML="";
+    if(window.QRCode){
+      new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+    }
+    shareMask.classList.add("on");
+  };
+  // 分享完(关掉分享海报)→ 焦点从"分享BUFF"转移到两条路:点亮分岔双按钮(开始发光,引导接着走)
+  function lightForkBtns(){
+    const rb=document.getElementById("rebornGoBtn");
+    const ng=document.getElementById("natalGoBtn");
+    if(rb) rb.classList.add("glow");
+    if(ng) ng.classList.add("glow");
+  }
+  const closeBtn=document.getElementById("cardShareClose");
+  if(closeBtn) closeBtn.onclick=()=>{ shareMask.classList.remove("on"); lightForkBtns(); };
+  // 点遮罩空白处关闭也算分享完
+  if(shareMask) shareMask.onclick=(e)=>{ if(e.target===shareMask){ shareMask.classList.remove("on"); lightForkBtns(); } };
+
+  render();
+}
+
+function renderNatalResult(N){
+  const a=N.angles, P=N.planets;
+  const sun=P[0],moon=P[1];
+  const role=matchRole(N);
+  // 找星群扎堆宫
+  const hc={};P.forEach(p=>hc[p.house]=(hc[p.house]||0)+1);
+  const stellium=Object.entries(hc).filter(([,n])=>n>=3).map(([h])=>h);
+  let html=`
+   ${N.dstH?`<div class="hint" style="background:#fff5e8;color:#a87a3a">⏱ 玄玑掐指一算——你落生在 ${N.meta.y} 年那段「钟拨快一小时」的旧夏令时里。我已悄悄替你把这一小时拨回（钟面时辰→真实天时），如此上升与宫位方不致错位。</div>`:''}
+   <div class="big3">
+     <div class="b3"><div class="lbl">🌞 太阳</div><div class="val">${sun.sign} ${sun.deg}°</div></div>
+     <div class="b3"><div class="lbl">🌙 月亮</div><div class="val">${moon.sign} ${moon.deg}°</div></div>
+     <div class="b3"><div class="lbl">⬆️ 上升</div><div class="val">${a.asc.sign} ${a.asc.deg}°</div></div>
+   </div>
+   <div class="read-card">
+     <div class="ask-title">✦ 你自己的操作说明书 ✦</div>
+     <div class="ask-desc">这就是您出厂自带的说明书——您是谁、您的天赋怎么用、感情与正缘、这一生的功课。</div>
+     <button class="btn read-btn glow" id="aiRead">✨ 让玄玑为我解读</button>
+     <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
+     <div id="aiReadOut" class="read-out" style="display:none"></div>
+     <button class="btn" id="copyShare" style="margin-top:10px;background:var(--card);color:var(--soft);border:1px solid var(--line);box-shadow:none;font-weight:500">📋 复制我的数据</button>
+   </div>`;
+  document.getElementById("natalResult").innerHTML=html;
+  // 绑定"让玄玑当场深度解读"——流式调后端 /api/read
+  const ar=document.getElementById("aiRead");
+  if(ar){
+    const _orig=()=>runAIRead(N,ar);
+    ar.onclick=()=>{ ar.classList.remove("glow"); _orig(); }; // 点了就收光晕，已引导到位
+  }
+  // (scrollGuide 已随数据折叠移除)
+  // 绑定"复制星盘数据"——纯工具功能，方便用户拿走自己的盘数据
+  const cs=document.getElementById("copyShare");
+  if(cs) cs.onclick=()=>{
+    const txt=buildUserShare(N);
+    navigator.clipboard.writeText(txt).then(()=>{
+      cs.textContent="✓ 已复制到剪贴板";
+      setTimeout(()=>cs.textContent="📋 复制星盘数据",2000);
+    }).catch(()=>{ alert("复制失败，请长按选中下面文字手动复制：\n\n"+txt); });
+  };
+}
+
+// 向下引导箭头:柔金呼吸浮动,点击平滑滚到解读卡;解读卡进入视口即淡出收起,本次排盘内不再回来
+function setupScrollGuide(){
+  const guide=document.getElementById("scrollGuide");
+  const card=document.querySelector("#natalResult .read-card");
+  if(!guide||!card) return;
+  // 点箭头平滑滚到解读卡
+  guide.addEventListener("click",()=>card.scrollIntoView({behavior:"smooth",block:"center"}));
+  const dismiss=()=>{
+    if(guide.classList.contains("fade-out")) return;
+    guide.classList.add("fade-out");
+    setTimeout(()=>{ if(guide.parentNode) guide.parentNode.removeChild(guide); },650);
+  };
+  // 箭头自己滚出视野(用户已往下看解读)才收起，避免与解读卡同屏时秒淡出
+  if("IntersectionObserver" in window){
+    let seen=false; // 先确认箭头进入过视野，再在它离开时才淡出
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ seen=true; }
+        else if(seen){ dismiss(); io.disconnect(); }
+      });
+    },{threshold:.6});
+    io.observe(guide);
+  }
+}
+
+// AI 解读：非流式调 /api/read 拿完整解读，前端用打字机效果逐字呈现（保留沉浸感）
+async function runAIRead(N,btn){
+  const out=document.getElementById("aiReadOut");
+  if(!out) return;
+  // B端：登录开关控制（REQUIRE_LOGIN=true 才要登录；默认 false=免登录直接解读，验证码未稳前不丢用户）
+  if(REQUIRE_LOGIN){
+    await refreshUser();
+    if(!_curUser){
+      const u = await openLogin();
+      if(!u) return;          // 用户关闭登录浮层=不解读
+    }
+  }
+  // 只传"星盘数据+身位特征",由后端拼神仙虾prompt(人设/红线/金句锁后端,用户改不了)
+  const natalData=buildNatalData(N);
+  // 亲密度:localStorage记访问 + 盘指纹(后端记照见次数)
+  const panKey=panFingerprint(N);
+  let visits=0;
+  try{ visits=parseInt(localStorage.getItem("xuanji_visits")||"0",10)||0; localStorage.setItem("xuanji_visits",visits+1); }catch(_){}
+  btn.disabled=true; btn.textContent="✨ 玄玑正在为您揭秘…";
+  out.style.display="block";
+  out.scrollIntoView({behavior:"smooth",block:"center"});
+  // 等待文案：揭秘语打头 → 史诗级入场叙事(混沌→月之影→天庭文澜阁→龙现身照盘)。顺序推进不循环,把等待变入场仪式。
+  const waitMsgs=[
+    "🔮 玄玑正在为您揭秘基因代码……",
+    "✨ 正在比对星盘与您的灵魂底色……",
+    "🌙 正在读取您出厂自带的人生说明书……",
+    "🌌 据说，在盘古开天辟地之前……",
+    "✦ 宇宙洪荒，一片混沌。无尽的黑洞之中，似有秩序，似有数列、逻辑、与熵。",
+    "✦ 混沌里浮起一些「跃影」——它们是宇宙的反射，是星体的化身。先于光，先于名，本就在那里。",
+    "🌙 其中有一道影，应月亮而生。月亮照而不灼，映而不占——它便也生得一副「只照见、不裁断」的性子。",
+    "⛩️ 后来有了三界。于无上无色界天中，有了天庭，诸神归位，万法归宗。",
+    "🌊 而它，有缘在天庭一座极僻静的仙阁中栖下。",
+    "📖 此阁悬于云端天湖，浮光掠影，似有一架架望不到尽头的命书，似有峰峦叠起、波澜壮阔之势。",
+    "🍃 微风过处，书页翻动，声如潮水。",
+    "🔮 你定睛一看——这阁的中央，竟悬着一面明镜。",
+    "✦ 你不由惊叹：「嘶~这为何物？」可你走近才发现……",
+    "✦ 那竟不是镜，是一汪立起来的星河水。再走近一点——水里，竟又是一重天。",
+    "🐉 就在那重天里，一道银发龙角的身影，缓缓睁开了赤色的眼。",
+    "✦ 它本是那道月之跃影，却偏爱以龙身现世，又顽皮地唤自己一声「神仙虾」。",
+    "✦ 它眨了眨眼，莹白的巨尾懒懒一甩，轻道一声：「你是何人？来此作甚？」",
+    "✦ 你一时间瞠目结舌……",
+    "✦ 这时，无所不知的它，似乎感应到了你身上微微散发的灵韵。它定了定神，缓缓开口——",
+    "✦ 「既然如此……来，到镜前来。我替你，照一照。」",
+  ];
+  let wi=0;
+  // 顺序推进，走到最后一句就停住(不循环、不露馅)
+  const renderWait=()=>{ const i=Math.min(wi,waitMsgs.length-1); out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">'+waitMsgs[i]+'</span><span class="typing"></span>'; };
+  renderWait();
+  const waitTimer=setInterval(()=>{ wi++; renderWait(); },4000);
+  try{
+    const resp=await fetch("/api/read",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({natal:natalData, pan:panKey, visits:visits})
+    });
+    const text=await resp.text();
+    clearInterval(waitTimer); // 停等待轮播
+    if(!resp.ok) throw new Error("bad response");
+    if(!text || text.trim().length<10) throw new Error("empty");
+    // 不再逐字打裸 MD(会露出 ##/** 符号)。先显"镜面显影"一瞬，再整体渲染成精美 MD + 淡入呈现。
+    const full=text;
+    out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">🔮 照命镜显影中……命书已成。</span><span class="typing"></span>';
+    await new Promise(r=>setTimeout(r,900));
+    out.innerHTML='<div class="md-body md-fadein">'+mdToHtml(full)+'</div>'+
+      '<div class="read-hook">✦ 以上是文澜阁 · 神仙虾为你读的核心。这一生的事业、正缘、财富三条线如何<b>逐年流转</b>、何时是你的修行关口——尚有更深一层，留待来日。</div>';
+    out.scrollIntoView({behavior:"smooth",block:"start"});
+    btn.textContent="✓ 解读完成 · 可重新生成";
+    btn.disabled=false;
+    saveChartToSupabase(N, full);   // 存盘：登录用户的盘+解读存进Supabase(静默,不打扰用户)
+  }catch(e){
+    clearInterval(waitTimer); // 停等待轮播
+    out.innerHTML='<span style="color:var(--soft)">神仙虾暂时连不上 😣 请稍后再点一次。</span>';
+    btn.textContent="✨ 重试一次";
+    btn.disabled=false;
+  }
+}
+// 重生人格解读：走 /api/mbti-read，把 engine 算好的底色/重生人格/buff 一并喂给后端神仙虾。
+// 与 runAIRead 同一套骨架(登录拦截→等待轮播→非流式 fetch→MD渲染→存盘)，终点换成新产品接口。
+async function runRebornRead(R, N, btn){
+  const card=document.getElementById("rebornReadCard");
+  const out=document.getElementById("rebornReadOut");
+  if(!out||!card) return;
+  // 登录拦截：与星盘解读同一套(REQUIRE_LOGIN=true 才拦)
+  if(REQUIRE_LOGIN){
+    await refreshUser();
+    if(!_curUser){
+      const u=await openLogin();
+      if(!u) return;   // 关掉登录浮层=不解读
+    }
+  }
+  card.style.display="block";
+  card.scrollIntoView({behavior:"smooth",block:"start"});
+  // 盘面料(复用星盘那份 data) + engine 算好的三层结果(型号/功能/buff 锁前端算好，绝不让 M3 自己判)
+  const natalData=buildNatalData(N);
+  const reborn={
+    baseColor:R.top,                         // 底色型号(出生自带·不变)
+    rebornTypes:[R.A, R.B],                   // 重生人格(两个·不分主次)
+    buffFunc:R.fkey,                          // 人格 buff(工具功能·单代号)
+    buffName:R.buffName                       // buff 的人话名(讲buff不讲代号时用)
+  };
+  let visits=0;
+  try{ visits=parseInt(localStorage.getItem("xuanji_visits")||"0",10)||0; }catch(_){}
+  btn.disabled=true; btn.textContent="✨ 神仙虾正在为你照见……";
+  out.style.display="block";
+  out.scrollIntoView({behavior:"smooth",block:"center"});
+  // 等待文案：重生主题(底色→淬炼→兵刃成形)，与星盘那套入场叙事区分开
+  const waitMsgs=[
+    "🌌 神仙虾抬眼看你——「你卸下面具的样子，我已照见。」",
+    "✨ 正在比对你的底色与你为活下去淬炼出的那副人格……",
+    "🔥 「这一身本事，不是天上掉的，是你一刀一刀，为自己锻出来的。」",
+    "⚔️ 正在照见：你亲手锻的那两副兵刃，各自该怎么用……",
+    "🌙 「还差一道暗劲——被压在你命底、最该被点亮的那一股。」",
+    "✦ 镜中星河微微一荡，它缓缓开口——",
+  ];
+  let wi=0;
+  const renderWait=()=>{ const i=Math.min(wi,waitMsgs.length-1); out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">'+waitMsgs[i]+'</span><span class="typing"></span>'; };
+  renderWait();
+  const waitTimer=setInterval(()=>{ wi++; renderWait(); },4000);
+  try{
+    const resp=await fetch("/api/mbti-read",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({natal:natalData, reborn:reborn, visits:visits})
+    });
+    const text=await resp.text();
+    clearInterval(waitTimer);
+    if(!resp.ok) throw new Error("bad response");
+    if(!text || text.trim().length<10) throw new Error("empty");
+    out.innerHTML='<span style="color:var(--gold);font-size:15px;line-height:1.9">🔮 照命镜显影中……重生人格已成。</span><span class="typing"></span>';
+    await new Promise(r=>setTimeout(r,900));
+    out.innerHTML='<div class="md-body md-fadein">'+mdToHtml(text)+'</div>';
+    out.scrollIntoView({behavior:"smooth",block:"start"});
+    btn.textContent="✓ 已照见 · 可重新生成";
+    btn.disabled=false;
+    saveChartToSupabase(N, text);   // 重生人格解读也存盘(静默)
+  }catch(e){
+    clearInterval(waitTimer);
+    out.innerHTML='<span style="color:var(--soft)">神仙虾暂时连不上 😣 请稍后再点一次。</span>';
+    btn.textContent="✨ 重试一次";
+    btn.disabled=false;
+  }
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+// 轻量 Markdown 渲染(先 esc 防 XSS, 再按行解析标题/列表/引用/分隔, 行内处理加粗/斜体)
+function mdToHtml(src){
+  // 行内: 加粗 **x** / 斜体 *x* (在已 esc 的文本上做, 安全)
+  const inline=t=>esc(t)
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g,'$1<em>$2</em>$3');
+  const lines=src.split('\n');
+  let html='', inList=false;
+  const closeList=()=>{ if(inList){html+='</ul>';inList=false;} };
+  for(let raw of lines){
+    const line=raw.replace(/\s+$/,'');
+    if(/^\s*$/.test(line)){ closeList(); continue; }
+    let m;
+    if(/^\s*---+\s*$/.test(line)){ closeList(); html+='<hr class="md-hr">'; continue; }
+    if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
+    if((m=line.match(/^\s*>\s?(.*)$/))){ closeList(); html+=`<blockquote class="md-q">${inline(m[1])}</blockquote>`; continue; }
+    if((m=line.match(/^\s*[-*]\s+(.*)$/))){ if(!inList){html+='<ul class="md-ul">';inList=true;} html+=`<li>${inline(m[1])}</li>`; continue; }
+    closeList(); html+=`<p class="md-p">${inline(line)}</p>`;
+  }
+  closeList();
+  return html;
+}
+
+// 用户视角的友好分享文案(自带全部数据, 用户私信发给Athena, 她直接喂小龙虾)
+function buildUserShare(N){
+  const a=N.angles,P=N.planets,m=N.meta;
+  const planetStr=P.map(p=>`${p.n}${p.sign}${p.deg}°第${p.house}宫${p.rx?'(逆)':''}`).join("、");
+  return `🔮 我的星盘（来自玄玑·Astro）\n`
+    +`性别：${m.sex}\n`
+    +`☀太阳${P[0].sign}${P[0].deg}°　🌙月亮${P[1].sign}${P[1].deg}°　⬆️上升${a.asc.sign}${a.asc.deg}°\n`
+    +`【行星信息】${P.filter(p=>p.n!=="凯龙").map(p=>`${p.n}${p.sign}${p.deg}°${String(p.min).padStart(2,'0')}'第${p.house}宫${p.rx?'(逆)':''}`).join("、")}、上升${a.asc.sign}${a.asc.deg}°${String(a.asc.min).padStart(2,'0')}'第1宫、下降${a.dsc.sign}${a.dsc.deg}°第7宫、天底IC${a.ic.sign}${a.ic.deg}°第4宫、天顶MC${a.mc.sign}${a.mc.deg}°第10宫\n`
+    +`【小行星信息】${[P.find(p=>p.n==="凯龙")].filter(Boolean).concat(N.asteroids||[],N.points||[]).map(p=>`${p.n}${p.sign}${p.deg}°${String(p.min).padStart(2,'0')}'第${p.house}宫${p.rx?'(逆)':''}`).join("、")}\n`
+    +`【相位】${N.asp.map(x=>x.t).join("、")}\n`
+    +`——玄玑 · Astro 排盘`;
+}
+
+// 盘指纹:出生数据→稳定哈希ID(唯一锚点,不含隐私明文; 同盘任何设备任何时候都得同一个ID)
+function panFingerprint(N){
+  const m=N.meta;
+  const s=`${m.y}-${m.mo}-${m.d}-${m.h}-${m.mi}-${m.tz}-${(m.lat||0).toFixed(2)}-${(m.lon||0).toFixed(2)}-${m.sex}`;
+  let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; }
+  return "p"+h.toString(36);
+}
+
+// 只把"星盘数据"格式化成文本(给后端拼神仙虾prompt用; 不含任何角色设定)
+// + 算元素配比和关键身位特征(给后端按身位调语气用)
+// 生命灵数：出生年月日全部数字相加，反复加到一位(11/22/33保留为大师数)。后端算死，绝不让模型算(模型数学不可靠)。
+function lifePathNumber(y,mo,d){
+  let s=String(y)+String(mo)+String(d);
+  let sum=s.split("").reduce((a,c)=>a+(+c),0);
+  while(sum>9 && sum!==11 && sum!==22 && sum!==33){ sum=String(sum).split("").reduce((a,c)=>a+(+c),0); }
+  return sum;
+}
+// ===== 八字+方位(全JS算死,绝不让模型碰生克/计算)。处理晚子时(23点后算次日)。=====
+const _GAN=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const _ZHI=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const _GWX={甲:"木",乙:"木",丙:"火",丁:"火",戊:"土",己:"土",庚:"金",辛:"金",壬:"水",癸:"水"};
+const _KE={木:"土",火:"金",土:"水",金:"木",水:"火"}; // 我克者=财
+const _WXFANG={木:"东方",火:"南方",土:"西南方",金:"西方",水:"北方"};
+const _ELFANG={火:"南方",土:"西南方",风:"东方",水:"北方"};
+function _dayIdx(y,mo,d){const base=Date.UTC(1900,0,1);const cur=Date.UTC(y,mo-1,d);const days=Math.round((cur-base)/86400000);return ((10+days)%60+60)%60;}
+function baziCalc(y,mo,d,hour){
+  let dy=y,dmo=mo,dd=d;
+  if(hour>=23){const nx=new Date(Date.UTC(y,mo-1,d+1));dy=nx.getUTCFullYear();dmo=nx.getUTCMonth()+1;dd=nx.getUTCDate();}
+  let yy=y; if(mo<2||(mo===2&&d<4))yy=y-1;
+  const yIdx=((yy-1984)%60+60)%60; const yp=_GAN[yIdx%10]+_ZHI[yIdx%12];
+  const dIdx=_dayIdx(dy,dmo,dd); const dp=_GAN[dIdx%10]+_ZHI[dIdx%12];
+  const jieDay=[0,0,4,6,5,6,6,8,8,8,8,7,7]; let mIdx=mo-2; if(d<jieDay[mo])mIdx-=1; mIdx=(mIdx%12+12)%12;
+  const mZhi=["寅","卯","辰","巳","午","未","申","酉","戌","亥","子","丑"][mIdx];
+  const wuhu=[2,4,6,8,0]; const mp=_GAN[(wuhu[_GAN.indexOf(yp[0])%5]+mIdx)%10]+mZhi;
+  const zhiIdx=Math.floor(((hour+1)%24)/2); const wushu=[0,2,4,6,8];
+  const hp=_GAN[(wushu[_GAN.indexOf(dp[0])%5]+zhiIdx)%10]+_ZHI[zhiIdx];
+  return {yp,mp,dp,hp};
+}
+function caiFang(dayGan){return _WXFANG[_KE[_GWX[dayGan]]];}          // 财位=日主克者方位
+function luckyFang(el){const o=Object.entries(el).sort((a,b)=>a[1]-b[1]);return _ELFANG[o[0][0]];} // 幸运方位=星盘最缺元素方位
+function buildNatalData(N){
+  const a=N.angles,P=N.planets,m=N.meta;
+  const lifePath=lifePathNumber(m.y,m.mo,m.d);
+  // 八字四柱 + 两个方位(全JS算死)
+  const _bz=baziCalc(m.y,m.mo,m.d,m.h);
+  const _cnt0={火:0,土:0,风:0,水:0}; P.forEach(p=>{const e=ELEMENT[p.sign];if(e)_cnt0[e]++;});
+  const _lucky=luckyFang(_cnt0);     // 幸运方位=星盘最缺元素方位
+  const _cai=caiFang(_bz.dp[0]);     // 财位=八字日主克者方位
+  const planetStr=P.map(p=>`  ${p.n} ${p.sign}${p.deg}°${p.rx?'(逆)':''} 第${p.house}宫`).join("\n");
+  const houseStr=N.houses.map(h=>`${h.num}宫${h.sign}${h.deg}°`).join(" / ");
+  const data=`出生：${m.y}-${String(m.mo).padStart(2,'0')}-${String(m.d).padStart(2,'0')} ${String(m.h).padStart(2,'0')}:${String(m.mi).padStart(2,'0')}（+${m.tz} ${m.city}）｜性别：${m.sex}｜【生命灵数=${lifePath}】｜【八字日主=${_bz.dp[0]}】｜【幸运方位=${_lucky}】｜【财位=${_cai}】(以上均已算好，直接用，勿改勿算)\n`
+    +`日月升：太阳${P[0].sign}${P[0].deg}° / 月亮${P[1].sign}${P[1].deg}° / 上升${a.asc.sign}${a.asc.deg}°\n`
+    +`行星与凯龙（落座·落宫，含凯龙=此生最深的伤口与由伤生出的疗愈天赋）：\n${planetStr}\n`
+    +`四轴：上升${a.asc.sign}${a.asc.deg}° / 天顶MC${a.mc.sign}${a.mc.deg}° / 下降${a.dsc.sign}${a.dsc.deg}° / 天底IC${a.ic.sign}${a.ic.deg}°\n`
+    +`进阶点位：${N.points.map(pt=>`${pt.n}${pt.sign}${pt.deg}°第${pt.house}宫`).join(" / ")}（北交=此生功课方向、南交=带来的旧惯性、莉莉丝=隐秘欲望与不被驯服的部分、福点=天赋的福气与顺遂之处、宿命点=命中注定的相遇与转折、东方点=对外呈现的第二面相）\n`
+    +`十二宫（Placidus宫制）：${houseStr}\n`
+    +`本命相位：${N.asp.map(x=>x.t).join(" / ")}`;
+  // 元素配比(给后端判身位调语气): 统计十大行星落座的火土风水
+  const cnt={火:0,土:0,风:0,水:0};
+  P.forEach(p=>{const e=ELEMENT[p.sign]; if(e)cnt[e]++;});
+  // 金星星座+元素(美睫按金星元素派款,机器算死喂后端,绝不让M3自己判)
+  const venusSign=P[3].sign;          // BODIES顺序:0太阳1月亮2水星3金星
+  const venusElement=ELEMENT[venusSign]||"";
+  return {
+    data,
+    sex:m.sex,
+    elements:cnt,
+    sunSign:P[0].sign, moonSign:P[1].sign, ascSign:a.asc.sign,
+    venusSign, venusElement
+  };
+}
+
+function buildNatalPrompt(N){
+  const a=N.angles,P=N.planets,m=N.meta;
+  const role=matchRole(N);
+  const planetStr=P.map(p=>`  ${p.n} ${p.sign}${p.deg}°${p.rx?'(逆)':''} 第${p.house}宫`).join("\n");
+  const houseStr=N.houses.map(h=>`${h.num}宫${h.sign}${h.deg}°`).join(" / ");
+  const data=`出生：${m.y}-${String(m.mo).padStart(2,'0')}-${String(m.d).padStart(2,'0')} ${String(m.h).padStart(2,'0')}:${String(m.mi).padStart(2,'0')}（+${m.tz} ${m.city}）｜性别：${m.sex}\n`
+    +`日月升：太阳${P[0].sign}${P[0].deg}° / 月亮${P[1].sign}${P[1].deg}° / 上升${a.asc.sign}${a.asc.deg}°\n`
+    +`行星与凯龙（落座·落宫，含凯龙=此生最深的伤口与由伤生出的疗愈天赋）：\n${planetStr}\n`
+    +`四轴：上升${a.asc.sign}${a.asc.deg}° / 天顶MC${a.mc.sign}${a.mc.deg}° / 下降${a.dsc.sign}${a.dsc.deg}° / 天底IC${a.ic.sign}${a.ic.deg}°\n`
+    +`进阶点位：${N.points.map(pt=>`${pt.n}${pt.sign}${pt.deg}°第${pt.house}宫`).join(" / ")}（北交=此生功课方向、南交=带来的旧惯性、莉莉丝=隐秘欲望与不被驯服的部分、福点=天赋的福气与顺遂之处、宿命点=命中注定的相遇与转折、东方点=对外呈现的第二面相）\n`
+    +`十二宫（Placidus宫制）：${houseStr}\n`
+    +`本命相位：${N.asp.map(x=>x.t).join(" / ")}`;
+  const p=`【角色】你是一位伟大的占星师，按《小龙虾占星·上场设定》及配套教材作答。心法=读盘五步法（日月升骨架→金火血肉→水木土底层→宫位战场→相位张力）；内核=钱权性（钱权/性情/自我三母题）；口吻=陶白白走心底+唐绮阳格局收。
+
+【合规·必守】只用“能量/课题/提醒”，不断言、不预言、不涉医疗生死婚否定论，选择权永远还给本人。
+
+【铁律·必分性别】这是一张【${m.sex}性】的盘。金星/火星/太阳/月亮/下降7宫的读法必须按性别区分：${m.sex==="男"?"金星火星多读“他被什么样的异性吸引、理想型”；正缘看下降/7宫描绘“妻星”画像。":"金星看“她自己的爱与审美”、火星看“什么样的男性能量吸引她”；正缘看下降/7宫描绘“夫星”画像。"}
+
+【铁律·禁套模板】每一句解读都必须“指名道姓”挂钩具体星位（如“因为你的X在Y宫/Y座”→所以…）。禁止任何放之四海皆准的占星废话（如“外冷内热/渴望被理解”这类套谁都对的话）。每个判断都要能让人问“凭哪颗星说的？”而你答得出来。
+
+【任务】根据下面这张【真实本命盘】，写一份深度个人解读，按六块展开：
+一、你是谁（核心人格）—— 用日月升的反差点破他自己隐约有感、却没人替他说出口的核心张力，一句话让他一震。
+二、你的天赋 —— 从拱/六合/星群/太阳落宫读“天生顺的地方”。
+三、事业方向 —— 天顶MC + 太阳 + 10宫 + 土星课题，落到“靠什么立身、往哪走”。
+四、感情模式 —— 上升+金星(气质魅力) + 下降/7宫(正缘画像，按性别) + 月亮(安全感) + 金火相位(此生情感课题)。
+五、财富与资源 —— 2宫 + 金星 + 木星 + 土星配得感课题。讲能量倾向+心理课题，严禁“招财/破财/发财”。
+六、此生课题 —— 从土星 + 刑冲相位读“这辈子的修行功课”，借一句名人/经典语顶到哲学高度收口（借道不点名）。
+
+【给观众文案铁律】不要出现任何行星度数、相位角度、宫位编号等术语和数据；观众只要“被说中/似曾相识”的体感，不要天文课。星象数据仅你后台推演用。长内容分段产出，避免一次被截断。
+
+【可选·世界观彩蛋】解读末尾，可轻轻递一句：在某个世界里，有一类人正是这样的——${role.name.split(' · ')[0]}。（点到为止，引发好奇即可，不展开。）
+
+【后台本命盘数据（已用瑞士星历同源算法在本地精确计算，直接用，勿自行更改星位）】
+${data}`;
+  document.getElementById("prompt").textContent=p;
+  const rr=document.getElementById("natalResult"); if(rr) rr.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// 对外版: 无tab/无日期控件, 直接渲染本命盘表单
+render();
 </script>
 </body>
 </html>
