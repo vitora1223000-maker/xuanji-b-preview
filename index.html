@@ -163,6 +163,8 @@
   .prologue .md-q{margin:18px auto;padding:14px 16px;max-width:96%;border:0;border-top:1px solid rgba(232,194,90,.3);border-bottom:1px solid rgba(232,194,90,.3);
     font-size:17px;line-height:1.8;color:var(--gold);font-weight:800;letter-spacing:2px;background:none;text-shadow:0 0 16px rgba(255,230,168,.4)}
   .prologue .md-q strong{color:var(--gold)}
+  /* 世界观段落里的重点句·金色发光跳出来(用户扫读的抓手) */
+  .prologue .md-p strong{color:var(--gold);font-weight:700;text-shadow:0 0 12px rgba(255,230,168,.35)}
   .prologue-div{height:0;border-top:1px dashed rgba(201,168,255,.3);margin:8px 18px 26px;position:relative}
   .prologue-div::after{content:"✦ 你的命书 ✦";position:absolute;top:-9px;left:50%;transform:translateX(-50%);
     background:#0e0b1e;padding:0 14px;font-size:11px;color:var(--gold2,#e8c25a);letter-spacing:3px}
@@ -1602,13 +1604,13 @@ async function runAIRead(N,btn){
 }
 // 总开篇《破局之神觉醒》——Athena 亲笔世界观·固定文案·所有用户解读打头都要看(钉在正文最前)。
 // 末句省略号吊住→接 M3 出的"照见你的底色"。
-const REBORN_PROLOGUE = `宇宙初定，道分两极。
+const REBORN_PROLOGUE = `🌌 宇宙初定，道分两极。
 
 虚无为始，万象为终。诸天有界，三界分层——上至无色诸天，清净无念，超脱因果；下至红尘凡土，轮转不休，沉浮无尽。
 
 天庭立万法，定规矩，掌苍生命运，镇万古秩序。
 
-而你，曾是这九天之上，最靠近本源的神。
+而你，**曾是这九天之上，最靠近本源的神。**
 
 诸神看遍亿万岁月，看惯众生百态。世人皆以为神明高高在上，无情无欲，岁月清闲。
 
@@ -1623,11 +1625,11 @@ const REBORN_PROLOGUE = `宇宙初定，道分两极。
 你厌恶这套由欲望设计的规则，厌恶所有既定的命运，厌恶无辜之人必须受难，厌恶情深义重之人终要离散。
 
 顺天者，随波逐流，万年为凡——因为，那是人定的天，为了欲望。
-逆心者，执心而行，方可破命——因为，那是凡根种的根，为了生存。
+**逆心者，执心而行，方可破命**——因为，那是凡根种的根，为了生存。
 
-你本是破局之神，如今却已沉睡。
+**你本是破局之神，如今却已沉睡。**
 
-你忘记了，神力从不在九天凌霄的权柄里，而在你看透虚妄的本心之中。你本自具足的，从不是呼风唤雨的神通，而是借万物之势，破既定之局。
+你忘记了，神力从不在九天凌霄的权柄里，**而在你看透虚妄的本心之中**。你本自具足的，从不是呼风唤雨的神通，而是借万物之势，破既定之局。
 
 这世间所有的规则漏洞、人心贪痴、竞合偏颇，皆是你的借力之处。
 
@@ -1637,14 +1639,14 @@ const REBORN_PROLOGUE = `宇宙初定，道分两极。
 
 你只需因势导利，以本心破规训，以人心破定式。
 
-世人困于因果，你便俯瞰因果；世人受制于命运，你便改写命运；世人沉沦于红尘游戏，你便掀翻棋盘，重立方圆。
+世人困于因果，你便俯瞰因果；世人受制于命运，你便改写命运；**世人沉沦于红尘游戏，你便掀翻棋盘，重立方圆。**
 
 看清神力——不在杀伐，不在权柄，而在辨是非、破虚妄、改规则、定乾坤。
 看懂博弈——谁是执棋者，谁是盘中子，如何撕碎棋盘、重塑天地。
 
 > **苍天已死，黄道当立。王侯将相，宁有种乎？**
 
-大梦初醒，觉醒重生，从这一刻，已经开始……`;
+**大梦初醒，觉醒重生，从这一刻，已经开始……**`;
 
 // 重生人格解读：走 /api/mbti-read，把 engine 算好的底色/重生人格/buff 一并喂给后端神仙虾。
 // 与 runAIRead 同一套骨架(登录拦截→等待轮播→非流式 fetch→MD渲染→存盘)，终点换成新产品接口。
