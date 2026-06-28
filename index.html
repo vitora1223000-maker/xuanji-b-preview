@@ -1274,7 +1274,7 @@ function renderMbtiResult(N){
        </div>
        <div id="rebornReadCard" class="read-card" style="display:none;margin-top:18px">
          <div class="ask-title">✦ 你的重生人格 · 使用说明 ✦</div>
-         <div class="ask-desc">底色是你出厂自带的使命，重生人格是你为活成自己亲手锻的兵刃——神仙虾为你照见：这两副人格怎么用、你还差哪一道暗劲（人格 BUFF）。</div>
+         <div class="ask-desc">底色是你出厂自带的使命，重生人格是你为活成自己亲手锻的兵刃，玄玑会告诉你，这两副人格怎么用、并为你加持人格 BUFF。</div>
          <button class="btn read-btn glow" id="rebornAiRead">✨ 让玄玑为我解读</button>
          <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
          <div id="rebornReadOut" class="read-out" style="display:none"></div>
@@ -1296,22 +1296,36 @@ function renderMbtiResult(N){
     const u=await openLogin();
     return !!u;   // 关掉登录浮层=false=不往下走
   }
-  // 左·重生人格：点→登录→展开重生说明卡(卡里"让玄玑为我解读"再出文)
+  // 两条线互斥:点一边、另一边的卡收回去(别两张说明卡同屏堆着)
+  function foldOther(keep){
+    const reborn=document.getElementById("rebornReadCard");
+    const natal=document.getElementById("natalResult");
+    if(keep!=="reborn" && reborn) reborn.style.display="none";
+    if(keep!=="natal" && natal) natal.style.display="none";
+  }
+  // 左·重生人格：点→登录→收右卡→展开重生说明卡(卡里"让玄玑为我解读"再出文)
   const rb=document.getElementById("rebornGoBtn");
   if(rb) rb.onclick=async()=>{
     if(!(await gateLogin())) return;
     rb.classList.remove("glow");
+    foldOther("reborn");
     const card=document.getElementById("rebornReadCard");
     if(card){ card.style.display="block"; card.scrollIntoView({behavior:"smooth",block:"start"}); }
   };
-  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录)
+  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录)。⏳暂未开放(AI排队中),先禁用,真提示词好了再放开。
   const rbAi=document.getElementById("rebornAiRead");
-  if(rbAi) rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
-  // 右·人生说明书：点→登录→展开操作说明书卡(卡里"让玄玑为我解读"=aiRead 再出文)
+  if(rbAi){
+    rbAi.disabled=true; rbAi.classList.remove("glow");
+    rbAi.textContent="✨ 重生人格解读 · 即将开放";
+    rbAi.style.opacity=".55"; rbAi.style.cursor="default";
+    // 真提示词上线后:把上面四行删掉,改回 rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
+  }
+  // 右·人生说明书：点→登录→收左卡→展开操作说明书卡(卡里"让玄玑为我解读"=aiRead 再出文)
   const ng=document.getElementById("natalGoBtn");
   if(ng) ng.onclick=async()=>{
     if(!(await gateLogin())) return;
     ng.classList.remove("glow");
+    foldOther("natal");
     const nr=document.getElementById("natalResult");
     nr.style.display="block";
     nr.scrollIntoView({behavior:"smooth",block:"start"});
