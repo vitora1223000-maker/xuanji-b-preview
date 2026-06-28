@@ -1275,6 +1275,7 @@ function renderMbtiResult(N){
        <div id="rebornReadCard" class="read-card" style="display:none;margin-top:18px">
          <div class="ask-title">✦ 你的重生人格 · 使用说明 ✦</div>
          <div class="ask-desc">底色是你出厂自带的使命，重生人格是你为活成自己亲手锻的兵刃——神仙虾为你照见：这两副人格怎么用、你还差哪一道暗劲（人格 BUFF）。</div>
+         <button class="btn read-btn glow" id="rebornAiRead">✨ 让玄玑为我解读</button>
          <div class="read-by">— 解读者 · 玄玑天庭 文澜阁 · 神仙虾 —</div>
          <div id="rebornReadOut" class="read-out" style="display:none"></div>
        </div>
@@ -1285,15 +1286,34 @@ function renderMbtiResult(N){
     {type:A, func:tk.top3[0].mineFunc, img:"占位图_人格1.jpg"},
     {type:B, func:tk.top3[1].mineFunc, img:"占位图_人格2.jpg"}
   ]);
-  // 分岔双按钮：左=重生人格(新产品·走神仙虾AI·登录才解读)，右=人生说明书(星盘六块)
+  // 分岔双按钮：两条线统一【点按钮→先登录→展开各自说明卡→卡里按钮再出解读】。
   const _reborn={top, A, B, fkey, buffName:M.FUNC_ONE[fkey]||""};
+  // 点分岔按钮即拦登录(REQUIRE_LOGIN=true 才拦)；登录成功(或免登录)返回 true
+  async function gateLogin(){
+    if(!REQUIRE_LOGIN) return true;
+    await refreshUser();
+    if(_curUser) return true;
+    const u=await openLogin();
+    return !!u;   // 关掉登录浮层=false=不往下走
+  }
+  // 左·重生人格：点→登录→展开重生说明卡(卡里"让玄玑为我解读"再出文)
   const rb=document.getElementById("rebornGoBtn");
-  if(rb) rb.onclick=()=>{ rb.classList.remove("glow"); runRebornRead(_reborn, N, rb); };
+  if(rb) rb.onclick=async()=>{
+    if(!(await gateLogin())) return;
+    rb.classList.remove("glow");
+    const card=document.getElementById("rebornReadCard");
+    if(card){ card.style.display="block"; card.scrollIntoView({behavior:"smooth",block:"start"}); }
+  };
+  // 卡里"让玄玑为我解读"→ 真正出文(此时已登录)
+  const rbAi=document.getElementById("rebornAiRead");
+  if(rbAi) rbAi.onclick=()=>{ rbAi.classList.remove("glow"); runRebornRead(_reborn, N, rbAi); };
+  // 右·人生说明书：点→登录→展开操作说明书卡(卡里"让玄玑为我解读"=aiRead 再出文)
   const ng=document.getElementById("natalGoBtn");
-  if(ng) ng.onclick=()=>{
+  if(ng) ng.onclick=async()=>{
+    if(!(await gateLogin())) return;
+    ng.classList.remove("glow");
     const nr=document.getElementById("natalResult");
     nr.style.display="block";
-    ng.classList.remove("glow");
     nr.scrollIntoView({behavior:"smooth",block:"start"});
   };
 }
