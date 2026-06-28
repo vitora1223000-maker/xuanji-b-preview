@@ -165,8 +165,13 @@
   .prologue .md-q strong{color:var(--gold)}
   /* 世界观段落里的重点句·金色发光跳出来(用户扫读的抓手) */
   .prologue .md-p strong{color:var(--gold);font-weight:700;text-shadow:0 0 12px rgba(255,230,168,.35)}
-  /* 章节装饰符·世界观四章之间的呼吸点(轻盈·不打断史诗感) */
-  .prologue .md-orn{text-align:center;color:rgba(232,201,118,.55);font-size:13px;letter-spacing:4px;margin:22px 0 20px;text-shadow:0 0 10px rgba(255,230,168,.3)}
+  /* 章节装饰符·世界观四章之间的呼吸点(纯CSS画·金色小菱形+两侧渐隐细线·不用emoji符号防被系统染色成绿块) */
+  .prologue .md-orn{display:flex;align-items:center;justify-content:center;gap:14px;margin:24px 0 22px}
+  .prologue .md-orn::before,.prologue .md-orn::after{content:"";width:46px;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(232,201,118,.45))}
+  .prologue .md-orn::after{background:linear-gradient(90deg,rgba(232,201,118,.45),transparent)}
+  .prologue .md-orn .orn-d{width:7px;height:7px;flex:none;transform:rotate(45deg);
+    background:linear-gradient(135deg,#fff6d8,#e8c25a);box-shadow:0 0 8px rgba(255,230,168,.6);border-radius:1px}
   .prologue-div{height:0;border-top:1px dashed rgba(201,168,255,.3);margin:8px 18px 26px;position:relative}
   .prologue-div::after{content:"重生，从这里开始";position:absolute;top:-9px;left:50%;transform:translateX(-50%);white-space:nowrap;
     background:#0e0b1e;padding:0 14px;font-size:11px;color:var(--gold2,#e8c25a);letter-spacing:3px}
@@ -1770,7 +1775,7 @@ function mdToHtml(src){
     if((m=line.match(/^([^\w\s#]{1,2})\s+(#{1,6})\s+(.+)$/))){ closeList(); const lv=Math.min(m[2].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[3].trim()+' '+m[1])}</div>`; continue; }
     if((m=line.match(/^\s*>\s?(.*)$/))){ closeList(); html+=`<blockquote class="md-q">${inline(m[1])}</blockquote>`; continue; }
     if((m=line.match(/^\s*[-*]\s+(.*)$/))){ if(!inList){html+='<ul class="md-ul">';inList=true;} html+=`<li>${inline(m[1])}</li>`; continue; }
-    if(/^\s*·✳·\s*$/.test(line)){ closeList(); html+='<div class="md-orn">·&nbsp;✳&nbsp;·</div>'; continue; } // 章节装饰符(世界观四章之间)
+    if(/^\s*·✳·\s*$/.test(line)){ closeList(); html+='<div class="md-orn"><span class="orn-d"></span></div>'; continue; } // 章节装饰符(世界观四章之间)·CSS画·不用emoji符号防染色
     closeList(); html+=`<p class="md-p">${inline(line)}</p>`;
   }
   closeList();
