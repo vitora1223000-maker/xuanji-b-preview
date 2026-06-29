@@ -25,7 +25,7 @@
 
 .arc-card{
   display:flex;align-items:center;gap:13px;padding:13px;
-  background:linear-gradient(135deg,rgba(40,30,70,.9),rgba(26,21,48,.9));
+  background:linear-gradient(135deg,rgb(40,30,70),rgb(26,21,48));
   border:1px solid rgba(255,230,168,.18);border-radius:15px;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s;
 }
 .arc-card:active{transform:scale(.985)}
