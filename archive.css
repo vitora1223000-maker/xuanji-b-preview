@@ -18,9 +18,10 @@
 .arc-empty{text-align:center;color:#9b91b5;font-size:13px;padding:48px 20px}
 
 /* 左滑删除容器 */
-.arc-card-wrap{position:relative;margin:10px 0;overflow:hidden;border-radius:15px}
-.arc-swipe-del{position:absolute;right:0;top:0;bottom:0;width:72px;background:#e53935;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;letter-spacing:.5px}
+.arc-card-wrap{position:relative;margin:10px 0;border-radius:15px;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.arc-swipe-del{position:absolute;right:0;top:0;bottom:0;width:72px;background:#e53935;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;letter-spacing:.5px;z-index:0}
 .arc-swipe-del:active{background:#c62828}
+.arc-card{position:relative;z-index:1;width:100%}
 
 .arc-card{
   display:flex;align-items:center;gap:13px;padding:13px;
