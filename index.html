@@ -1682,11 +1682,22 @@ async function runRebornRead(R, N, btn){
   const natalData=buildNatalData(N);
   // 双重作证要用底色的主导/劣势功能(engine STACKS)，前端查好一起喂(M3 绝不自己查栈)
   const STK=(window.MBTI&&window.MBTI.STACKS&&window.MBTI.STACKS[R.top])||null;
+  // ⭐定生死料：辅助功能 + 隔壁同主导型 + 隔壁的区分功能(engine 查表算死·M3 绝不自己猜邻型)
+  //   Ni 打底(隔壁也有)、aux 定生死(把本型和隔壁型分开)——焊死 M3 别再扯隔壁型号
+  const NB=(window.MBTI&&window.MBTI.neighborInfo)?window.MBTI.neighborInfo(R.top):null;
   const reborn={
     baseColor:R.top,                         // 底色型号(出生自带·不变·使命)
-    domFunc:STK?STK[0]:"",                    // 主导功能=天赋(正向作证)
-    infFunc:STK?STK[3]:"",                    // 劣势功能(反向180°=主导·第二证人)
+    domFunc:STK?STK[0]:"",                    // 主导功能=天赋(正向作证·Ni 打底)
+    auxFunc:NB?NB.aux:(STK?STK[1]:""),        // 辅助功能=定生死(Fe·把本型和隔壁型分开)
+    infFunc:STK?STK[3]:"",                    // 劣势功能(反向180°=主导·第三证人)
+    neighbor:NB?NB.neighbor:"",               // 隔壁同主导型(INTJ·只共享 dom 不共享 aux)
+    neighborAux:NB?NB.neighborAux:"",         // 隔壁型的区分功能(Te·当反例衬出本型 aux)
     rebornTypes:[R.A, R.B],                   // 重生人格(两个·不分主次)
+    // 两副人格各自的看家功能(主导)·喂死让 M3 分开加粗·绝不让它自己查栈
+    rebornFuncs:[
+      (window.MBTI&&window.MBTI.STACKS&&window.MBTI.STACKS[R.A])?window.MBTI.STACKS[R.A][0]:"",
+      (window.MBTI&&window.MBTI.STACKS&&window.MBTI.STACKS[R.B])?window.MBTI.STACKS[R.B][0]:""
+    ],
     buffs:R.buffs||[],                        // 人格buff代号数组(有两说两)
     buffDescs:R.buffDescs||[]                 // 每个buff对应的人话解说(各一句)
   };

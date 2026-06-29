@@ -167,6 +167,20 @@ function mineOfType(t,mine){
   cand.sort((a,b)=>b[1]-a[1]);
   return cand[0][0];
 }
+// ⭐底色「定生死」料：找出和本型【主导功能相同、辅助功能不同】的隔壁型。
+//   双重作证用：dom 只证明"看得透"(隔壁型也有)，真正把这个型和隔壁型分开的是 aux。
+//   规律：每个主导功能正好被两个型共享(一个 Fe/Fi 系、一个 Te/Ti 系)，aux 互为对立。
+//   返回 {dom, aux, inf, neighbor, neighborAux}——纯查表，零误差。
+function neighborInfo(t){
+  const st=STACKS[t]; if(!st) return null;
+  const dom=st[0], aux=st[1], inf=st[3];
+  let neighbor="", neighborAux="";
+  for(const o in STACKS){
+    if(o===t) continue;
+    if(STACKS[o][0]===dom && STACKS[o][1]!==aux){ neighbor=o; neighborAux=STACKS[o][1]; break; }
+  }
+  return {dom, aux, inf, neighbor, neighborAux};
+}
 function rankTools(chart){
   const m=bodyMap(chart);
   const mine=mineTension(chart,m), fp=funcPower(chart,m);
@@ -273,5 +287,5 @@ const FUNC_ONE={
  Se:"应变·抓当下（变局里快准狠出手）",Si:"沉淀·稳扎稳打（把经验变成一步一脚印的扎实）"};
 
 
-window.MBTI={derive:deriveBaseColor, tools:rankTools, pickName:pickName, pickLine:pickLine, SOUL_NAMES:SOUL_NAMES, SOUL_LINES:SOUL_LINES, BASECOLOR_SOUL:BASECOLOR_SOUL, PERSONA_SCENE:PERSONA_SCENE, FUNC_ONE:FUNC_ONE, STACKS:STACKS};
+window.MBTI={derive:deriveBaseColor, tools:rankTools, pickName:pickName, pickLine:pickLine, SOUL_NAMES:SOUL_NAMES, SOUL_LINES:SOUL_LINES, BASECOLOR_SOUL:BASECOLOR_SOUL, PERSONA_SCENE:PERSONA_SCENE, FUNC_ONE:FUNC_ONE, STACKS:STACKS, neighborInfo:neighborInfo};
 })();
