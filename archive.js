@@ -92,7 +92,7 @@
               <div class="arc-d-city-hd">
                 <button id="arcDLocCancel">取消</button>
                 <span>出生地</span>
-                <button id="arcDLocOk" class="ready">确定</button>
+                <button id="arcDLocOk">确定</button>
               </div>
               <div class="arc-d-city-wheels" id="arcDLocWheels">
                 <div class="dt-col" data-k="prov"></div>

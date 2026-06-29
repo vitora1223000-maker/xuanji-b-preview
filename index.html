@@ -1214,7 +1214,13 @@ function makeCityPicker(cfg){
     buildCol('dist',distsOf(sel.prov,sel.city));
   }
   const mask=document.getElementById(cfg.mask),sheet=document.getElementById(cfg.sheet);
-  function open(){ mask.classList.add('on');sheet.classList.add('on'); setTimeout(rebuildAll,60); }
+  function open(){
+    mask.classList.add('on');sheet.classList.add('on');
+    // 有已选值→打开即可确定；没选过→灰色等滑动
+    if(sel.prov) document.getElementById(cfg.ok).classList.add("ready");
+    else document.getElementById(cfg.ok).classList.remove("ready");
+    setTimeout(rebuildAll,60);
+  }
   function close(){ mask.classList.remove('on');sheet.classList.remove('on'); }
   document.getElementById(cfg.pill).onclick=open;
   document.getElementById(cfg.cancel).onclick=close;

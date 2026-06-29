@@ -90,7 +90,7 @@
 .arc-d-city-wheels .dt-col{flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
 .arc-d-city-wheels .dt-col .it{height:40px;line-height:40px;text-align:center;font-size:13.5px;color:#9b91b5;scroll-snap-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
 .arc-d-city-wheels .dt-col .it.sel{color:#ffe6a8;font-weight:600}
-.arc-d-city-wheels .dt-col .pad{height:80px}
+.arc-d-city-wheels .dt-col .pad{height:60px}
 
 /* 日期时间浮层(详情页专用，5列) */
 .arc-d-dt-wheels{display:flex;height:200px;overflow:hidden}
