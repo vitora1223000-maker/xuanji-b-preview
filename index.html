@@ -212,6 +212,8 @@
   #acctBadge{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 8px);right:12px;z-index:900;display:flex;align-items:center;background:rgba(20,22,46,.92);border:1px solid var(--line);border-radius:20px;padding:4px;font-size:12px;color:var(--soft);backdrop-filter:blur(4px);box-shadow:0 2px 12px rgba(0,0,0,.4)}
   #acctBadge #acctBtn{background:none;border:0;color:var(--accent);font-size:12px;cursor:pointer;padding:3px 10px;border-radius:14px}
   #acctBadge #acctBtn:active{background:rgba(201,168,255,.15)}
+  #acctBadge #archiveBtn{background:none;border:0;font-size:15px;cursor:pointer;padding:3px 9px;border-radius:14px;border-right:1px solid var(--line)}
+  #acctBadge #archiveBtn:active{background:rgba(255,230,168,.12)}
 /* ===== 星盘测MBTI 两屏 ===== */
 #mbtiResult{max-width:460px;margin:0 auto;}
 .mbti-screen{padding:8px 4px 20px;}
@@ -385,9 +387,10 @@
 .share-mask .share-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:10px;cursor:pointer;padding:8px 20px;
   border:1px solid rgba(201,168,255,.18);border-radius:18px}
 </style>
+<link rel="stylesheet" href="./archive.css">
 </head>
 <body>
-<div id="acctBadge"><button id="acctBtn">登入</button></div>
+<div id="acctBadge"><button id="archiveBtn" title="我的档案库" style="display:none">📁</button><button id="acctBtn">登入</button></div>
 <div class="wrap">
   <h1>✦ 玄玑 · Astro ✦</h1>
   <div class="sub" id="now">解构人性 · 主宰人生 · 游戏玩家从不做 NPC</div>
@@ -567,17 +570,54 @@ async function refreshUser(){
   updateAcctBadge();
   return _curUser;
 }
-// 存盘：把登录用户这张盘(出生信息+盘数据+解读)存进 Supabase charts 表(静默)
-async function saveChartToSupabase(N, reading){
+// 出生指纹：同一个人(同出生数据)只算一条档案，避免测两种解读=两条
+function _birthFp(m){ return [m.y,m.mo,m.d,m.h,m.mi,m.tz,(m.lat||0).toFixed(2),(m.lon||0).toFixed(2),m.sex].join("-"); }
+// 从盘 N 里取型号 + 日月升(列表页直接显示，免得重算)
+function _archiveTags(N){
+  try{
+    const P=N.planets||[], a=N.angles||{};
+    const sun=(P[0]&&P[0].sign)||"", moon=(P[1]&&P[1].sign)||"", asc=(a.asc&&a.asc.sign)||"";
+    let mbti="";
+    if(window.MBTI&&window.MBTI.derive){
+      // 和 renderMbtiResult 里一模一样的 ch 构造(derive 吃 ch 不吃 N)
+      const ch={planets:N.planets, points:N.points, angles:N.angles,
+                aspects:(N.aspects)||(N.asp||[]).map(x=>x.t||x)};
+      try{ mbti=window.MBTI.derive(ch).rank[0][0]||""; }catch(_){}
+    }
+    return {sun,moon,asc_sign:asc,mbti};
+  }catch(_){ return {sun:"",moon:"",asc_sign:"",mbti:""}; }
+}
+// 存盘：把登录用户这张盘(出生信息+盘数据+解读+档案标签)存进 Supabase charts 表(静默)
+// 幂等：同一个人(出生指纹相同)已存过 → update 补解读/标签，不新建第二条档案。
+// extra={nickname,relation} 由"测完起名"弹窗传入(可选)；不传则保持原值/留空。
+async function saveChartToSupabase(N, reading, extra){
   try{
     if(!sb || !_curUser || !N) return;
     const m=N.meta||{};
-    const birth_meta={ y:m.y, mo:m.mo, d:m.d, h:m.h, mi:m.mi, tz:m.tz, lat:m.lat, lon:m.lon, city:m.city, sex:m.sex };
+    const birth_meta={ y:m.y, mo:m.mo, d:m.d, h:m.h, mi:m.mi, tz:m.tz, lat:m.lat, lon:m.lon, city:m.city, sex:m.sex, fp:_birthFp(m) };
     const chart_data={
       planets:(N.planets||[]).map(p=>({n:p.n,sign:p.sign,deg:p.deg,house:p.house,rx:p.rx})),
       angles:N.angles, points:N.points, aspects:(N.asp||[]).map(x=>x.t)
     };
-    await sb.from("charts").insert({ user_id:_curUser.id, email:_curUser.email, birth_meta, chart_data, reading:(reading||"").slice(0,8000) });
+    const tags=_archiveTags(N);
+    const row={ user_id:_curUser.id, email:_curUser.email, birth_meta, chart_data,
+                reading:(reading||"").slice(0,8000), ...tags };
+    if(extra&&extra.nickname!=null) row.nickname=extra.nickname;
+    if(extra&&extra.relation!=null) row.relation=extra.relation;
+    // 找这个人是否已有档案(同 user + 同出生指纹)
+    const {data:exist}=await sb.from("charts").select("id")
+      .eq("user_id",_curUser.id).eq("birth_meta->>fp", birth_meta.fp).limit(1);
+    if(exist&&exist.length){
+      // 已有 → 补解读/标签(不覆盖已填的昵称/关系：只在 extra 显式传时才更新)
+      const upd={ reading:row.reading, chart_data, ...tags };
+      if(extra&&extra.nickname!=null) upd.nickname=extra.nickname;
+      if(extra&&extra.relation!=null) upd.relation=extra.relation;
+      await sb.from("charts").update(upd).eq("id", exist[0].id);
+      return exist[0].id;
+    }else{
+      const {data:ins}=await sb.from("charts").insert(row).select("id").single();
+      return ins&&ins.id;
+    }
   }catch(_){ /* 存盘静默,失败不打扰用户 */ }
 }
 // 右上角账号角标：登录后显示登出；免登录模式(REQUIRE_LOGIN=false)且未登录时整个隐藏，用户碰不到会发链接的登录入口
@@ -587,6 +627,7 @@ function updateAcctBadge(){
   // 免登录且未登录 → 藏掉角标（手机号登录上线/开关打开后自动恢复）
   if(badge) badge.style.display = (!REQUIRE_LOGIN && !_curUser) ? "none" : "flex";
   btn.textContent = _curUser ? "登出" : "登入";
+  const ab=document.getElementById("archiveBtn"); if(ab) ab.style.display = _curUser ? "block" : "none";
 }
 // 绑定登出 + 页面加载即检查登录态
 (function initAcct(){
@@ -1266,13 +1307,20 @@ function doCalcNatal(){
   // MBTI 选填：没选也照常排盘（选了更好，先攒数据；后续接星座×MBTI解读）
   const sex=document.querySelector("#bSex .opt.on").dataset.v;
   const inp={y,mo,d,h,mi,tz,lat,lon,city:cityName||`${lat},${lon}`,sex};
-  natalResult=computeNatal(inp);
   // 自报MBTI(面具)只悄悄存后台·不对外显示
   try{const mb=document.getElementById("bMbti"); if(mb&&mb.value) console.log("[后台·自报MBTI·面具不对外]",mb.value);}catch(e){}
+  runChartFromInp(inp);
+}
+// 用一组出生数据 inp{y,mo,d,h,mi,tz,lat,lon,city,sex} 跑完整照见流程。
+// 表单提交、档案库"点TA直接算"都调它——后者免手填，直接喂存好的 birth_meta。
+function runChartFromInp(inp){
+  natalResult=computeNatal(inp);
   renderMbtiResult(natalResult);          // ← 第一个出来的:星盘测MBTI(底色→重生)
   renderNatalResult(natalResult);         // 星盘解析(先渲染好,但藏起来当钩子)
   buildNatalPrompt(natalResult);
   document.getElementById("natalResult").style.display="none";  // 🔴照见时不让看星盘,扣后面
+  // 收起档案库浮层(若从档案库点进来的)
+  const arc=document.getElementById("archiveOverlay"); if(arc) arc.classList.remove("on");
   setTimeout(()=>{const r=document.getElementById("mbtiResult"); if(r) r.scrollIntoView({behavior:"smooth",block:"start"});},100);
 }
 
@@ -1958,5 +2006,6 @@ ${data}`;
 // 对外版: 无tab/无日期控件, 直接渲染本命盘表单
 render();
 </script>
+<script src="./archive.js"></script>
 </body>
 </html>
