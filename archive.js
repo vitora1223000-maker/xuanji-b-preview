@@ -285,14 +285,24 @@
     // 左滑逻辑
     const DEL_W=72;
     let startX=0,curX=0,swiping=false,opened=false;
-    el.addEventListener("touchstart",e=>{startX=e.touches[0].clientX;swiping=true;curX=0;},{passive:true});
+    let startY=0;
+    el.addEventListener("touchstart",e=>{
+      startX=e.touches[0].clientX;
+      startY=e.touches[0].clientY;
+      swiping=true;curX=0;
+    },{passive:true});
     el.addEventListener("touchmove",e=>{
       if(!swiping)return;
-      curX=e.touches[0].clientX-startX;
-      if(curX>0){el.style.transform="translateX(0)";return;}
-      el.style.transition="none";
-      el.style.transform=`translateX(${Math.max(curX,-DEL_W)}px)`;
-    },{passive:true});
+      const dx=e.touches[0].clientX-startX;
+      const dy=e.touches[0].clientY-startY;
+      // 横向幅度大于纵向才认定为左滑，阻止页面滚动
+      if(Math.abs(dx)>Math.abs(dy)&&dx<0){
+        e.preventDefault();
+        curX=dx;
+        el.style.transition="none";
+        el.style.transform=`translateX(${Math.max(curX,-DEL_W)}px)`;
+      }
+    },{passive:false});
     el.addEventListener("touchend",()=>{
       swiping=false;
       el.style.transition="transform .22s ease";
