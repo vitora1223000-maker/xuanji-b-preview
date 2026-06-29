@@ -66,6 +66,7 @@
     try{
       const {data}=await sb.from("charts")
         .select("id,nickname,relation,mbti,sun,asc_sign,moon,birth_meta,created_at")
+        .is("deleted_at",null)
         .order("created_at",{ascending:false});
       rows=data||[];
     }catch(_){ listEl.innerHTML='<div class="arc-empty">档案暂时唤不回，稍后再试。</div>'; return; }
@@ -114,7 +115,8 @@
     el.querySelector(".arc-del").onclick=async e=>{
       e.stopPropagation();
       if(!confirm(`删除「${showName}」的档案？`)) return;
-      try{ await sb.from("charts").delete().eq("id",d.id); load(); }catch(_){}
+      // 软删除：不物理删，打 deleted_at 标记(用户列表里消失，后台数据仍在=护城河)
+      try{ await sb.from("charts").update({deleted_at:new Date().toISOString()}).eq("id",d.id); load(); }catch(_){}
     };
     return el;
   }
