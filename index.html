@@ -1817,7 +1817,8 @@ function mdToHtml(src){
     const line=raw.replace(/\s+$/,'');
     if(/^\s*$/.test(line)){ closeList(); continue; }
     let m;
-    if(/^\s*---+\s*$/.test(line)){ closeList(); html+='<hr class="md-hr">'; continue; }
+    // M3 自己打的 --- 直接吞掉不渲染:大段分割线已由 ## 标题前自动插的金色 .md-hr-sec 统一负责,M3 手打的暗灰线=多余的第二条线=双线。统一只留金色那条。
+    if(/^\s*---+\s*$/.test(line)){ closeList(); continue; }
     if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); sepBeforeH2(lv); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
     // 兜底:M3 偶尔在 ## 前加 emoji(如 "✨ ## 二"),致行首不是#、标题没被识别、## 裸露给用户。
     // 只兜底"emoji/符号前缀(非字母数字,1-2字符) + 空格 + ## + 标题文字"这种,把 emoji 挪到标题末尾,绝不误伤正文。
