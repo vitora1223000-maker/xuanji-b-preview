@@ -187,6 +187,9 @@
   .md-body .md-ul li{margin:5px 0;line-height:1.85}
   .md-body .md-q{margin:12px 0;padding:10px 14px;border-left:3px solid var(--gold);background:rgba(169,143,216,.1);border-radius:0 8px 8px 0;color:var(--gold);font-size:15px;line-height:1.8}
   .md-body .md-hr{border:none;border-top:1px solid var(--line);margin:16px 0;opacity:.5}
+  /* 大段之间的分割线·金色仙气调·中间亮两头淡·留白给足·让五大段一段段切开喘口气 */
+  .md-body .md-hr-sec{border:none;height:1px;margin:30px 0 24px;opacity:.85;background:linear-gradient(90deg,transparent,rgba(255,230,168,.45) 35%,rgba(255,230,168,.7) 50%,rgba(255,230,168,.45) 65%,transparent)}
+  .md-body .md-hr-sec::after{content:"❖";display:block;text-align:center;color:rgba(255,230,168,.55);font-size:11px;margin-top:-8px;line-height:1;text-shadow:0 0 6px rgba(255,230,168,.5)}
   /* 登录浮层（用现站紫色调变量，与全站统一）*/
   #loginOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}
   #loginOverlay .lg-mask{position:absolute;inset:0;background:rgba(6,8,20,.72);backdrop-filter:blur(3px)}
@@ -1806,17 +1809,19 @@ function mdToHtml(src){
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g,'$1<em>$2</em>$3');
   const lines=src.split('\n');
-  let html='', inList=false;
+  let html='', inList=false, h2seen=false;
   const closeList=()=>{ if(inList){html+='</ul>';inList=false;} };
+  // 二级标题(## 一大段)前自动插分割线·第一个标题不插(开头不用线)·纯前端控制·M3 碰不到·五大段天然切开省得糊成一坨
+  const sepBeforeH2=lv=>{ if(lv===2){ if(h2seen) html+='<hr class="md-hr md-hr-sec">'; h2seen=true; } };
   for(let raw of lines){
     const line=raw.replace(/\s+$/,'');
     if(/^\s*$/.test(line)){ closeList(); continue; }
     let m;
     if(/^\s*---+\s*$/.test(line)){ closeList(); html+='<hr class="md-hr">'; continue; }
-    if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
+    if((m=line.match(/^(#{1,6})\s+(.*)$/))){ closeList(); const lv=Math.min(m[1].length,4); sepBeforeH2(lv); html+=`<div class="md-h md-h${lv}">${inline(m[2])}</div>`; continue; }
     // 兜底:M3 偶尔在 ## 前加 emoji(如 "✨ ## 二"),致行首不是#、标题没被识别、## 裸露给用户。
     // 只兜底"emoji/符号前缀(非字母数字,1-2字符) + 空格 + ## + 标题文字"这种,把 emoji 挪到标题末尾,绝不误伤正文。
-    if((m=line.match(/^([^\w\s#]{1,2})\s+(#{1,6})\s+(.+)$/))){ closeList(); const lv=Math.min(m[2].length,4); html+=`<div class="md-h md-h${lv}">${inline(m[3].trim()+' '+m[1])}</div>`; continue; }
+    if((m=line.match(/^([^\w\s#]{1,2})\s+(#{1,6})\s+(.+)$/))){ closeList(); const lv=Math.min(m[2].length,4); sepBeforeH2(lv); html+=`<div class="md-h md-h${lv}">${inline(m[3].trim()+' '+m[1])}</div>`; continue; }
     if((m=line.match(/^\s*>\s?(.*)$/))){ closeList(); html+=`<blockquote class="md-q">${inline(m[1])}</blockquote>`; continue; }
     if((m=line.match(/^\s*[-*]\s+(.*)$/))){ if(!inList){html+='<ul class="md-ul">';inList=true;} html+=`<li>${inline(m[1])}</li>`; continue; }
     if(/^\s*·✳·\s*$/.test(line)){ closeList(); html+='<div class="md-orn"><span class="orn-d"></span></div>'; continue; } // 章节装饰符(世界观四章之间)·CSS画·不用emoji符号防染色
