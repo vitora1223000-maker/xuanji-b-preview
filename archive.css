@@ -42,6 +42,22 @@
 .arc-del{flex:0 0 auto;background:none;border:0;font-size:15px;opacity:.4;cursor:pointer;padding:6px;border-radius:8px}
 .arc-del:active{opacity:1;background:rgba(255,90,90,.15)}
 
+/* 管理按钮 */
+.arc-mgmt-btn{position:absolute;right:16px;font-size:13px;color:#e8c25a;cursor:pointer;padding:4px 8px}
+
+/* 管理模式底栏 */
+.arc-mgmt-bar{flex:0 0 auto;display:flex;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,230,168,.12)}
+.arc-mgmt-all{flex:1;height:46px;border-radius:13px;border:1px solid rgba(255,230,168,.25);background:transparent;color:#ffe6a8;font-size:14px;cursor:pointer}
+.arc-mgmt-del{flex:1;height:46px;border-radius:13px;border:none;background:#e53935;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+
+/* 复选框 */
+.arc-check{position:absolute;left:-36px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,230,168,.4);background:transparent;transition:left .2s ease,background .15s;z-index:2;pointer-events:none}
+.arc-check.on{background:#e8c25a;border-color:#e8c25a}
+.arc-check.on::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#1a1023;font-weight:700}
+/* 管理模式下复选框滑入 */
+.arc-card-wrap.mgmt .arc-check{left:10px}
+.arc-card-wrap.mgmt .arc-card{transform:translateX(36px)}
+
 /* 卡片箭头 */
 .arc-arrow{flex:0 0 auto;color:#ffe6a8;opacity:.5;font-size:18px;margin-left:4px}
 

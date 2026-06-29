@@ -23,9 +23,15 @@
           <div class="arc-top">
             <span class="arc-back" id="arcClose">‹</span>
             <span class="arc-ttl">我 的 档 案 库</span>
+            <span class="arc-mgmt-btn" id="arcMgmtBtn">管理</span>
           </div>
           <div class="arc-sub">玄玑为你照见过的每一个人，都在这里 · 点 TA 即查看档案</div>
           <div class="arc-list" id="arcList"></div>
+          <!-- 管理模式底栏 -->
+          <div class="arc-mgmt-bar" id="arcMgmtBar" style="display:none">
+            <button class="arc-mgmt-all" id="arcSelectAll">全 选</button>
+            <button class="arc-mgmt-del" id="arcDelSelected">删除所选</button>
+          </div>
         </div>
 
         <!-- 详情视图 -->
@@ -152,6 +158,25 @@
     });
     document.getElementById("arcNameCancel").onclick=()=>document.getElementById("arcNameMask").classList.remove("on");
 
+    // 管理模式
+    document.getElementById("arcMgmtBtn").onclick=toggleMgmt;
+    document.getElementById("arcSelectAll").onclick=()=>{
+      const checks=document.querySelectorAll(".arc-check");
+      const allOn=[...checks].every(c=>c.classList.contains("on"));
+      checks.forEach(c=>c.classList.toggle("on",!allOn));
+      document.getElementById("arcSelectAll").textContent=allOn?"全 选":"取消全选";
+    };
+    document.getElementById("arcDelSelected").onclick=async()=>{
+      const ids=[...document.querySelectorAll(".arc-check.on")].map(c=>c.dataset.id);
+      if(!ids.length){alert("请先选择要删除的档案");return;}
+      if(!confirm(`删除选中的 ${ids.length} 个档案？`))return;
+      try{
+        await sb.from("charts").update({deleted_at:new Date().toISOString()}).in("id",ids);
+      }catch(_){}
+      exitMgmt();
+      load();
+    };
+
     // 详情页返回
     document.getElementById("arcDetailBack").onclick=backToList;
 
@@ -190,6 +215,25 @@
         onpick:()=>{ _arcDtPicked=true; }
       });
     }
+  }
+
+  let _mgmtMode=false;
+
+  function toggleMgmt(){
+    _mgmtMode=!_mgmtMode;
+    document.getElementById("arcMgmtBtn").textContent=_mgmtMode?"完成":"管理";
+    document.getElementById("arcMgmtBar").style.display=_mgmtMode?"flex":"none";
+    document.querySelectorAll(".arc-check").forEach(c=>c.classList.remove("on"));
+    document.getElementById("arcSelectAll").textContent="全 选";
+    // 显示/隐藏复选框
+    document.querySelectorAll(".arc-card-wrap").forEach(w=>{
+      w.classList.toggle("mgmt",_mgmtMode);
+    });
+  }
+  function exitMgmt(){
+    _mgmtMode=false;
+    const btn=document.getElementById("arcMgmtBtn"); if(btn) btn.textContent="管理";
+    const bar=document.getElementById("arcMgmtBar"); if(bar) bar.style.display="none";
   }
 
   let _arcLocSel={prov:"",city:"",dist:""};
@@ -279,6 +323,11 @@
     delBtn.className="arc-swipe-del";
     delBtn.textContent="删除";
 
+    // 复选框（管理模式才显示）
+    const chk=document.createElement("div");
+    chk.className="arc-check";
+    chk.dataset.id=d.id;
+    wrap.appendChild(chk);
     wrap.appendChild(el);
     wrap.appendChild(delBtn);
 
@@ -310,8 +359,9 @@
       else { el.style.transform="translateX(0)"; opened=false; }
     });
 
-    // 点卡片：若已展开→收回；否则→详情页
+    // 点卡片：管理模式→勾选；已展开→收回；否则→详情页
     el.onclick=()=>{
+      if(_mgmtMode){ chk.classList.toggle("on"); return; }
       if(opened){ el.style.transform="translateX(0)"; opened=false; return; }
       openDetail(d,i);
     };
