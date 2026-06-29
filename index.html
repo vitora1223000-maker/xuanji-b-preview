@@ -503,6 +503,29 @@ const REQUIRE_LOGIN = _loginParam === "1" ? true : _loginParam === "0" ? false :
 
 // 当前登录用户(null=未登录)
 let _curUser = null;
+
+// 🔴【掉登录根治】统一更新备份 token 的小工具：拿到 session 就把【当前最新】token 覆盖进备份。
+//   过去备份只在登录那一刻存一次=旧船票；supabase 自动续期会换新 refresh_token(rotation)，
+//   旧票作废、备份却不更新，关键时刻拿旧票补 session 必失败=偶发掉登录的真凶。
+function saveAuthBak(session){
+  try{
+    if(session && session.access_token && session.refresh_token){
+      localStorage.setItem("xuanji-auth-bak", JSON.stringify({ at:session.access_token, rt:session.refresh_token }));
+    }
+  }catch(_){}
+}
+// 🔴监听登录态变化：登录/自动续期成功时，实时把最新 token 刷进备份，让备份永远是"当前有效票"。
+//   TOKEN_REFRESHED=access_token 续期(refresh_token 也可能 rotation)；SIGNED_IN=刚登录；都覆盖备份。
+//   只有用户主动 signOut 时才清备份(那段在登出按钮里单独处理)，这里 SIGNED_OUT 不删(避免误删)。
+if(sb && sb.auth && sb.auth.onAuthStateChange){
+  sb.auth.onAuthStateChange((event, session)=>{
+    if((event==="TOKEN_REFRESHED" || event==="SIGNED_IN" || event==="USER_UPDATED") && session){
+      saveAuthBak(session);
+      if(session.user){ _curUser=session.user; try{updateAcctBadge();}catch(_){} }
+    }
+  });
+}
+
 async function refreshUser(){
   if(!sb) return null;
   // ① 先读 supabase 自己的 session（邮箱登录走这条，正常落盘）
@@ -518,7 +541,7 @@ async function refreshUser(){
       const {at,rt}=JSON.parse(bak);
       if(at&&rt){
         const {data,error}=await sb.auth.setSession({access_token:at, refresh_token:rt});
-        if(!error&&data&&data.user){ _curUser=data.user; updateAcctBadge(); return _curUser; }
+        if(!error&&data&&data.user){ _curUser=data.user; saveAuthBak(data.session); updateAcctBadge(); return _curUser; }  // 🔴补回成功→把换来的新token存回备份(旧票已可能rotation作废)
         // 🔴只在确认 token 真失效时才删备份；网络/服务临时不可达(如部署中)绝不删——
         //   否则部署那几十秒里误删好token,用户被迫重登且再也回不来(这是"偶发要重登"的真凶)。
         //   token失效特征:错误信息含 invalid/expired/jwt/refresh 等;网络错(failed to fetch/超时)则保留备份。
@@ -531,8 +554,13 @@ async function refreshUser(){
       }
     }
   }catch(_){}
-  // ③ 都没有 → 回退网络校验
-  try{ const {data}=await sb.auth.getUser(); _curUser=(data&&data.user)?data.user:null; }catch(_){ _curUser=null; }
+  // ③ 都没有 → 回退网络校验。🔴网络失败【绝不清 _curUser】(网络抖动/部署中≠未登录)：
+  //   只有 getUser 成功返回、且明确没有 user 时才判未登录；catch(网络错)保持原登录态不动。
+  try{
+    const {data,error}=await sb.auth.getUser();
+    if(!error){ _curUser=(data&&data.user)?data.user:null; }  // 成功才更新(含明确未登录)
+    // error(多为网络/服务不可达)：什么都不改，保留 _curUser 原值，下次网络好了再校验
+  }catch(_){ /* 网络错→保持原登录态，不清空 */ }
   updateAcctBadge();
   return _curUser;
 }
