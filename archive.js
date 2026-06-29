@@ -234,7 +234,10 @@
     }catch(_){ listEl.innerHTML='<div class="arc-empty">档案暂时唤不回，稍后再试。</div>'; return; }
     if(!rows.length){ listEl.innerHTML='<div class="arc-empty">还没有档案。去照见第一个人吧 ✦</div>'; return; }
     listEl.innerHTML="";
-    rows.forEach((d,i)=>listEl.appendChild(renderCard(d,i)));
+    const cards=[];
+    rows.forEach((d,i)=>{ const w=renderCard(d,i); cards.push(w); listEl.appendChild(w); });
+    // 点别处收回已展开的卡片
+    listEl.addEventListener("touchstart",()=>{ cards.forEach(w=>w._closeSwipe&&w._closeSwipe()); },{passive:true,once:false});
   }
 
   function signLine(d){
@@ -254,10 +257,15 @@
     const showName=named?d.nickname:"觉醒者";
     const avaChar=named?d.nickname.trim()[0]:"觉";
     const typeTitle=(d.mbti?d.mbti:"")+(titleOf(d.mbti)?(" · "+titleOf(d.mbti)):"");
-    const el=document.createElement("div");
-    el.className="arc-card";
     const tag=named?`<span class="arc-rel">${d.relation||"未定"}</span>`
                     :`<button class="arc-name-btn">✨ 赐名</button>`;
+
+    // wrapper = 左滑容器
+    const wrap=document.createElement("div");
+    wrap.className="arc-card-wrap";
+
+    const el=document.createElement("div");
+    el.className="arc-card";
     el.innerHTML=`
       <div class="arc-ava" style="background:linear-gradient(135deg,${c[0]},${c[1]})">${avaChar}</div>
       <div class="arc-meta">
@@ -267,14 +275,51 @@
       </div>
       <span class="arc-arrow">›</span>`;
 
-    // 点卡片 → 详情页
-    el.onclick=()=>{ openDetail(d,i); };
+    const delBtn=document.createElement("button");
+    delBtn.className="arc-swipe-del";
+    delBtn.textContent="删除";
+
+    wrap.appendChild(el);
+    wrap.appendChild(delBtn);
+
+    // 左滑逻辑
+    const DEL_W=72;
+    let startX=0,curX=0,swiping=false,opened=false;
+    el.addEventListener("touchstart",e=>{startX=e.touches[0].clientX;swiping=true;curX=0;},{passive:true});
+    el.addEventListener("touchmove",e=>{
+      if(!swiping)return;
+      curX=e.touches[0].clientX-startX;
+      if(curX>0){el.style.transform="translateX(0)";return;}
+      el.style.transition="none";
+      el.style.transform=`translateX(${Math.max(curX,-DEL_W)}px)`;
+    },{passive:true});
+    el.addEventListener("touchend",()=>{
+      swiping=false;
+      el.style.transition="transform .22s ease";
+      if(curX<-DEL_W/2){ el.style.transform=`translateX(-${DEL_W}px)`; opened=true; }
+      else { el.style.transform="translateX(0)"; opened=false; }
+    });
+
+    // 点卡片：若已展开→收回；否则→详情页
+    el.onclick=()=>{
+      if(opened){ el.style.transform="translateX(0)"; opened=false; return; }
+      openDetail(d,i);
+    };
 
     // 赐名(觉醒者才有)
     const nb=el.querySelector(".arc-name-btn");
     if(nb) nb.onclick=e=>{ e.stopPropagation(); openName(d); };
 
-    return el;
+    // 删除按钮
+    delBtn.onclick=async()=>{
+      if(!confirm(`删除「${showName}」的档案？`)) return;
+      try{ await sb.from("charts").update({deleted_at:new Date().toISOString()}).eq("id",d.id); load(); }catch(_){}
+    };
+
+    // 点列表其他地方收回
+    wrap._closeSwipe=()=>{ el.style.transition="transform .22s ease"; el.style.transform="translateX(0)"; opened=false; };
+
+    return wrap;
   }
 
   // ── 详情页 ────────────────────────────────────────────────
