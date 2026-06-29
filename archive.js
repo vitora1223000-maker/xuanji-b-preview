@@ -53,14 +53,29 @@
               </div>
             </div>
 
-            <!-- 出生日期时间 -->
-            <div class="arc-d-row">
-              <label class="arc-d-lbl">出生日期</label>
-              <input class="arc-d-input arc-d-date" type="date" id="arcDDate">
-            </div>
+            <!-- 出生日期时间（滚轮，复用 makeDatePicker） -->
             <div class="arc-d-row">
               <label class="arc-d-lbl">出生时间</label>
-              <input class="arc-d-input arc-d-date" type="time" id="arcDTime">
+              <div class="arc-d-citypill" id="arcDDtPill">
+                <span id="arcDDtVal" class="ph">请选择出生日期时间</span>
+                <span class="chev">▾</span>
+              </div>
+            </div>
+            <!-- 日期时间浮层（详情页专用） -->
+            <div class="arc-d-city-mask" id="arcDDtMask"></div>
+            <div class="arc-d-city-sheet" id="arcDDtSheet">
+              <div class="arc-d-city-hd">
+                <button id="arcDDtCancel">取消</button>
+                <span>出生日期时间</span>
+                <button id="arcDDtOk">确定</button>
+              </div>
+              <div class="arc-d-dt-wheels" id="arcDDtWheels">
+                <div class="dt-col" data-k="y"></div>
+                <div class="dt-col" data-k="m"></div>
+                <div class="dt-col" data-k="d"></div>
+                <div class="dt-col" data-k="h"></div>
+                <div class="dt-col" data-k="mi"></div>
+              </div>
             </div>
 
             <!-- 出生地 (复用makeCityPicker，独立DOM) -->
@@ -166,10 +181,22 @@
         sel:_arcLocSel,onpick:function(v){ _arcLocPicked=v; }
       });
     }
+    if(typeof makeDatePicker==="function"){
+      makeDatePicker({
+        wheels:"arcDDtWheels",mask:"arcDDtMask",sheet:"arcDDtSheet",
+        pill:"arcDDtPill",cancel:"arcDDtCancel",ok:"arcDDtOk",val:"arcDDtVal",
+        sel:_arcDtSel,
+        getProg:()=>_arcDtProg, setProg:v=>{_arcDtProg=v;},
+        onpick:()=>{ _arcDtPicked=true; }
+      });
+    }
   }
 
   let _arcLocSel={prov:"",city:"",dist:""};
   let _arcLocPicked=false;
+  let _arcDtSel={y:1995,m:1,d:1,h:12,mi:0};
+  let _arcDtProg=false;
+  let _arcDtPicked=false;
 
   function closeOverlay(){
     const o=document.getElementById("archiveOverlay");
@@ -283,14 +310,19 @@
       b.classList.toggle("on",b.dataset.v===(m.sex||"M"));
     });
 
-    // 日期 + 时间
+    // 日期+时间 → 填入 arcDtSel 并回显
     if(m.y&&m.mo&&m.d){
+      _arcDtSel.y=m.y; _arcDtSel.m=m.mo; _arcDtSel.d=m.d;
+      _arcDtSel.h=m.h||12; _arcDtSel.mi=m.mi||0;
+      _arcDtPicked=true;
       const p=n=>String(n).padStart(2,"0");
-      document.getElementById("arcDDate").value=`${m.y}-${p(m.mo)}-${p(m.d)}`;
-      document.getElementById("arcDTime").value=`${p(m.h||12)}:${p(m.mi||0)}`;
+      const valEl=document.getElementById("arcDDtVal");
+      if(valEl){ valEl.textContent=`${m.y}年${p(m.mo)}月${p(m.d)}日 ${p(m.h||12)}:${p(m.mi||0)}`; valEl.classList.remove("ph"); }
     } else {
-      document.getElementById("arcDDate").value="";
-      document.getElementById("arcDTime").value="";
+      _arcDtSel.y=1995;_arcDtSel.m=1;_arcDtSel.d=1;_arcDtSel.h=12;_arcDtSel.mi=0;
+      _arcDtPicked=false;
+      const valEl=document.getElementById("arcDDtVal");
+      if(valEl){ valEl.textContent="请选择出生日期时间"; valEl.classList.add("ph"); }
     }
 
     // 城市：预填 arcLocSel + 显示文字
@@ -345,12 +377,10 @@
     const sexEl=document.querySelector(".arc-d-sex.on");
     const sex=sexEl?sexEl.dataset.v:"M";
 
-    // 日期时间
-    const dateVal=document.getElementById("arcDDate").value;
-    const timeVal=document.getElementById("arcDTime").value||"12:00";
-    if(!dateVal){ alert("请填写出生日期"); return; }
-    const [yy,mmo,dd]=dateVal.split("-").map(Number);
-    const [hh,mmi]=timeVal.split(":").map(Number);
+    // 日期时间（来自滚轮 _arcDtSel）
+    if(!_arcDtPicked||!_arcDtSel.y){ alert("请选择出生日期时间"); return; }
+    const yy=_arcDtSel.y, mmo=_arcDtSel.m, dd=_arcDtSel.d;
+    const hh=_arcDtSel.h, mmi=_arcDtSel.mi;
     const tz=parseFloat(document.getElementById("arcDTz").value)||8;
 
     // 城市→经纬度
@@ -370,13 +400,14 @@
       alert("请选择出生地"); return;
     }
 
-    // 存档案更新(名字/关系/性别)
+    // 存档案更新(名字/关系/性别/日期/城市)
     try{
       const upd={};
       if(nick) upd.nickname=nick;
       if(rel) upd.relation=rel;
-      // 更新 birth_meta 里的性别
-      const newMeta=Object.assign({},d.birth_meta||{},{sex});
+      const newMeta=Object.assign({},d.birth_meta||{},{
+        sex,y:yy,mo:mmo,d:dd,h:hh,mi:mmi,tz,lat,lon,city:cityName
+      });
       upd.birth_meta=newMeta;
       await sb.from("charts").update(upd).eq("id",d.id);
     }catch(_){}

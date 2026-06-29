@@ -1110,21 +1110,24 @@ let dtPicked=false;                  // 用户是否已确认过一次
 let dtProg=false;                    // true=程序在定位滚轮(非用户拨动)，期间不点亮确定
 function dtRange(a,b,suf){const r=[];for(let i=a;i<=b;i++)r.push({v:i,t:i+suf});return r;}
 function dtDaysIn(y,m){return new Date(y,m,0).getDate();}
-function initDateSelect(){
-  const wheels=document.getElementById("dtWheels"); if(!wheels) return;
-  // 默认值：1995-01-01 12:00（中间档，给个起手位）
-  if(!dtSel.y){dtSel.y=1995;dtSel.m=1;dtSel.d=1;dtSel.h=12;dtSel.mi=0;}
+// 通用日期时间滚轮选择器
+// cfg: {wheels,mask,sheet,pill,cancel,ok,val, sel(状态对象), prog(getter/setter), onpick}
+function makeDatePicker(cfg){
+  const wheels=document.getElementById(cfg.wheels); if(!wheels) return;
+  const sel=cfg.sel;
+  if(!sel.y){sel.y=1995;sel.m=1;sel.d=1;sel.h=12;sel.mi=0;}
   const ranges={
     y:dtRange(1950,2025,"年"), m:dtRange(1,12,"月"), d:dtRange(1,31,"日"),
     h:dtRange(0,23,"时"), mi:dtRange(0,59,"分")
   };
   const cols={};
   wheels.querySelectorAll(".dt-col").forEach(col=>{cols[col.dataset.k]=col;});
+  function mark(col,i){col.querySelectorAll('.it').forEach((el,j)=>el.classList.toggle('sel',j===i));}
   function build(k){
     const col=cols[k];
-    const items=k==='d'?ranges.d.slice(0,dtDaysIn(dtSel.y,dtSel.m)):ranges[k];
+    const items=k==='d'?ranges.d.slice(0,dtDaysIn(sel.y,sel.m)):ranges[k];
     col.innerHTML='<div class="pad"></div>'+items.map(o=>`<div class="it" data-v="${o.v}">${o.t}</div>`).join('')+'<div class="pad"></div>';
-    let idx=items.findIndex(o=>o.v===dtSel[k]); if(idx<0)idx=0;
+    let idx=items.findIndex(o=>o.v===sel[k]); if(idx<0)idx=0;
     col.scrollTop=idx*DT_H; mark(col,idx);
     let t;
     col.onscroll=()=>{
@@ -1132,35 +1135,45 @@ function initDateSelect(){
       const i=Math.round(col.scrollTop/DT_H); mark(col,i);
       t=setTimeout(()=>{
         col.scrollTo({top:i*DT_H,behavior:'smooth'});
-        const its=col.querySelectorAll('.it'); if(its[i])dtSel[k]=+its[i].dataset.v;
-        if(!dtProg) document.getElementById("dtOk").classList.add("ready"); // 仅用户拨动才点亮(程序定位不算)
-        if(k==='y'||k==='m')build('d'); // 改年月→重算当月天数
+        const its=col.querySelectorAll('.it'); if(its[i])sel[k]=+its[i].dataset.v;
+        if(!cfg.getProg()) document.getElementById(cfg.ok).classList.add("ready");
+        if(k==='y'||k==='m')build('d');
       },90);
     };
   }
-  function mark(col,i){col.querySelectorAll('.it').forEach((el,j)=>el.classList.toggle('sel',j===i));}
   ['y','m','d','h','mi'].forEach(build);
 
-  const mask=document.getElementById("dtMask"),sheet=document.getElementById("dtSheet");
+  const mask=document.getElementById(cfg.mask),sheet=document.getElementById(cfg.sheet);
   function open(){
     mask.classList.add('on');sheet.classList.add('on');
-    document.getElementById("dtOk").classList.remove("ready"); // 打开时素，拨动后才亮金（与其他浮层一致）
-    dtProg=true;  // 标记：接下来的滚动是程序定位，不算用户拨动
+    document.getElementById(cfg.ok).classList.remove("ready");
+    cfg.setProg(true);
     setTimeout(()=>{['y','m','d','h','mi'].forEach(k=>{
-      const items=k==='d'?ranges.d.slice(0,dtDaysIn(dtSel.y,dtSel.m)):ranges[k];
-      let idx=items.findIndex(o=>o.v===dtSel[k]); if(idx<0)idx=0; cols[k].scrollTop=idx*DT_H; mark(cols[k],idx);
-    }); setTimeout(()=>dtProg=false,300);},60); // 定位滚动稳定后再放开，之后才认用户拨动
+      const items=k==='d'?ranges.d.slice(0,dtDaysIn(sel.y,sel.m)):ranges[k];
+      let idx=items.findIndex(o=>o.v===sel[k]); if(idx<0)idx=0; cols[k].scrollTop=idx*DT_H; mark(cols[k],idx);
+    }); setTimeout(()=>cfg.setProg(false),300);},60);
   }
   function close(){mask.classList.remove('on');sheet.classList.remove('on');}
-  document.getElementById("dtPill").onclick=open;
-  document.getElementById("dtCancel").onclick=close;
+  document.getElementById(cfg.pill).onclick=open;
+  document.getElementById(cfg.cancel).onclick=close;
   mask.onclick=close;
-  document.getElementById("dtOk").onclick=()=>{
+  document.getElementById(cfg.ok).onclick=()=>{
     const p=n=>String(n).padStart(2,'0');
-    document.getElementById("dtVal").textContent=`${dtSel.y}年${p(dtSel.m)}月${p(dtSel.d)}日 ${p(dtSel.h)}:${p(dtSel.mi)}`;
-    document.getElementById("dtVal").classList.remove('ph');
-    dtPicked=true; close();
+    document.getElementById(cfg.val).textContent=`${sel.y}年${p(sel.m)}月${p(sel.d)}日 ${p(sel.h)}:${p(sel.mi)}`;
+    document.getElementById(cfg.val).classList.remove('ph');
+    cfg.onpick&&cfg.onpick(); close();
   };
+  // 暴露 open 供外部预定位调用
+  return {open, reposition:open};
+}
+
+function initDateSelect(){
+  makeDatePicker({
+    wheels:"dtWheels",mask:"dtMask",sheet:"dtSheet",pill:"dtPill",cancel:"dtCancel",ok:"dtOk",val:"dtVal",
+    sel:dtSel,
+    getProg:()=>dtProg, setProg:v=>{dtProg=v;},
+    onpick:()=>{dtPicked=true;}
+  });
 }
 
 // 出生地·三级联动滚轮（省→市→区，复用 .dt-* 滚轮样式）
