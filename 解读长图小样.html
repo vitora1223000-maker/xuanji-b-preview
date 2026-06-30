@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>玄玑 · 解读长图小样</title>
+<style>
+:root{--gold:#ffe6a8;--gold2:#e8c25a;--accent2:#c9b6f0;--line:rgba(255,230,168,.18);--soft:#9a92bd}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#07091a;color:#e9e3ff;font-family:"PingFang SC",-apple-system,sans-serif;
+  padding:24px 12px 60px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.hint{font-size:12px;color:var(--soft);text-align:center;line-height:1.7;max-width:360px}
+
+/* ───────── 这一整块 = 要被 html2canvas 截下来存图的「命书长图」 ───────── */
+.scroll-poster{width:100%;max-width:360px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(180deg,#15102e 0%,#0d0a20 30%,#0b0918 100%);
+  border:1px solid rgba(232,201,118,.28);box-shadow:0 10px 40px rgba(0,0,0,.5);position:relative}
+/* 顶部金线流光边 */
+.scroll-poster::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(255,230,168,.7),transparent)}
+
+/* ── 顶牌:玄玑✦ + 型号称号 ── */
+.sp-head{text-align:center;padding:30px 24px 20px;position:relative}
+.sp-brand{font-size:12px;letter-spacing:5px;color:var(--gold2);margin-bottom:18px;
+  display:flex;align-items:center;justify-content:center;gap:8px;opacity:.92}
+.sp-brand .bstar{display:inline-block;width:12px;height:12px}
+.sp-type{font-size:40px;font-weight:800;letter-spacing:4px;line-height:1;
+  color:var(--gold);text-shadow:0 0 22px rgba(255,230,168,.45);margin-bottom:10px}
+.sp-title{font-size:18px;letter-spacing:8px;color:#f3ecff;font-weight:600;text-indent:8px}
+.sp-sub{font-size:11px;letter-spacing:2px;color:var(--soft);margin-top:14px}
+/* 顶牌与正文之间的分隔 */
+.sp-headdiv{height:1px;margin:22px 26px 4px;
+  background:linear-gradient(90deg,transparent,rgba(255,230,168,.5),transparent)}
+
+/* ── 正文(复用主站 .md-body 一整套样式) ── */
+.sp-body{padding:8px 24px 6px}
+.md-body{white-space:normal}
+.md-body .md-h{font-weight:700;color:var(--gold);letter-spacing:.5px;line-height:1.5}
+.md-body .md-h2{font-size:16px;margin:18px 0 9px}
+.md-body .md-h3{font-size:15px;margin:15px 0 8px;color:var(--accent2)}
+.md-body .md-p{margin:9px 0;line-height:1.95;font-size:14px;color:#e3dcf5}
+.md-body strong{color:var(--gold);font-weight:700}
+.md-body em{color:var(--accent2);font-style:normal}
+.md-body .md-q{margin:14px 0;padding:11px 15px;border-left:3px solid var(--gold);
+  background:rgba(169,143,216,.1);border-radius:0 8px 8px 0;color:var(--gold);font-size:15px;line-height:1.8}
+.md-body .md-hr-sec{border:none;height:1px;margin:28px 0 22px;opacity:.85;
+  background:linear-gradient(90deg,transparent,rgba(255,230,168,.45) 35%,rgba(255,230,168,.7) 50%,rgba(255,230,168,.45) 65%,transparent)}
+.md-body .md-hr-sec::after{content:"❖";display:block;text-align:center;color:rgba(255,230,168,.55);
+  font-size:11px;margin-top:-8px;line-height:1;text-shadow:0 0 6px rgba(255,230,168,.5)}
+
+/* ── 底部落款:解读者 + 二维码 + 玄玑Astro ── */
+.sp-foot{margin:18px 22px 26px;padding-top:18px;border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:14px}
+.sp-foot .urls{display:flex;flex-direction:column;gap:7px}
+.sp-foot .by{font-size:11px;color:var(--soft);letter-spacing:1px;line-height:1.6}
+.sp-foot .go{color:#bdb2e0;font-size:13px}
+.sp-foot .u{font-size:13px;letter-spacing:4px;font-weight:700;color:var(--gold2)}
+.sp-qr{position:relative;width:76px;height:76px;flex-shrink:0;padding:5px;background:#fff;border-radius:8px}
+.sp-qr img,.sp-qr canvas{width:100%!important;height:100%!important;display:block}
+.sp-qr .qr-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;line-height:0}
+.sp-qr .qr-logo svg{display:block;width:100%;height:100%}
+</style></head>
+<body>
+<div class="hint">✦ 解读长图 · 版式小样(假文填充看排版)✦<br>顶牌型号称号 · 中间整段正文 · 底部解读者+二维码<br>定了版式我再接真解读 + 一键存图</div>
+
+<div class="scroll-poster" id="scrollPoster">
+  <div class="sp-head">
+    <div class="sp-brand"><span class="bstar" id="bstar"></span>玄 玑 · Astro<span class="bstar" id="bstar2"></span></div>
+    <div class="sp-type">INTJ</div>
+    <div class="sp-title">暗 夜 军 师</div>
+    <div class="sp-sub">— 你自己的操作说明书 · 神仙虾亲启 —</div>
+  </div>
+  <div class="sp-headdiv"></div>
+
+  <div class="sp-body">
+    <div class="md-body">
+      <div class="md-h md-h2">你是谁</div>
+      <div class="md-p">棋盘早在你脑子里了,你只是在等他们,自己入局。你天生带着一副<strong>看穿结构</strong>的眼睛——别人看到的是一团乱麻,你看到的是齿轮与因果。</div>
+      <div class="md-p">你不爱解释,因为在你开口之前,整盘棋的十步之后你已经走完了。这让你显得清冷,其实你只是<em>把力气都用在了刀刃上</em>。</div>
+      <div class="md-q">你的孤独不是没人懂,是你走得太快,别人还在原地系鞋带。</div>
+
+      <div class="md-hr-sec"></div>
+
+      <div class="md-h md-h2">你的天赋怎么用</div>
+      <div class="md-p">把"想清楚"变成"做出来"——你最大的杠杆不是聪明,是<strong>把复杂的事拆到能执行</strong>的那一刻。当你愿意把脑子里的棋盘画给别人看,你就从独行的谋士,变成了能调动一整盘人的军师。</div>
+      <div class="md-p">别等"准备好"。你的"差不多"已经是别人的"完美",收手交付,世界才看得见你。</div>
+
+      <div class="md-hr-sec"></div>
+
+      <div class="md-h md-h2">感情与正缘</div>
+      <div class="md-p">你不缺爱的能力,缺的是<em>把铠甲卸下来</em>的那一秒。真正配得上你的人,不是能跟上你思路的人,是能让你愿意慢下来的人。</div>
+      <div class="md-q">你以为你要的是势均力敌,其实你要的是一个能让你安心当个笨蛋的人。</div>
+
+      <div class="md-hr-sec"></div>
+
+      <div class="md-h md-h2">这一生的功课</div>
+      <div class="md-p">学会"不完美也交出去"。你这辈子的关口,不在能力,在<strong>允许自己被看见、被需要、被爱</strong>——哪怕那一刻你还没算好十步之后。</div>
+    </div>
+  </div>
+
+  <div class="sp-foot">
+    <div class="urls">
+      <div class="by">— 解读者 · 玄玑天庭<br>文澜阁 · 神仙虾 —</div>
+      <div class="go">▸ 扫码测你的本相</div>
+      <div class="u">玄玑 · Astro</div>
+    </div>
+    <div class="sp-qr"><div id="spqr"></div></div>
+  </div>
+</div>
+
+<script src="./qrcode.min.js"></script>
+<script>
+(function(){
+  // 顶牌两侧小金星(SVG·和二维码同款芒星)
+  var starSvg='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+
+    '<polygon points="50,0 58,42 100,50 58,58 50,100 42,58 0,50 42,42" fill="#e8c25a"/></svg>';
+  document.getElementById("bstar").innerHTML=starSvg;
+  document.getElementById("bstar2").innerHTML=starSvg;
+
+  // 二维码 + 中心两层套娃芒星(和海报同款)
+  var URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  if(window.QRCode){
+    new QRCode(document.getElementById("spqr"),{text:URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+    var logo=document.createElement("div");logo.className="qr-logo";
+    logo.innerHTML='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4d6"/><stop offset="0.55" stop-color="#ffe6a8"/><stop offset="1" stop-color="#e8c25a"/></linearGradient></defs>'+
+      '<polygon points="50,0 58,42 100,50 58,58 50,100 42,58 0,50 42,42" fill="url(#g)"/>'+
+      '<polygon points="50,25 54,46 75,50 54,54 50,75 46,54 25,50 46,46" fill="#0a0e1f"/></svg>';
+    document.getElementById("spqr").parentNode.appendChild(logo);
+  }
+})();
+</script>
+</body></html>
