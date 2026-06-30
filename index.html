@@ -387,18 +387,10 @@
   -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
 .share-mask .poster .p-foot .qr{position:relative;width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
 .share-mask .poster .p-foot .qr img,.share-mask .poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
-/* 中心玄玑✦星标:两层套娃星(金芒星托 套 深芒星·对齐小样A·容错H保扫)
-   注意:clip-path 与 transform 拆到不同层,避免 WebKit 下 clip-path 失效渲染成方块 */
+/* 中心玄玑✦星标:两层套娃星 = SVG画(矢量·所有浏览器+html2canvas全稳·绝不退化成方块) */
 .share-mask .poster .p-foot .qr .qr-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:19px;height:19px;display:flex;align-items:center;justify-content:center}
-.share-mask .poster .p-foot .qr .qr-logo .qr-logo-out{width:19px;height:19px;
-  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
-  -webkit-clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%);
-  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%);
-  display:flex;align-items:center;justify-content:center}
-.share-mask .poster .p-foot .qr .qr-logo .qr-logo-in{width:10px;height:10px;background:#0a0e1f;
-  -webkit-clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%);
-  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%)}
+  width:20px;height:20px;line-height:0}
+.share-mask .poster .p-foot .qr .qr-logo svg{display:block;width:100%;height:100%}
 .share-mask .share-ops{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:14px}
 .share-mask .share-save{font-size:14px;letter-spacing:2px;cursor:pointer;padding:11px 30px;border-radius:22px;font-weight:700;
   color:#0a0e1f;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);border:none;
@@ -1615,9 +1607,17 @@ function initCard(personas, buffs){
       // C方案:容错H(30%)保扫 + 生成后在中心叠玄玑✦金标
       new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
       const logo=document.createElement("div");logo.className="qr-logo";
-      const logoOut=document.createElement("div");logoOut.className="qr-logo-out";
-      const logoIn=document.createElement("div");logoIn.className="qr-logo-in";
-      logoOut.appendChild(logoIn);logo.appendChild(logoOut);
+      // SVG两层套娃芒星:外金星(渐变) + 内深星(同心)·四角芒星路径(viewBox 100)
+      const STAR="50,0 58,42 100,50 58,58 50,100 42,58 0,50 42,42";   // 外金星·满铺100
+      const STAR_IN="50,25 54,46 75,50 54,54 50,75 46,54 25,50 46,46"; // 内深星·缩到50%居中
+      logo.innerHTML=
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><linearGradient id="qrStarG" x1="0" y1="0" x2="1" y2="1">'+
+        '<stop offset="0" stop-color="#fff4d6"/><stop offset="0.55" stop-color="#ffe6a8"/><stop offset="1" stop-color="#e8c25a"/>'+
+        '</linearGradient></defs>'+
+        '<polygon points="'+STAR+'" fill="url(#qrStarG)"/>'+
+        '<polygon points="'+STAR_IN+'" fill="#0a0e1f"/>'+
+        '</svg>';
       qrBox.appendChild(logo);
     }
     shareMask.classList.add("on");
