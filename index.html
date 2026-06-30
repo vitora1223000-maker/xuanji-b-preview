@@ -387,7 +387,23 @@
   -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
 .share-mask .poster .p-foot .qr{width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
 .share-mask .poster .p-foot .qr img,.share-mask .poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
-.share-mask .share-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:10px;cursor:pointer;padding:8px 20px;
+.share-mask .share-ops{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:14px}
+.share-mask .share-save{font-size:14px;letter-spacing:2px;cursor:pointer;padding:11px 30px;border-radius:22px;font-weight:700;
+  color:#0a0e1f;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);border:none;
+  box-shadow:0 4px 18px rgba(255,230,168,.35);transition:.18s}
+.share-mask .share-save:active{transform:scale(.96);box-shadow:0 2px 10px rgba(255,230,168,.3)}
+.share-mask .share-save.busy{opacity:.7;pointer-events:none}
+.share-mask .share-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:6px;cursor:pointer;padding:8px 20px;
+  border:1px solid rgba(201,168,255,.18);border-radius:18px}
+/* 生成好的图：盖在分享浮层上,让用户长按存相册(iOS最稳) */
+.savedimg-mask{position:fixed;inset:0;z-index:260;background:rgba(5,6,15,.94);backdrop-filter:blur(8px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.savedimg-mask.on{display:flex}
+.savedimg-tip{color:#ffe6a8;font-size:14px;letter-spacing:1px;margin-bottom:14px;text-align:center;line-height:1.7;
+  text-shadow:0 0 12px rgba(255,230,168,.35)}
+.savedimg-mask img{max-width:330px;width:100%;max-height:74vh;object-fit:contain;border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.savedimg-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:16px;cursor:pointer;padding:8px 22px;
   border:1px solid rgba(201,168,255,.18);border-radius:18px}
 </style>
 <link rel="stylesheet" href="./archive.css">
@@ -479,10 +495,19 @@
 <!-- 命格卡·分享图弹层(固定覆盖层,放 body 末尾) -->
 <div class="share-mask" id="cardShareMask">
   <div class="share-scroll"><div class="poster" id="cardPoster"></div></div>
-  <div class="share-close" id="cardShareClose">关闭</div>
+  <div class="share-ops">
+    <button class="share-save" id="cardShareSave">⬇ 存 下 这 张 命 格 卡</button>
+    <div class="share-close" id="cardShareClose">关闭</div>
+  </div>
+</div>
+<div class="savedimg-mask" id="savedImgMask">
+  <div class="savedimg-tip" id="savedImgTip">✦ 命格卡已铸成 ✦<br>长按下图 · 存入相册</div>
+  <img id="savedImgEl" alt="我的命格卡">
+  <div class="savedimg-close" id="savedImgClose">收 起</div>
 </div>
 
 <script src="./qrcode.min.js"></script>
+<script src="./html2canvas.min.js"></script>
 <script src="./astronomy.js"></script>
 <script src="./cities.js"></script>
 <script src="./ephemeris.bundle.js"></script>
@@ -1574,6 +1599,48 @@ function initCard(personas, buffs){
     }
     shareMask.classList.add("on");
   };
+
+  // ── 保存命格卡为纯净 PNG(html2canvas·绝不靠长按截图糊弄) ──────────
+  // 渲染海报 DOM → PNG → 显示在生成图浮层,让用户长按存相册(iOS 最稳)。
+  // 神仙虾人设:渲染中/失败都用剧情话术接住,绝不露技术字眼。
+  const saveBtn=document.getElementById("cardShareSave");
+  const savedMask=document.getElementById("savedImgMask");
+  const savedImg=document.getElementById("savedImgEl");
+  const savedTip=document.getElementById("savedImgTip");
+  const savedClose=document.getElementById("savedImgClose");
+  // 等海报里的图片(卡面图+二维码)都加载完,html2canvas 才能画全
+  function waitImgs(node){
+    const imgs=[...node.querySelectorAll("img")];
+    return Promise.all(imgs.map(im=> (im.complete&&im.naturalWidth)
+      ? Promise.resolve()
+      : new Promise(r=>{ im.onload=im.onerror=r; })));
+  }
+  if(saveBtn) saveBtn.onclick=async()=>{
+    if(typeof html2canvas!=="function"){ alert("画卷一时凝不出形，请稍候再试 ✦"); return; }
+    const poster=document.getElementById("cardPoster");
+    if(!poster) return;
+    const orig=saveBtn.textContent;
+    saveBtn.classList.add("busy"); saveBtn.textContent="✦ 正在为你凝铸命格卡 ✦";
+    try{
+      await waitImgs(poster);
+      const canvas=await html2canvas(poster,{
+        backgroundColor:null, scale:Math.min(window.devicePixelRatio||2, 3),
+        useCORS:true, logging:false
+      });
+      const url=canvas.toDataURL("image/png");
+      savedImg.src=url;
+      savedTip.innerHTML="✦ 命格卡已铸成 ✦<br>长按下图 · 存入相册";
+      savedMask.classList.add("on");
+    }catch(err){
+      // 露破绽处也用人设接住(不提服务器/canvas/失败)
+      alert("天机一时未凝成画卷，待会儿再唤玄玑为你铸卡 ✦");
+    }finally{
+      saveBtn.classList.remove("busy"); saveBtn.textContent=orig;
+    }
+  };
+  if(savedClose) savedClose.onclick=()=>savedMask.classList.remove("on");
+  if(savedMask) savedMask.onclick=(e)=>{ if(e.target===savedMask) savedMask.classList.remove("on"); };
+
   // 分享完(关掉分享海报)→ 焦点从"分享BUFF"转移到两条路:点亮分岔双按钮(开始发光,引导接着走)
   function lightForkBtns(){
     const rb=document.getElementById("rebornGoBtn");
