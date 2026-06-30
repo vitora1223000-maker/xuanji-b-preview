@@ -2110,7 +2110,9 @@ async function saveReadingAsImage(out, typeCode, btn){
 
     const qrBox=poster.querySelector(".rp-qr-box");
     if(window.QRCode){
-      new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+      // 顶层函数够不着函数内的 TOOL_URL,这里直接用预览站根域名常量(和 TOOL_URL 同值)
+      const READ_QR_URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+      new QRCode(qrBox,{text:READ_QR_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
       const logo=document.createElement("div"); logo.className="qr-logo"; logo.innerHTML=buildReadQrLogoSvg();
       qrBox.parentNode.appendChild(logo);
     }
