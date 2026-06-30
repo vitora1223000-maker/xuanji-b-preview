@@ -190,6 +190,49 @@
   /* 大段之间的分割线·金色仙气调·中间亮两头淡·留白给足·让五大段一段段切开喘口气 */
   .md-body .md-hr-sec{border:none;height:1px;margin:30px 0 24px;opacity:.85;background:linear-gradient(90deg,transparent,rgba(255,230,168,.45) 35%,rgba(255,230,168,.7) 50%,rgba(255,230,168,.45) 65%,transparent)}
   .md-body .md-hr-sec::after{content:"❖";display:block;text-align:center;color:rgba(255,230,168,.55);font-size:11px;margin-top:-8px;line-height:1;text-shadow:0 0 6px rgba(255,230,168,.5)}
+
+  /* ───── 解读存图:保存按钮 + 长图命书海报 + 生成图浮层(纯加法·不碰解读逻辑) ───── */
+  .read-save-wrap{text-align:center;margin-top:20px}
+  .read-save-btn{font-size:14px;letter-spacing:2px;cursor:pointer;padding:11px 28px;border-radius:22px;font-weight:700;
+    color:#0a0e1f;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);border:none;
+    box-shadow:0 4px 16px rgba(232,201,118,.35)}
+  .read-save-btn.busy{opacity:.7;pointer-events:none}
+  #readPosterStage{position:fixed;left:-9999px;top:0;z-index:-1;pointer-events:none}
+  .read-poster{width:380px;box-sizing:border-box;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,#15102e 0%,#0d0a20 30%,#0b0918 100%);
+    border:1px solid rgba(232,201,118,.28)}
+  .read-poster::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,transparent,rgba(255,230,168,.7),transparent)}
+  .read-poster .rp-head{text-align:center;padding:32px 26px 18px}
+  .read-poster .rp-brand{font-size:12px;letter-spacing:5px;color:var(--gold2,#e8c25a);margin-bottom:16px;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .read-poster .rp-brand .bstar{display:inline-block;width:12px;height:12px;line-height:0}
+  .read-poster .rp-type{font-size:38px;font-weight:800;letter-spacing:4px;line-height:1;
+    color:var(--gold);text-shadow:0 0 22px rgba(255,230,168,.45);margin-bottom:9px}
+  .read-poster .rp-title{font-size:17px;letter-spacing:7px;color:#f3ecff;font-weight:600;text-indent:7px}
+  .read-poster .rp-sub{font-size:11px;letter-spacing:2px;color:var(--soft);margin-top:12px}
+  .read-poster .rp-headdiv{height:1px;margin:20px 26px 4px;
+    background:linear-gradient(90deg,transparent,rgba(255,230,168,.5),transparent)}
+  .read-poster .rp-body{padding:6px 26px 4px}
+  .read-poster .rp-foot{margin:16px 24px 26px;padding-top:16px;border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .read-poster .rp-foot .urls{display:flex;flex-direction:column;gap:6px}
+  .read-poster .rp-foot .by{font-size:11px;color:var(--soft);letter-spacing:1px;line-height:1.6}
+  .read-poster .rp-foot .go{color:#bdb2e0;font-size:13px}
+  .read-poster .rp-foot .u{font-size:13px;letter-spacing:4px;font-weight:700;color:var(--gold2,#e8c25a)}
+  .read-poster .rp-qr{position:relative;width:74px;height:74px;flex-shrink:0;padding:5px;background:#fff;border-radius:8px}
+  .read-poster .rp-qr canvas,.read-poster .rp-qr img{width:100%!important;height:100%!important;display:block}
+  .read-poster .rp-qr .qr-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:19px;height:19px;line-height:0}
+  .read-poster .rp-qr .qr-logo svg{display:block;width:100%;height:100%}
+  #savedReadMask{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;
+    background:rgba(5,6,15,.88);backdrop-filter:blur(6px);padding:20px}
+  #savedReadMask.on{display:flex}
+  #savedReadMask .sr-inner{max-width:88%;max-height:86vh;display:flex;flex-direction:column;align-items:center;gap:12px}
+  #savedReadMask .sr-tip{font-size:13px;color:var(--gold);text-align:center;line-height:1.7;letter-spacing:1px}
+  #savedReadMask img{max-width:100%;max-height:70vh;border-radius:14px;box-shadow:0 12px 50px rgba(0,0,0,.6)}
+  #savedReadMask .sr-close{font-size:13px;color:var(--soft);background:none;border:1px solid var(--line);
+    border-radius:20px;padding:8px 24px;cursor:pointer}
+  .read-poster.h2c .md-body .md-h,.read-poster.h2c .rp-type{background:none!important;-webkit-text-fill-color:var(--gold)!important;color:var(--gold)!important}
   /* 登录浮层（用现站紫色调变量，与全站统一）*/
   #loginOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}
   #loginOverlay .lg-mask{position:absolute;inset:0;background:rgba(6,8,20,.72);backdrop-filter:blur(3px)}
@@ -513,6 +556,16 @@
   <div class="savedimg-tip" id="savedImgTip">✦ 命格卡已铸成 ✦<br>长按下图 · 存入相册</div>
   <img id="savedImgEl" alt="我的命格卡">
   <div class="savedimg-close" id="savedImgClose">收 起</div>
+</div>
+
+<!-- 解读存图:离屏渲染舞台(画长图用·画完即清) + 生成图浮层(长按存相册) -->
+<div id="readPosterStage"></div>
+<div id="savedReadMask">
+  <div class="sr-inner">
+    <div class="sr-tip" id="savedReadTip">✦ 命书已凝成 ✦<br>长按下图 · 存入相册</div>
+    <img id="savedReadImg" alt="命书长图">
+    <button class="sr-close" id="savedReadClose">收起</button>
+  </div>
 </div>
 
 <script src="./qrcode.min.js"></script>
@@ -1982,11 +2035,98 @@ async function runRebornRead(R, N, btn){
     btn.textContent="✓ 已照见 · 可重新生成";
     btn.disabled=false;
     saveChartToSupabase(N, text);   // 重生人格解读也存盘(静默)
+    // 解读出文末尾挂「凝铸命书长图」保存按钮(纯加法·把这条解读截成精美长图存相册)
+    appendReadSaveBtn(out, R.top);
   }catch(e){
     clearInterval(waitTimer);
     out.innerHTML='<span style="color:var(--soft)">神仙虾暂时连不上 😣 请稍后再点一次。</span>';
     btn.textContent="✨ 重试一次";
     btn.disabled=false;
+  }
+}
+
+/* ───── 解读存图(纯加法·不碰解读逻辑)──────────────────────────────
+ * appendReadSaveBtn: 在解读出文末尾追加「凝铸命书长图」按钮
+ * saveReadingAsImage: 把 out 容器里已渲染的解读(开篇+正文)包进命书长图框架→html2canvas→PNG→浮层长按存
+ * 通用:传入哪个 out 容器就截哪条解读,开篇/正文跟着容器走,不会串。
+ */
+function appendReadSaveBtn(out, typeCode){
+  if(!out || out.querySelector(".read-save-wrap")) return; // 防重复挂
+  const wrap=document.createElement("div");
+  wrap.className="read-save-wrap";
+  const b=document.createElement("button");
+  b.className="read-save-btn"; b.textContent="✦ 凝铸我的命书长图 ✦";
+  b.onclick=()=>saveReadingAsImage(out, typeCode, b);
+  wrap.appendChild(b);
+  out.appendChild(wrap);
+}
+
+// 顶牌两侧小金星(SVG·和二维码同款芒星)
+const RP_STAR_SVG='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,0 58,42 100,50 58,58 50,100 42,58 0,50 42,42" fill="#e8c25a"/></svg>';
+
+function buildReadQrLogoSvg(){
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs><linearGradient id="rpqrg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff4d6"/><stop offset="0.55" stop-color="#ffe6a8"/><stop offset="1" stop-color="#e8c25a"/></linearGradient></defs>'+
+    '<polygon points="50,0 58,42 100,50 58,58 50,100 42,58 0,50 42,42" fill="url(#rpqrg)"/>'+
+    '<polygon points="50,25 54,46 75,50 54,54 50,75 46,54 25,50 46,46" fill="#0a0e1f"/></svg>';
+}
+
+async function saveReadingAsImage(out, typeCode, btn){
+  if(typeof html2canvas!=="function"){ alert("画卷一时凝不出形，请稍候再试 ✦"); return; }
+  const orig=btn.textContent;
+  btn.classList.add("busy"); btn.textContent="✦ 正在为你凝铸命书 ✦";
+  const stage=document.getElementById("readPosterStage");
+  try{
+    // 取屏幕上已显示的 .md-body 解读内容(开篇+正文),克隆进长图框架(不动原 DOM)
+    const mdSrc=out.querySelector(".md-body");
+    if(!mdSrc){ throw new Error("no content"); }
+    const mdClone=mdSrc.cloneNode(true);
+    mdClone.classList.remove("md-fadein");
+    const sb=mdClone.querySelector(".read-save-wrap"); if(sb) sb.remove();
+
+    // 称号:抓卡片上正显示的(和屏幕一致),抓不到再退回 pickName
+    let nick="";
+    const cardName=document.querySelector(".cardstage .front .pname")||document.querySelector(".p-card-name .pname");
+    if(cardName) nick=cardName.textContent.trim();
+    if(!nick && typeof pickName==="function") nick=pickName(typeCode);
+
+    const poster=document.createElement("div");
+    poster.className="read-poster h2c";
+    poster.innerHTML=
+      '<div class="rp-head">'+
+        '<div class="rp-brand"><span class="bstar">'+RP_STAR_SVG+'</span>玄 玑 · Astro<span class="bstar">'+RP_STAR_SVG+'</span></div>'+
+        '<div class="rp-type">'+(typeCode||"")+'</div>'+
+        (nick?'<div class="rp-title">'+nick+'</div>':'')+
+        '<div class="rp-sub">— 你的重生人格 · 神仙虾亲启 —</div>'+
+      '</div>'+
+      '<div class="rp-headdiv"></div>'+
+      '<div class="rp-body"></div>'+
+      '<div class="rp-foot">'+
+        '<div class="urls"><div class="by">— 解读者 · 玄玑天庭<br>文澜阁 · 神仙虾 —</div><div class="go">▸ 扫码照见你的本相</div><div class="u">玄玑 · Astro</div></div>'+
+        '<div class="rp-qr"><div class="rp-qr-box"></div></div>'+
+      '</div>';
+    poster.querySelector(".rp-body").appendChild(mdClone);
+    stage.innerHTML=""; stage.appendChild(poster);
+
+    const qrBox=poster.querySelector(".rp-qr-box");
+    if(window.QRCode){
+      new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+      const logo=document.createElement("div"); logo.className="qr-logo"; logo.innerHTML=buildReadQrLogoSvg();
+      qrBox.parentNode.appendChild(logo);
+    }
+    await Promise.all([...poster.querySelectorAll("img")].map(im=>(im.complete&&im.naturalWidth)?0:new Promise(r=>{im.onload=im.onerror=r;})));
+    await new Promise(r=>setTimeout(r,60));
+
+    const canvas=await html2canvas(poster,{backgroundColor:null, scale:Math.min(window.devicePixelRatio||2,3), useCORS:true, logging:false});
+    const url=canvas.toDataURL("image/png");
+    document.getElementById("savedReadImg").src=url;
+    document.getElementById("savedReadTip").innerHTML="✦ 命书已凝成 ✦<br>长按下图 · 存入相册";
+    document.getElementById("savedReadMask").classList.add("on");
+  }catch(err){
+    alert("天机一时未凝成画卷，待会儿再唤玄玑为你铸书 ✦");
+  }finally{
+    stage.innerHTML="";
+    btn.classList.remove("busy"); btn.textContent=orig;
   }
 }
 
@@ -2147,6 +2287,14 @@ ${data}`;
 
 // 对外版: 无tab/无日期控件, 直接渲染本命盘表单
 render();
+
+// 解读存图浮层·关闭事件(纯加法)
+(function(){
+  const m=document.getElementById("savedReadMask");
+  const c=document.getElementById("savedReadClose");
+  if(c) c.onclick=()=>m.classList.remove("on");
+  if(m) m.onclick=(e)=>{ if(e.target===m) m.classList.remove("on"); };
+})();
 </script>
 <script src="./archive.js"></script>
 </body>
