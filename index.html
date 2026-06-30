@@ -562,7 +562,7 @@
 <div id="readPosterStage"></div>
 <div id="savedReadMask">
   <div class="sr-inner">
-    <div class="sr-tip" id="savedReadTip">✦ 命书已凝成 ✦<br>长按下图 · 存入相册</div>
+    <div class="sr-tip" id="savedReadTip">✦ 人格长书已凝成 ✦<br>长按下图 · 存入相册</div>
     <img id="savedReadImg" alt="命书长图">
     <button class="sr-close" id="savedReadClose">收起</button>
   </div>
@@ -2055,7 +2055,7 @@ function appendReadSaveBtn(out, typeCode){
   const wrap=document.createElement("div");
   wrap.className="read-save-wrap";
   const b=document.createElement("button");
-  b.className="read-save-btn"; b.textContent="✦ 凝铸我的命书长图 ✦";
+  b.className="read-save-btn"; b.textContent="✦ 凝铸我的人格长书 ✦";
   b.onclick=()=>saveReadingAsImage(out, typeCode, b);
   wrap.appendChild(b);
   out.appendChild(wrap);
@@ -2074,7 +2074,7 @@ function buildReadQrLogoSvg(){
 async function saveReadingAsImage(out, typeCode, btn){
   if(typeof html2canvas!=="function"){ alert("画卷一时凝不出形，请稍候再试 ✦"); return; }
   const orig=btn.textContent;
-  btn.classList.add("busy"); btn.textContent="✦ 正在为你凝铸命书 ✦";
+  btn.classList.add("busy"); btn.textContent="✦ 正在为你凝铸人格长书 ✦";
   const stage=document.getElementById("readPosterStage");
   try{
     // 取屏幕上已显示的 .md-body 解读内容(开篇+正文),克隆进长图框架(不动原 DOM)
@@ -2120,10 +2120,10 @@ async function saveReadingAsImage(out, typeCode, btn){
     const canvas=await html2canvas(poster,{backgroundColor:null, scale:Math.min(window.devicePixelRatio||2,3), useCORS:true, logging:false});
     const url=canvas.toDataURL("image/png");
     document.getElementById("savedReadImg").src=url;
-    document.getElementById("savedReadTip").innerHTML="✦ 命书已凝成 ✦<br>长按下图 · 存入相册";
+    document.getElementById("savedReadTip").innerHTML="✦ 人格长书已凝成 ✦<br>长按下图 · 存入相册";
     document.getElementById("savedReadMask").classList.add("on");
   }catch(err){
-    alert("天机一时未凝成画卷，待会儿再唤玄玑为你铸书 ✦");
+    alert("天机一时未凝成画卷，待会儿再唤玄玑为你铸人格长书 ✦");
   }finally{
     stage.innerHTML="";
     btn.classList.remove("busy"); btn.textContent=orig;
