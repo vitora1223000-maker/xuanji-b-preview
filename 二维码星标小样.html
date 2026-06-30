@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>玄玑 · 二维码星标小样</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);
+  color:#ffe6a8;font-family:"PingFang SC",sans-serif;padding:24px 16px 60px;min-height:100vh}
+h1{font-size:17px;letter-spacing:3px;text-align:center;margin-bottom:6px;color:#ffe6a8}
+.sub{font-size:12px;color:#9a92bd;text-align:center;margin-bottom:28px;line-height:1.7}
+.row{display:flex;flex-direction:column;gap:30px;align-items:center}
+.demo{width:100%;max-width:340px;background:linear-gradient(170deg,#161a36,#0c1024);
+  border:1px solid rgba(232,201,118,.25);border-radius:18px;padding:24px 20px}
+.demo .label{font-size:14px;letter-spacing:2px;color:#ffe6a8;margin-bottom:4px;font-weight:700}
+.demo .note{font-size:11px;color:#9a92bd;margin-bottom:18px;line-height:1.6}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(255,230,168,.18);padding-top:16px}
+.foot .urls{display:flex;flex-direction:column;gap:6px}
+.foot .urls .go{color:#9a92bd;font-size:13px}
+.foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;color:#e8c976}
+
+.qr{position:relative;width:84px;height:84px;flex-shrink:0;padding:6px;background:#fff;border-radius:10px;
+  box-shadow:0 0 0 1px rgba(232,201,118,.7),0 0 14px rgba(255,230,168,.35)}
+.qr img,.qr canvas{width:100%!important;height:100%!important;display:block}
+
+/* 中心星标:绝对居中,外接尺寸控制在 ~22px 保证不吃太多码 */
+.starlogo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,.35))}
+
+/* A · 实心五角星(金渐变·无白托·最干净) */
+.starA{width:22px;height:22px;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+
+/* B · 五角星 + 白底圆托(星浮白圆上·和码隔一圈·最稳妥) */
+.starB-wrap{width:24px;height:24px;background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1.5px rgba(232,201,118,.6)}
+.starB{width:15px;height:15px;background:linear-gradient(135deg,#ffe6a8,#e8c25a);
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+
+/* C · 四角芒星 ✦(玄玑那个尖角星·瘦·吃码最少) */
+.starC{width:24px;height:24px;
+  background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
+  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%)}
+
+/* D · 黑星 + 金圈(中心黑小星·外描金边·Athena想法) */
+.starD-wrap{width:22px;height:22px;border-radius:50%;
+  background:#fff; /* 白底托一下黑星不糊进黑码 */
+  border:2px solid #e8c25a; /* 金圈 */
+  box-shadow:0 0 6px rgba(255,230,168,.55);
+  display:flex;align-items:center;justify-content:center}
+.starD{width:11px;height:11px;background:#0a0e1f; /* 黑色小星 */
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+
+/* E · 黑星 + 金圈(四角芒星版·更玄玑) */
+.starE-wrap{width:22px;height:22px;border-radius:50%;
+  background:#fff;border:2px solid #e8c25a;box-shadow:0 0 6px rgba(255,230,168,.55);
+  display:flex;align-items:center;justify-content:center}
+.starE{width:13px;height:13px;background:#0a0e1f;
+  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%)}
+</style></head>
+<body>
+<h1>✦ 二维码星标 · 三方案对比 ✦</h1>
+<div class="sub">三个都是真码 · 直接拿手机扫一下<br>看哪个好看 + 哪个扫得出(尤其 A 实心星要重点测)</div>
+
+<div class="row">
+  <div class="demo">
+    <div class="label">A · 实心五角星(金渐变 · 无白托)</div>
+    <div class="note">最干净最直接,星星直接盖在码上。尖角会吃几个码点,容错H兜底。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qa"></div><div class="starlogo"><div class="starA"></div></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">B · 五角星 + 白底圆托(最稳妥)</div>
+    <div class="note">星浮在白圆上,和码隔开一圈白边,扫得最稳。白圆≈微信群码那种。推荐。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qb"></div><div class="starlogo"><div class="starB-wrap"><div class="starB"></div></div></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">C · 四角芒星 ✦(玄玑尖角星)</div>
+    <div class="note">就是你 logo 那个 ✦,瘦长尖角,吃码最少,最"玄玑"。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qc"></div><div class="starlogo"><div class="starC"></div></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">D · 黑星 + 金圈(中心黑小星 · 外描金边)</div>
+    <div class="note">你的想法:中心一个黑色小五角星,外面金圈勾边。黑星小+融码,金圈点睛。最精致。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qd"></div><div class="starlogo"><div class="starD-wrap"><div class="starD"></div></div></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">E · 黑星 + 金圈(四角芒星 ✦ 版)</div>
+    <div class="note">同上,但黑星换成玄玑那个尖角 ✦。更玄玑、更瘦。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qe"></div><div class="starlogo"><div class="starE-wrap"><div class="starE"></div></div></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="./qrcode.min.js"></script>
+<script>
+(function(){
+  var URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  new QRCode(document.getElementById("qa"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qb"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qc"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qd"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qe"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+})();
+</script>
+</body></html>

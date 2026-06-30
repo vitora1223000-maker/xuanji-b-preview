@@ -387,11 +387,14 @@
   -webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(232,201,118,.12)}
 .share-mask .poster .p-foot .qr{position:relative;width:76px;height:76px;border-radius:8px;background:#fff;padding:5px;flex-shrink:0}
 .share-mask .poster .p-foot .qr img,.share-mask .poster .p-foot .qr canvas{width:100%!important;height:100%!important;display:block}
-/* C方案:中心玄玑✦金标(容错H保扫·尺寸小于码15%) */
+/* 中心玄玑✦星标:两层套娃星(金芒星托 套 深芒星·容错H保扫) */
 .share-mask .poster .p-foot .qr .qr-logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:17px;height:17px;border-radius:5px;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
-  display:flex;align-items:center;justify-content:center;font-size:10px;color:#0a0e1f;line-height:1;
-  box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.3)}
+  width:20px;height:20px;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
+  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%);
+  display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+.share-mask .poster .p-foot .qr .qr-logo .qr-logo-in{width:11px;height:11px;background:#0a0e1f;
+  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%)}
 .share-mask .share-ops{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:14px}
 .share-mask .share-save{font-size:14px;letter-spacing:2px;cursor:pointer;padding:11px 30px;border-radius:22px;font-weight:700;
   color:#0a0e1f;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);border:none;
@@ -1607,7 +1610,8 @@ function initCard(personas, buffs){
     if(window.QRCode){
       // C方案:容错H(30%)保扫 + 生成后在中心叠玄玑✦金标
       new QRCode(qrBox,{text:TOOL_URL,width:128,height:128,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
-      const logo=document.createElement("div");logo.className="qr-logo";logo.textContent="✦";
+      const logo=document.createElement("div");logo.className="qr-logo";
+      const logoIn=document.createElement("div");logoIn.className="qr-logo-in";logo.appendChild(logoIn);
       qrBox.appendChild(logo);
     }
     shareMask.classList.add("on");

@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>玄玑 · 二维码套娃星小样</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);
+  color:#ffe6a8;font-family:"PingFang SC",sans-serif;padding:24px 16px 60px;min-height:100vh}
+h1{font-size:17px;letter-spacing:3px;text-align:center;margin-bottom:6px;color:#ffe6a8}
+.sub{font-size:12px;color:#9a92bd;text-align:center;margin-bottom:28px;line-height:1.7}
+.row{display:flex;flex-direction:column;gap:30px;align-items:center}
+.demo{width:100%;max-width:340px;background:linear-gradient(170deg,#161a36,#0c1024);
+  border:1px solid rgba(232,201,118,.25);border-radius:18px;padding:24px 20px}
+.demo .label{font-size:14px;letter-spacing:2px;color:#ffe6a8;margin-bottom:4px;font-weight:700}
+.demo .note{font-size:11px;color:#9a92bd;margin-bottom:18px;line-height:1.6}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(255,230,168,.18);padding-top:16px}
+.foot .urls{display:flex;flex-direction:column;gap:6px}
+.foot .urls .go{color:#9a92bd;font-size:13px}
+.foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;color:#e8c976}
+
+.qr{position:relative;width:84px;height:84px;flex-shrink:0;padding:6px;background:#fff;border-radius:10px;
+  box-shadow:0 0 0 1px rgba(232,201,118,.7),0 0 14px rgba(255,230,168,.35)}
+.qr img,.qr canvas{width:100%!important;height:100%!important;display:block}
+.starlogo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))}
+
+/* 四角芒星形状(你那个 ✦) */
+.star{display:flex;align-items:center;justify-content:center;
+  clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%)}
+.gold{background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a)}
+.dark{background:#0a0e1f}
+
+/* A · 两层(金星 套 深星)= 你原版反过来 */
+.A1{width:24px;height:24px}
+.A2{width:13px;height:13px}
+
+/* B · 三层套娃(金 套 深 套 金) */
+.B1{width:26px;height:26px}
+.B2{width:16px;height:16px}
+.B3{width:8px;height:8px}
+
+/* C · 四层套娃(金深金深·小宇宙) */
+.C1{width:28px;height:28px}
+.C2{width:19px;height:19px}
+.C3{width:11px;height:11px}
+.C4{width:5px;height:5px}
+</style></head>
+<body>
+<h1>✦ 二维码套娃星 · 三方案对比 ✦</h1>
+<div class="sub">星里开宇宙 🌌 都是真码 · 手机扫一下<br>层越多越好玩但中心越小越吃码 · 重点测 C 四层扫不扫得出</div>
+
+<div class="row">
+  <div class="demo">
+    <div class="label">A · 两层(金星 套 深星)</div>
+    <div class="note">最干净:金芒星托底,里面嵌你原版那个深芒星。就是原版方块托换成星托。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qa"></div>
+        <div class="starlogo"><div class="star gold A1"><div class="star dark A2"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">B · 三层套娃(金 → 深 → 金)</div>
+    <div class="note">套娃感出来了:金星里嵌深星,深星里再点一颗小金星。层次刚好。推荐。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qb"></div>
+        <div class="starlogo"><div class="star gold B1"><div class="star dark B2"><div class="star gold B3"></div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">C · 四层套娃(金 → 深 → 金 → 深 · 小宇宙)</div>
+    <div class="note">最套娃最玄学,但中心已经很小、细节会糊,吃码也最多。重点扫这个验扫得出。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qr"><div id="qc"></div>
+        <div class="starlogo"><div class="star gold C1"><div class="star dark C2"><div class="star gold C3"><div class="star dark C4"></div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./qrcode.min.js"></script>
+<script>
+(function(){
+  var URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  new QRCode(document.getElementById("qa"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qb"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+  new QRCode(document.getElementById("qc"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+})();
+</script>
+</body></html>
