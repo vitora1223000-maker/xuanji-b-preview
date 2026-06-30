@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>玄玑 · 二维码装饰小样</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(170deg,#12152e 0%,#0a0e1f 55%,#0b0a1c 100%);
+  color:#ffe6a8;font-family:"PingFang SC",sans-serif;padding:24px 16px 60px;min-height:100vh}
+h1{font-size:17px;letter-spacing:3px;text-align:center;margin-bottom:6px;color:#ffe6a8}
+.sub{font-size:12px;color:#9a92bd;text-align:center;margin-bottom:28px;line-height:1.7}
+.row{display:flex;flex-direction:column;gap:30px;align-items:center}
+.demo{width:100%;max-width:340px;background:linear-gradient(170deg,#161a36,#0c1024);
+  border:1px solid rgba(232,201,118,.25);border-radius:18px;padding:24px 20px}
+.demo .label{font-size:14px;letter-spacing:2px;color:#ffe6a8;margin-bottom:4px;font-weight:700}
+.demo .note{font-size:11px;color:#9a92bd;margin-bottom:18px;line-height:1.6}
+/* 模拟海报底部那一条:左文字 + 右二维码 */
+.foot{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(255,230,168,.18);padding-top:16px}
+.foot .urls{display:flex;flex-direction:column;gap:6px}
+.foot .urls .go{color:#9a92bd;font-size:13px}
+.foot .urls .u{font-size:12px;letter-spacing:3px;font-weight:700;color:#e8c976}
+
+/* ───── 方案A:金框+四角仙气(白底深码·最安全) ───── */
+.qrA{position:relative;width:84px;height:84px;flex-shrink:0;padding:6px;background:#fff;border-radius:10px;
+  box-shadow:0 0 0 1px rgba(232,201,118,.7),0 0 14px rgba(255,230,168,.35)}
+.qrA::before{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,230,168,.55);
+  border-radius:13px;pointer-events:none}
+.qrA .corner{position:absolute;color:#ffe6a8;font-size:10px;opacity:.9;text-shadow:0 0 6px rgba(255,230,168,.8)}
+.qrA .c1{top:-9px;left:-7px}.qrA .c2{top:-9px;right:-7px}
+.qrA .c3{bottom:-9px;left:-7px}.qrA .c4{bottom:-9px;right:-7px}
+.qrA img,.qrA canvas{width:100%!important;height:100%!important;display:block}
+
+/* ───── 方案B:金色码点(深金棕·容错H) ───── */
+.qrB{width:84px;height:84px;flex-shrink:0;padding:6px;border-radius:10px;flex-shrink:0;
+  background:#fffdf5;box-shadow:0 0 0 1px rgba(232,201,118,.7),0 0 14px rgba(255,230,168,.3)}
+.qrB img,.qrB canvas{width:100%!important;height:100%!important;display:block}
+
+/* ───── 方案C:中心嵌玄玑✦ logo(容错H) ───── */
+.qrC{position:relative;width:84px;height:84px;flex-shrink:0;padding:6px;background:#fff;border-radius:10px;
+  box-shadow:0 0 0 1px rgba(232,201,118,.7),0 0 14px rgba(255,230,168,.35)}
+.qrC img,.qrC canvas{width:100%!important;height:100%!important;display:block}
+.qrC .logo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#fff4d6,#ffe6a8,#e8c25a);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:#0a0e1f;
+  box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.3)}
+</style></head>
+<body>
+<h1>✦ 二维码装饰 · 三方案对比 ✦</h1>
+<div class="sub">三个都是真码 · 直接拿手机扫一下<br>看哪个好看 + 哪个扫得出(尤其 B 金码 / C 带logo 要重点测)</div>
+
+<div class="row">
+  <div class="demo">
+    <div class="label">A · 金框 + 四角仙气(白底深码)</div>
+    <div class="note">最安全:码本身高对比(白底深蓝黑),只装饰外框。推荐。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qrA"><span class="corner c1">✦</span><span class="corner c2">✦</span><span class="corner c3">✦</span><span class="corner c4">✦</span><div id="qa"></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">B · 金色码点(深金棕码 · 容错H)</div>
+    <div class="note">码点改成深金棕,更融仙气。但金不如黑对比强,容错拉到H保扫。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qrB"><div id="qb"></div></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="label">C · 中心嵌玄玑✦ logo(容错H)</div>
+    <div class="note">码中心叠个小金标(像微信群码)。logo小于15%+容错H保扫。</div>
+    <div class="foot">
+      <div class="urls"><div class="go">▸ 扫码测你重生成谁</div><div class="u">玄玑 · Astro</div></div>
+      <div class="qrC"><div id="qc"></div><div class="logo">✦</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="./qrcode.min.js"></script>
+<script>
+(function(){
+  var URL="https://xuanji777.preview.aliyun-zeabur.cn/";
+  // A:标准深码 容错M
+  new QRCode(document.getElementById("qa"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  // B:深金棕码点 容错H
+  new QRCode(document.getElementById("qb"),{text:URL,width:160,height:160,colorDark:"#6e4a16",colorLight:"#fffdf5",correctLevel:QRCode.CorrectLevel.H});
+  // C:深码+中心logo 容错H
+  new QRCode(document.getElementById("qc"),{text:URL,width:160,height:160,colorDark:"#0a0e1f",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+})();
+</script>
+</body></html>
