@@ -405,6 +405,11 @@
   box-shadow:0 8px 40px rgba(0,0,0,.6)}
 .savedimg-close{color:#9a92bd;font-size:13px;letter-spacing:2px;margin-top:16px;cursor:pointer;padding:8px 22px;
   border:1px solid rgba(201,168,255,.18);border-radius:18px}
+/* html2canvas 存图专用:渲染瞬间把渐变字降级成纯金实心字(html2canvas不支持background-clip:text会画成色条) */
+.poster.h2c-render .p-card-name .ptype{background:none!important;-webkit-text-fill-color:#ffe6a8!important;
+  color:#ffe6a8!important;filter:drop-shadow(0 0 16px rgba(255,230,168,.6))}
+.poster.h2c-render .p-foot .urls .u{background:none!important;-webkit-text-fill-color:#e8c976!important;
+  color:#e8c976!important}
 </style>
 <link rel="stylesheet" href="./archive.css">
 </head>
@@ -1623,10 +1628,19 @@ function initCard(personas, buffs){
     saveBtn.classList.add("busy"); saveBtn.textContent="✦ 正在为你凝铸命格卡 ✦";
     try{
       await waitImgs(poster);
-      const canvas=await html2canvas(poster,{
-        backgroundColor:null, scale:Math.min(window.devicePixelRatio||2, 3),
-        useCORS:true, logging:false
-      });
+      // 🔴 html2canvas 不支持 background-clip:text(渐变字会被画成整块色条)。
+      //   渲染前临时给海报加 .h2c-render,CSS 把渐变字降级成纯金实心字;渲完移除。
+      //   屏幕上看到的还是渐变金,只有"存下来的图"用纯金,两不影响。
+      poster.classList.add("h2c-render");
+      let canvas;
+      try{
+        canvas=await html2canvas(poster,{
+          backgroundColor:null, scale:Math.min(window.devicePixelRatio||2, 3),
+          useCORS:true, logging:false
+        });
+      } finally {
+        poster.classList.remove("h2c-render");   // 无论成败都恢复渐变字
+      }
       const url=canvas.toDataURL("image/png");
       savedImg.src=url;
       savedTip.innerHTML="✦ 命格卡已铸成 ✦<br>长按下图 · 存入相册";
