@@ -624,6 +624,24 @@ async function saveChartToSupabase(N, reading, extra){
     }
   }catch(_){ /* 存盘静默,失败不打扰用户 */ }
 }
+
+// ── G2 每日来访埋点(数据地基·为融资算留存/连击用) ──────────────────
+// 纯静默记录:谁哪天来、连续来访几天。【这一步只埋点不展示】——用户看不到任何变化,
+// 但从今天起每个登录用户的来访都进库,留存曲线开始累积(越早上线累积越深)。
+// 当天重复进来靠后端 daily_visit() 的 dedup_key='daily:日期' 兜底,不会重复记;
+// 本会话标记 _visitLogged 再加一层,免得 updateAcctBadge 多次调用打多余请求。
+// 失败完全静默,绝不影响任何现有逻辑。
+// 🔮 以后要给用户看(弹窗/连击特效/功德数)时,daily_visit 已返回 {earned,streak,already},
+//    届时把返回值接到展示组件即可,数据地基不用再动。
+let _visitLogged=false;
+async function logDailyVisit(){
+  if(_visitLogged) return;
+  if(typeof sb==="undefined"||!sb||!_curUser) return;
+  _visitLogged=true;                 // 先置位,防并发重复触发
+  try{ await sb.rpc("daily_visit"); }
+  catch(_){ _visitLogged=false; }    // 失败回滚标记,下次确认登录态时再试
+}
+
 // 右上角账号角标：登录后显示登出；免登录模式(REQUIRE_LOGIN=false)且未登录时整个隐藏，用户碰不到会发链接的登录入口
 function updateAcctBadge(){
   const badge=document.getElementById("acctBadge");
@@ -632,6 +650,8 @@ function updateAcctBadge(){
   if(badge) badge.style.display = (!REQUIRE_LOGIN && !_curUser) ? "none" : "flex";
   btn.textContent = _curUser ? "登出" : "登入";
   const ab=document.getElementById("archiveBtn"); if(ab) ab.style.display = _curUser ? "block" : "none";
+  // 确认到已登录用户 → 静默记一次今日来访(当天只记一次,SQL+本会话标记双兜底)
+  if(_curUser) logDailyVisit();
 }
 // 绑定登出 + 页面加载即检查登录态
 (function initAcct(){
